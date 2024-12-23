@@ -12,7 +12,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: ghcr.io/biosimulators/verification-server-gateway:0.0.1
-    container_name: api
+    container_name: gateway
     environment:
       - MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=verification-server"
       - MONGO_USERNAME=alex

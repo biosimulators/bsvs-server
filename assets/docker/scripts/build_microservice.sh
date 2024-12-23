@@ -1,14 +1,8 @@
 #!/usr/bin/env bash
 
-prune="$1"
-service="$2"
+set -e
 
-if [ "$prune" == "-p" ]; then
-  docker system prune -a -f
-fi
-
-# remove pycaches if exists
-sudo rm -r "$service"/__pycache__
+service="$1"
 
 if [ "$service" != "" ]; then
   echo "Building specified library: $service"
