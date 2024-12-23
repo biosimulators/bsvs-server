@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-LABEL org.opencontainers.image.title="bio-compose-server-base" \
+LABEL org.opencontainers.image.title="verification-service" \
     org.opencontainers.image.description="Base Docker image for BioCompose REST API management, job processing, and datastorage with MongoDB, ensuring scalable and robust performance." \
     org.opencontainers.image.url="https://biosimulators.org/" \
     org.opencontainers.image.source="https://github.com/biosimulators/verification-server" \
