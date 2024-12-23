@@ -11,38 +11,27 @@ from pymongo.collection import Collection as MongoCollection
 
 from shared.data_model import JobStatus, DatabaseCollections, BUCKET_NAME
 from shared.database import MongoDbConnector
+from shared.io import download_file
 from shared.log_config import setup_logging
-from shared.io_worker import read_h5_reports, download_file
 from shared.utils import unique_id, handle_sbml_exception, get_output_stack
+
 
 # for dev only
 load_dotenv('../assets/dev/config/.env_dev')
 
 
 class Supervisor:
-    def __init__(self, db_connector: MongoDbConnector, app_process_registry=None, queue_timer: int = 10, preferred_queue_index: int = 0):
+    def __init__(self, db_connector: MongoDbConnector, queue_timer: int = 10, preferred_queue_index: int = 0):
         self.db_connector = db_connector
         self.queue_timer = queue_timer
         self.preferred_queue_index = preferred_queue_index
         self.job_queue = self.db_connector.pending_jobs()
         self._supervisor_id: Optional[str] = "supervisor_" + unique_id()
-        self.app_process_registry = app_process_registry
         self.logger = logging.getLogger("biochecknet.job.supervisor.log")
         setup_logging(self.logger)
 
     async def check_jobs(self) -> int:
-        """Returns non-zero if max retries reached, zero otherwise.
-
-        # 1. For job (i) in job q, check if jobid exists for any job within db_connector.completed_jobs()
-        # 1a. If so, pop the job from the pending queue
-        # 2. If job doesnt yet exist in completed, summon a worker.
-        # 3. Give the worker the pending job (i)
-        # 4. Create completed job in which the job id from # 1 is the job id (id?) and results is worker.job_result
-        # 5. Worker automatically is dismissed
-        # 5a: TODO: In parallel, keep a pool of n workers List[Worker]. Summon them asynchronously and append more instances as demand increases.
-        # 6. Sleep for a larger period of time
-        # 7. At the end of check_jobs, run self.job_queue = self.db_connector.pending_jobs() (refresh)
-        """
+        """Returns non-zero if max retries reached, zero otherwise."""
         for _ in range(self.queue_timer):
             # perform check
             await self.run_job_check()
@@ -201,9 +190,9 @@ class Worker:
         # get ground truth from bucket if applicable
         truth_vals = None
         local_report_fp = None
-        if source_report_fp is not None:
-            local_report_fp = download_file(source_blob_path=source_report_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
-            truth_vals = read_h5_reports(local_report_fp)
+        # if source_report_fp is not None:
+        #     local_report_fp = download_file(source_blob_path=source_report_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
+        #     truth_vals = read_h5_reports(local_report_fp)
 
         simulators = self.job_params.get('simulators', [])
         include_outs = self.job_params.get('include_outputs', False)
