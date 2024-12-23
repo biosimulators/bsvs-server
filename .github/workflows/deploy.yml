@@ -1,6 +1,10 @@
-name: Deploy All Microservices
+name: Continuous Deployment
 
 on:
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
@@ -40,7 +44,7 @@ jobs:
           rm -f gateway/spec/openapi_3_1_0_generated.yaml 
           python -B gateway/openapi_spec.py
           sudo rm -rf gateway/__pycache__
-          docker-compose build api
+          docker-compose build gateway
 
       - name: Deploy API microservice container to GHCR
         run: |
