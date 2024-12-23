@@ -2,28 +2,27 @@ import os
 import logging
 import uuid
 from typing import *
-
-import dotenv
 from tempfile import mkdtemp
 
+import dotenv
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query, APIRouter, Body
 from fastapi.responses import FileResponse
 from pydantic import BeforeValidator
 from starlette.middleware.cors import CORSMiddleware
 
-from compatible import COMPATIBLE_VERIFICATION_SIMULATORS
-from data_model import (
+from shared.database import MongoDbConnector
+from shared.io import save_uploaded_file, check_upload_file_extension, download_file_from_bucket
+from shared.log_config import setup_logging
+from shared.data_model import (
     VerificationOutput,
     OmexVerificationRun,
     DbClientResponse,
     CompatibleSimulators,
-    Simulator,
-    IncompleteJob
+    Simulator
 )
-from shared.shared_api import upload_blob, MongoDbConnector, DB_NAME, DB_TYPE, BUCKET_NAME, JobStatus, DatabaseCollections, file_upload_prefix
-from shared.io_api import write_uploaded_file, save_uploaded_file, check_upload_file_extension, download_file_from_bucket
-from shared.log_config import setup_logging
+
+from gateway.compatible import COMPATIBLE_VERIFICATION_SIMULATORS
 
 
 logger = logging.getLogger("verification-server.api.main.log")

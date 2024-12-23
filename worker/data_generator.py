@@ -1,4 +1,3 @@
-import abc
 import asyncio
 import time
 import os
@@ -14,10 +13,11 @@ from pathlib import Path
 import numpy as np
 from dotenv import load_dotenv
 
-from worker.biosimulations_runutils.biosim_pipeline.datamodels import Simulator
+from shared.biosimulations_runutils.biosim_pipeline.datamodels import Simulator
+from shared.data_model import BiosimulationsRunOutputData
+from shared.io import RunUtilsIO
 
-from worker.utils import *
-from worker.data_model import *
+from shared.utils import *
 
 
 __all__ = [

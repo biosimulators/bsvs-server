@@ -1,5 +1,7 @@
 import traceback
+import uuid
 from enum import Enum, EnumMeta
+from asyncio import sleep
 from typing import *
 from pprint import pformat
 
@@ -14,6 +16,10 @@ __all__ = [
     'stdout_colors',
     'get_output_stack'
 ]
+
+
+def unique_id() -> str:
+    return str(uuid.uuid4())
 
 
 def stdout_colors():
@@ -77,4 +83,22 @@ def get_output_stack(spec_name: str, output):
         stack[simulator_name] = data
 
     return stack
+
+
+async def load_arrows(timer):
+    check_timer = timer
+    ell = ""
+    bars = ""
+    msg = "|"
+    n_ellipses = timer
+    log_interval = check_timer / n_ellipses
+    for n in range(n_ellipses):
+        single_interval = log_interval / 3
+        await sleep(single_interval)
+        bars += "="
+        disp = bars + ">"
+        if n == n_ellipses - 1:
+            disp += "|"
+        print(disp)
+
 

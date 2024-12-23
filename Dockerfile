@@ -34,4 +34,7 @@ RUN mkdir -p /Pysces \
     && python -m pip install --upgrade pip \
     && python -m pip install poetry \
     && poetry lock \
-    && poetry install
+    && poetry install \
+
+# expose gateway port
+EXPOSE 3001

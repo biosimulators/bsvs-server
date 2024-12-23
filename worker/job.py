@@ -1,8 +1,6 @@
 import logging
 import math
-import os
 import tempfile
-from abc import ABC, abstractmethod
 from asyncio import sleep
 from typing import *
 
@@ -11,20 +9,14 @@ import pandas as pd
 from dotenv import load_dotenv
 from pymongo.collection import Collection as MongoCollection
 
-from shared.shared_worker import MongoDbConnector, JobStatus, DatabaseCollections, unique_id, BUCKET_NAME, handle_exception
+from shared.data_model import JobStatus, DatabaseCollections, BUCKET_NAME
+from shared.database import MongoDbConnector
 from shared.log_config import setup_logging
-from shared.io_worker import get_sbml_species_mapping, read_h5_reports, download_file, format_smoldyn_configuration, write_uploaded_file
-
-
-# TODO: Create general Worker process implementation!
+from shared.io_worker import read_h5_reports, download_file
+from shared.utils import unique_id, handle_sbml_exception, get_output_stack
 
 # for dev only
 load_dotenv('../assets/dev/config/.env_dev')
-
-
-# logging TODO: implement this.
-logger = logging.getLogger("biochecknet.job.global.log")
-setup_logging(logger)
 
 
 class Supervisor:
@@ -103,17 +95,7 @@ class Supervisor:
 
                 # run job again
                 try:
-                    # check: run simulations
-                    if job_id.startswith('simulation-execution'):
-                        worker = SimulationRunWorker(job=pending_job)
-                    # check: verifications
-                    elif job_id.startswith('verification'):
-                        worker = VerificationWorker(job=pending_job)
-                    # check: files
-                    elif job_id.startswith('files'):
-                        worker = FilesWorker(job=pending_job)
-                    elif job_id.startswith('composition'):
-                        worker = CompositionRunWorker(job=pending_job)
+                    worker = Worker(job=pending_job)
 
                     # when worker completes, dismiss worker (if in parallel)
                     await worker.run()
@@ -130,22 +112,11 @@ class Supervisor:
                         requested_simulators=pending_job.get('simulators')
                     )
 
-                    # store the state result if composite (currently only verification and Composition)
-                    if isinstance(worker, VerificationWorker) or isinstance(worker, CompositionRunWorker):
-                        state_result = worker.state_result
-                        await self.db_connector.write(
-                            collection_name="result_states",
-                            job_id=job_id,
-                            timestamp=self.db_connector.timestamp(),
-                            source=source_name,
-                            state=state_result,
-                        )
-
                     # remove in progress job
                     self.db_connector.db.in_progress_jobs.delete_one({'job_id': job_id})
                 except:
                     # save new execution error to db
-                    error = handle_exception('Job Execution Error')
+                    error = handle_sbml_exception()
                     self.logger.error(error)
                     await self.db_connector.write(
                         collection_name="failed_jobs",
@@ -168,7 +139,7 @@ class Supervisor:
 
 
 # run singularity in docker 1 batch mode 1 web version
-class Worker(ABC):
+class Worker:
     job_params: Dict
     job_id: str
     job_result: Dict | None
@@ -176,76 +147,93 @@ class Worker(ABC):
     supervisor: Supervisor
     logger: logging.Logger
 
-    def __init__(self, job: Dict, scope: str, supervisor: Supervisor = None):
+    def __init__(self, job: Dict, supervisor: Supervisor = None):
         """
-        Args:
-            job: job parameters received from the supervisor (who gets it from the db) which is a document from the pending_jobs collection within mongo.
+        :param job: job parameters received from the supervisor (who gets it from the db) which is a document from the pending_jobs collection within mongo.
         """
+        self.logger = logging.getLogger(f"biochecknet.job.worker.log")
+        setup_logging(self.logger)
         self.job_params = job
         self.job_id = self.job_params['job_id']
+        self.supervisor = supervisor
         self.job_result = {}
         self.job_failed = False
+        self.verifier = Verifier()
 
         # for parallel processing in a pool of workers. TODO: eventually implement this.
         self.worker_id = unique_id()
-        self.supervisor = supervisor
-        self.scope = scope
-        self.logger = logging.getLogger(f"biochecknet.job.worker-{self.scope}.log")
-        setup_logging(self.logger)
-
-    @abstractmethod
-    async def run(self):
-        pass
-
-    def result(self) -> tuple[dict, bool]:
-        return (self.job_result, self.job_failed)
-
-
-class VerificationWorker(Worker):
-    def __init__(self, job: Dict, supervisor: Supervisor = None):
-        super().__init__(job=job, supervisor=supervisor, scope='verification')
-        self.state_result = {}
 
     async def run(self, selection_list: List[str] = None) -> Dict:
         # process simulation
         input_fp = self.job_params['path']
         selection_list = self.job_params.get('selection_list')
         if input_fp.endswith('.omex'):
-            self._execute_omex_job()
-        elif input_fp.endswith('.xml'):
-            self._execute_sbml_job()
+            self.execute_omex_job()
+        else:
+            raise IOError('Input file must be a valid OMEX archive.')
 
         # select data if applicable
         selections = self.job_params.get("selection_list", selection_list)
         if selections is not None:
-            self.job_result = self._select_observables(job_result=self.job_result, observables=selections)
+            self.job_result = self.verifier.select_observables(job_result=self.job_result, observables=selections)
 
         # calculate rmse
         try:
-            rmse_matrix = self._calculate_pairwise_rmse()
-            self.job_result['rmse'] = self._format_rmse_matrix(rmse_matrix)
+            rmse_matrix = self.verifier.calculate_pairwise_rmse()
+            self.job_result['rmse'] = self.verifier.format_rmse_matrix(rmse_matrix)
             # self.job_result['rmse'] = self._calculate_pairwise_rmse()
         except:
-            e = handle_exception('RMSE Calculation')
+            e = handle_sbml_exception()
             self.logger.error(e)
             self.job_result['rmse'] = {'error': e}
 
-        # simulators = self.job_params.get('simulators')
-        # # include expected results in rmse if applicable
-        # if self.job_params.get('expected_results') is not None:
-        #     simulators.append('expected_results')
-        # # calc rmse for each simulator
-        # for simulator in simulators:
-        #     try:
-        #         self.job_result['rmse'][simulator] = self._calculate_inter_simulator_rmse(target_simulator=simulator)
-        #     except:
-        #         self.job_result['rmse'][simulator] = {}
-
         return self.job_result
 
-    def _calculate_inter_simulator_rmse(self, target_simulator):
+    def execute_omex_job(self):
+        params = None
+        out_dir = tempfile.mkdtemp()
+        source_fp = self.job_params['path']
+        source_report_fp = self.job_params.get('expected_results')
+
+        # download sbml file
+        local_fp = download_file(source_blob_path=source_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
+
+        # get ground truth from bucket if applicable
+        truth_vals = None
+        local_report_fp = None
+        if source_report_fp is not None:
+            local_report_fp = download_file(source_blob_path=source_report_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
+            truth_vals = read_h5_reports(local_report_fp)
+
+        simulators = self.job_params.get('simulators', [])
+        include_outs = self.job_params.get('include_outputs', False)
+        tol = self.job_params.get('rTol')
+        atol = self.job_params.get('aTol')
+        comparison_id = self.job_params.get('job_id')
+
+        result = self.verifier.run_comparison(
+            path=local_fp,
+            simulators=simulators,
+            out_dir=out_dir,
+            include_outputs=include_outs,
+            truth_vals=truth_vals
+        )
+
+        self.job_result = result
+        # except:
+        # error = handle_sbml_exception()
+        # logger.error(error)
+        # self.job_result = {"error": error}
+
+    def get_result(self) -> tuple[dict, bool]:
+        return (self.job_result, self.job_failed)
+
+
+class Verifier:
+    """Class which handles all non-network-based verification and data formatting logic."""
+    def calculate_inter_simulator_rmse(self, target_simulator: str, job_result: Dict):
         # extract data fields
-        spec_data = self.job_result
+        spec_data = job_result
 
         # iterate through observables
         mse_values = []
@@ -257,17 +245,9 @@ class VerificationWorker(Worker):
                 if sim != target_simulator:
                     mse_values.append(mse)
 
-        # calculate the mean of the collected MSE values
-        if mse_values:
-            mean_mse = sum(mse_values) / len(mse_values)
+        return math.sqrt(sum(mse_values) / len(mse_values)) if mse_values else 0.0
 
-            # return the square root of the mean MSE (RMSE)
-            return math.sqrt(mean_mse)
-        # else:
-        # handle case where no MSE values are present (to avoid division by zero)
-        # return 0.0
-
-    def _format_rmse_matrix(self, matrix) -> dict[str, dict[str, float]]:
+    def format_rmse_matrix(self, matrix) -> dict[str, dict[str, float]]:
         _m = matrix
         rmse = {}
 
@@ -293,11 +273,11 @@ class VerificationWorker(Worker):
 
         return rmse
 
-    def _calculate_pairwise_rmse(self) -> dict:
+    def calculate_pairwise_rmse(self, job_result: Dict, job_params: Dict) -> Dict:
         # get input data
-        spec_data = self.job_result
-        simulators = self.job_params['simulators']
-        if self.job_params.get('expected_results') is not None:
+        spec_data = job_result
+        simulators = job_params['simulators']
+        if job_params.get('expected_results') is not None:
             simulators.append('expected_results')
         n = len(simulators)
 
@@ -328,45 +308,7 @@ class VerificationWorker(Worker):
 
         return pd.DataFrame(rmse_matrix, columns=simulators, index=simulators).to_dict()
 
-    def _execute_omex_job(self):
-        params = None
-        out_dir = tempfile.mkdtemp()
-        source_fp = self.job_params['path']
-        source_report_fp = self.job_params.get('expected_results')
-
-        # download sbml file
-        local_fp = download_file(source_blob_path=source_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
-
-        # get ground truth from bucket if applicable
-        truth_vals = None
-        local_report_fp = None
-        if source_report_fp is not None:
-            local_report_fp = download_file(source_blob_path=source_report_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
-            truth_vals = read_h5_reports(local_report_fp)
-
-        simulators = self.job_params.get('simulators', [])
-        include_outs = self.job_params.get('include_outputs', False)
-        tol = self.job_params.get('rTol')
-        atol = self.job_params.get('aTol')
-        comparison_id = self.job_params.get('job_id')
-
-        result = self._run_comparison(
-            path=local_fp,
-            simulators=simulators,
-            out_dir=out_dir,
-            include_outputs=include_outs,
-            truth_vals=truth_vals
-        )
-
-        self.job_result = result
-        # except:
-        # error = handle_sbml_exception()
-        # logger.error(error)
-        # self.job_result = {"error": error}
-
-
-class VerificationExecutor:
-    def _select_observables(self, job_result, observables: List[str] = None) -> Dict:
+    def select_observables(self, job_result: Dict, observables: List[str] = None) -> Dict:
         """Select data from the input data that is passed which should be formatted such that the data has mappings of observable names
             to dicts in which the keys are the simulator names and the values are arrays. The data must have content accessible at: `data['content']['results']`.
         """
@@ -391,7 +333,7 @@ class VerificationExecutor:
 
         return outputs
 
-    def _run_comparison(
+    def run_comparison(
             self,
             path: str,
             simulators: List[str],
@@ -443,7 +385,7 @@ class VerificationExecutor:
                 #             ground_truth_data = data['data']
                 # generate species comparison
 
-                results[species] = self._generate_species_comparison(
+                results[species] = self.generate_species_comparison(
                     output_data=output_data,
                     species_name=species,
                     simulators=simulators,
@@ -454,9 +396,9 @@ class VerificationExecutor:
 
         return results
 
-    def _generate_species_comparison(self, output_data, species_name, simulators, ground_truth=None, rTol=None, aTol=None):
+    def generate_species_comparison(self, output_data, species_name, simulators, ground_truth=None, rTol=None, aTol=None):
         # extract valid comparison data
-        stack = get_output_stack(outputs=output_data, spec_name=species_name)
+        stack = get_output_stack(output=output_data, spec_name=species_name)
         species_comparison_data = {}
         for simulator_name in stack.keys():
             row = stack[simulator_name]
@@ -470,7 +412,7 @@ class VerificationExecutor:
         if len(outputs) > 1:
             # outputs = _get_output_stack(output_data, species_name)
             matrix_vals = list(map(
-                lambda m: self._generate_species_comparison_matrix(outputs=outputs, simulators=valid_sims, method=m, ground_truth=ground_truth, rtol=rTol, atol=aTol).to_dict(),
+                lambda m: self.generate_species_comparison_matrix(outputs=outputs, simulators=valid_sims, method=m, ground_truth=ground_truth, rtol=rTol, atol=aTol).to_dict(),
                 methods
             ))
         else:
@@ -493,7 +435,7 @@ class VerificationExecutor:
                 results['output_data'][simulator_name] = data.tolist() if isinstance(data, np.ndarray) else data
         return results
 
-    def _generate_species_comparison_matrix(
+    def generate_species_comparison_matrix(
             self,
             outputs: Union[np.ndarray, List[np.ndarray]],
             simulators: List[str],
