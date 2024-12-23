@@ -55,7 +55,7 @@ def test_generate_omex_outputs():
 
     buffer = 10
     test_biomodel_id = BIOMODEL_IDS[0]
-    test_biomodel_output_dir = f'./verification_request/results/{test_biomodel_id}'
+    test_biomodel_output_dir = f'../tests/verification_request/results/{test_biomodel_id}'
     outputfile_id = min(str(uuid.uuid4()).split('-'))
     json_fp = f'./verification_request/output_data/{test_biomodel_id}-outputs-{outputfile_id}.json'
     return batch_generate_omex_outputs(BIOMODEL_IDS, test_biomodel_output_dir, json_fp, simulators, buffer)

@@ -170,3 +170,30 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+release_env
+commit.sh
+.idea/
+.notes
+*.pyc
+.dev_env
+worker/handlers/__pycache__/
+venv
+smoldyn-2.73-mac.tgz.1
+assets/dev/config/.env_dev
+assets/docker/config/.bio-check.json
+assets/docker/config/.biosimulations-prodbucket.json
+assets/docker/config/.biosimulations.json
+bucket.sh
+.env_dev
+NOTES
+scratch.ipynb
+test.ipynb
+poetry.lock
+*_parsetab.py
+condaenv.n_dn60fa.requirements.txt
+worker/.worker_STABLE
+build
+.DS_Store
+

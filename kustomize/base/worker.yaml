@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: worker
+  name: worker
+spec:
+  selector:
+    matchLabels:
+      app: worker
+  replicas: 0
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+        - name: worker
+          image: ghcr.io/biosimulators/bio-compose-server-worker  # bio-check-compose_worker
+          imagePullPolicy: "Always"
+          resources:
+            requests:
+              memory: "400Mi"
+              cpu: "500m"
+            limits:
+              memory: "2000Mi"
+              cpu: "1500m"
+          envFrom:
+            - configMapRef:
+                name: worker-config
+          env:
+            - name: MONGO_DB_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: biochecknet-api-secrets
+                  key: mongo-password
+            - name: MONGO_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: biochecknet-api-secrets
+                  key: mongo-username
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              valueFrom:
+                secretKeyRef:
+                  name: biochecknet-api-secrets
+                  key: google-application-credentials
+          ports:
+            - containerPort: 3001
+          volumeMounts:
+            - name: biochecknet-api-secrets
+              mountPath: /run/secrets/api-secrets
+      restartPolicy: Always
+      imagePullSecrets:
+        - name: ghcr-secret
+      volumes:
+        - name: biochecknet-api-secrets
+          secret:
+            items:
+              - key: mongo-password
+                path: mongo-password
+              - key: mongo-username
+                path: mongo-username
+              - key: google-application-credentials
+                path: google-application-credentials
+            secretName: biochecknet-api-secrets
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: worker
+  name: worker
+spec:
+  ports:
+    - name: "3001"
+      port: 3001
+      targetPort: 3001
+  selector:
+    app: worker
