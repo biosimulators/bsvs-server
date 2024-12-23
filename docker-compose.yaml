@@ -1,29 +1,26 @@
-# version: '3.8'
-
 services:
   mongodb:
     image: mongo:latest
     container_name: mongodb
     ports:
       - "27017:27017"
-    # volumes:
-      # - mongo-data:/data/db
     networks:
       - appnetwork
 
   api:
     build:
-      context: ./gateway
-      dockerfile: Dockerfile-api
+      context: .
+      dockerfile: Dockerfile
     image: ghcr.io/biosimulators/verification-server-api:0.0.1
     container_name: api
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/?retryWrites=true&w=majority&appName=bio-compose
+      - MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=verification-server"
       - MONGO_USERNAME=alex
       - MONGO_DB_PWD=123
       - GOOGLE_APPLICATION_CREDENTIALS=/.google/.bio-check.json
       - DB_NAME=service_requests
       - BUCKET_NAME=files-biochecknet
+      - CONTENT_DIR=gateway
     ports:
       - "3001:3001"
     networks:
@@ -31,17 +28,18 @@ services:
 
   worker:
     build:
-      context: ./worker
-      dockerfile: Dockerfile-worker
+      context: .
+      dockerfile: Dockerfile
     image: ghcr.io/biosimulators/verification-server-worker:0.0.1
     container_name: worker
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/?retryWrites=true&w=majority&appName=bio-compose
+      - MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=verification-server"
       - MONGO_USERNAME=alex
       - MONGO_DB_PWD=123
       - GOOGLE_APPLICATION_CREDENTIALS=/.google/.bio-check.json
       - DB_NAME=service_requests
       - BUCKET_NAME=files-biochecknet
+      - CONTENT_DIR=worker
     networks:
       - appnetwork
 

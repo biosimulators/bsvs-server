@@ -1,14 +1,9 @@
-# FROM ubuntu:22.04  <-- heavy out of the box, substantially heavier after build
-# FROM continuumio/miniconda3:main  <-- issues with liscening/debian-only(not ubuntu)
-# FROM condaforge/miniforge-pypy3:24.9.0-0
-# FROM condaforge/miniforge:24.9.0-0
-
-FROM continuumio/miniconda3:main
+FROM python:3.11-slim
 
 LABEL org.opencontainers.image.title="bio-compose-server-base" \
     org.opencontainers.image.description="Base Docker image for BioCompose REST API management, job processing, and datastorage with MongoDB, ensuring scalable and robust performance." \
     org.opencontainers.image.url="https://biosimulators.org/" \
-    org.opencontainers.image.source="https://github.com/biosimulators/bio-check" \
+    org.opencontainers.image.source="https://github.com/biosimulators/verification-server" \
     org.opencontainers.image.authors="Alexander Patrie <apatrie@uchc.edu>, BioSimulators Team <info@biosimulators.org>" \
     org.opencontainers.image.vendor="BioSimulators Team"
 
@@ -16,37 +11,28 @@ SHELL ["/usr/bin/env", "bash", "-c"]
 
 # shared env
 ENV DEBIAN_FRONTEND=noninteractive \
-    MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=bio-check" \
-    POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_NO_INTERACTION=1 \
-    TEST_SBML_FP="../test_fixtures/sbml-core/Elowitz-Nature-2000-Repressilator/BIOMD0000000012_url.xml" \
-    TEST_PSC_FP="/Pysces/psc/BIOMD0000000012_url.xml.psc" \
-    TEST_OMEX_FP="../test_fixtures/sbml-core/Elowitz-Nature-2000-Repressilator.omex"
+    MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=verification-server" \
+    POETRY_VIRTUALENVS_CREATE=true \
+    POETRY_NO_INTERACTION=1
 
 # copy docker assets
 COPY assets/docker/config/.biosimulations.json /.google/.bio-check.json
 COPY assets/docker/config/.pys_usercfg.ini /Pysces/.pys_usercfg.ini
 COPY assets/docker/config/.pys_usercfg.ini /root/Pysces/.pys_usercfg.ini
-COPY assets/docker/shared.py /app/shared.py
-COPY test_fixtures /test_fixtures
-COPY assets/docker/config/environment.base.yml /app/environment.base.yml
 
 # cd /app
 WORKDIR /app
+
+ARG CONTENT_DIR
+COPY ./$CONTENT_DIR /app/$CONTENT_DIR
+# COPY ./gateway /app/gateway
+# COPY ./worker /app/worker
 
 RUN mkdir -p /Pysces \
     && mkdir -p /Pysces/psc \
     && mkdir -p /root/Pysces \
     && mkdir -p /root/Pysces/psc \
-    && mkdir config \
-    && conda update -n base -c conda-forge conda \
-    && conda run -n base pip3 install --upgrade pip \
-    && conda run -n base pip install --upgrade pip \
-    && conda env create -n server -f environment.base.yml -y \
-    && echo "conda activate server" >> ~/.bashrc \
-    && source ~/.bashrc \
-    && conda env export -n server --no-builds -f config/environment.base.lock.yml \
-    && rm -f environment.base.yml
+    &&
 
 
 # to run with a local network:
