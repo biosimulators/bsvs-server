@@ -12,16 +12,26 @@ packages = [
 
 
 [tool.poetry.dependencies]
-python = "^3.10"
-requests-toolbelt = "^1.0.0"
-seaborn = "^0.13.2"
-toml = "^0.10.2"
-requests = "^2.32.3"
+python = "^3.11"
 
 
-[tool.poetry.group.dev.dependencies]
+# [tool.poetry.group.dev.dependencies]
+# pip-autoremove = "^0.10.0"
+# pytest = "*"
 pip-autoremove = "^0.10.0"
-pytest = "*"
+requests-toolbelt = "^1.0.0"
+python-dotenv = "^1.0.1"
+google-cloud-storage = "^2.19.0"
+python-multipart = "^0.0.20"
+fastapi = "^0.115.6"
+toml = "^0.10.2"
+typing-extensions = "^4.12.2"
+pymongo = "^4.10.1"
+pydantic-settings = "^2.7.0"
+pydantic = "^2.10.4"
+uvicorn = "^0.34.0"
+pyyaml = "^6.0.2"
+requests = "^2.32.3"
 
 
 [tool.pytest.ini_options]
