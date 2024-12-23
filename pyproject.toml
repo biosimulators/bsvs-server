@@ -39,6 +39,7 @@ chardet = "^5.2.0"
 [tool.poetry.group.worker.dependencies]
 python-libsbml = "^5.20.4"
 
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--ignore=setup.py"
