@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "bio-compose-data-generator"
+version = "0.0.1"
+description = "Create, execute, and introspect reproducible composite simulations of dynamic biological systems."
+authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
+readme = "README.md"
+include = ["pyproject.toml"]
+packages = [
+    {include = "biosimulations_runutils"},
+    {include = "datagen"}
+]
+
+
+[tool.poetry.scripts]
+verify = "bio_compose.__main__:verification_cli"
+run-simulation = "bio_compose.__main__:simulation_run_cli"
+
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests-toolbelt = "^1.0.0"
+seaborn = "^0.13.2"
+antimony = "*"
+toml = "^0.10.2"
+process-bigraph = "^0.0.21"
+requests = "^2.32.3"
+
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^8.1.3"
+sphinx-autodoc-typehints = "^2.5.0"
+sphinx-rtd-theme = "^3.0.2"
+
+
+[tool.poetry.group.notebook.dependencies]
+ipykernel = "^6.29.5"
+jupyterlab = "^4.3.4"
+
+
+[tool.poetry.group.dev.dependencies]
+pip-autoremove = "^0.10.0"
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--ignore=setup.py"
+python_files = "main.py"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
