@@ -11,14 +11,12 @@ from typing import *
 import numpy as np
 import h5py
 import libsbml
-import typer
 
-from datagen.biosimulations_runutils.biosim_pipeline import run_project, check_run_status
-from datagen.biosimulations_runutils.biosim_pipeline.data_manager import DataManager
-from datagen.biosimulations_runutils.biosim_pipeline import Simulator, SimulationRun
-from datagen.biosimulations_runutils.common.api_utils import download_file
-
-from datagen.utils import visit_datasets, printc
+from worker.biosimulations_runutils.biosim_pipeline.biosim_api import run_project, check_run_status
+from worker.biosimulations_runutils.biosim_pipeline.data_manager import DataManager
+from worker.biosimulations_runutils.biosim_pipeline.datamodels import Simulator, SimulationRun
+from worker.biosimulations_runutils.common.api_utils import download_file
+from worker.utils import visit_datasets, printc
 
 
 __all__ = [
@@ -217,10 +215,10 @@ class RunUtilsIO(IOBase):
     @classmethod
     def download_runs(
             cls,
-            omex_src_dir: Annotated[Union[Path, None], typer.Option(help="defaults env.OMEX_SOURCE_DIR")] = None,
-            out_dir: Annotated[Union[Path, None], typer.Option(help="defaults to env.OMEX_OUTPUT_DIR")] = None,
-            project_id: Annotated[Union[str, None], typer.Option(help="filter by project_id")] = None,
-            simulator: Annotated[Union[Simulator, None], typer.Option(help="filter by simulator")] = None,
+            omex_src_dir=None,
+            out_dir=None,
+            project_id=None,
+            simulator=None,
     ) -> Path:
         data_manager = DataManager(omex_src_dir=omex_src_dir, out_dir=out_dir)
         api_base_url = os.environ.get('API_BASE_URL')
@@ -275,9 +273,9 @@ class RunUtilsIO(IOBase):
     @classmethod
     def upload_omex(
             cls,
-            simulator: Annotated[Simulator, typer.Option(help="simulator to run")] = Simulator.vcell,
-            simulator_version: Annotated[str, typer.Option(help="simulator version to run - defaults to 'latest'")] = "latest",
-            project_id: Annotated[Union[str, None], typer.Option(help="filter by project_id")] = None,
+            simulator=Simulator.vcell,
+            simulator_version="latest",
+            project_id=None,
             omex_src_dir: Path = None,
             out_dir: Path = None
     ) -> None:
@@ -292,12 +290,6 @@ class RunUtilsIO(IOBase):
                 continue
             printc(source_omex.project_id, "Project ID: ")
             run_project(source_omex=source_omex, simulator=simulator, simulator_version=simulator_version, data_manager=data_manager)
-    # simulator_outputs = read_report_outputs(report_file_path=report_path)
-    # data = explore_hdf5_data(report_path)
-    # dataset_keys = data.keys()
-    # dataset_path = list(data.keys()).pop() if len(dataset_keys) == 1 else list(data.keys())[0]
-    # labeled_data = read_report_outputs_with_labels(report_file_path=report_path, dataset_path=dataset_path)
-    # return labeled_data
 
 
 STATUS_SCHEMA = {

@@ -42,6 +42,11 @@ services:
       - CONTENT_DIR=worker
     networks:
       - appnetwork
+    command:
+      sh -c "
+      cd worker
+      poetry run python main.py
+      "
 
 networks:
   appnetwork:

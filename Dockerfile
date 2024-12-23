@@ -20,13 +20,12 @@ COPY assets/docker/config/.biosimulations.json /.google/.bio-check.json
 COPY assets/docker/config/.pys_usercfg.ini /Pysces/.pys_usercfg.ini
 COPY assets/docker/config/.pys_usercfg.ini /root/Pysces/.pys_usercfg.ini
 
-# cd /app
 WORKDIR /app
 
-ARG CONTENT_DIR
-COPY ./$CONTENT_DIR /app/$CONTENT_DIR
-# COPY ./gateway /app/gateway
-# COPY ./worker /app/worker
+COPY ./gateway /app/gateway
+COPY ./worker /app/worker
+COPY ./shared /app/shared
+COPY pyproject.toml /app/pyproject.toml
 
 RUN mkdir -p /Pysces \
     && mkdir -p /Pysces/psc \

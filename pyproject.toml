@@ -32,7 +32,12 @@ requests = "^2.32.3"
 pytest = "^8.3.4"
 numpy = "^2.2.1"
 pandas = "^2.2.3"
+h5py = "^3.12.1"
+chardet = "^5.2.0"
 
+
+[tool.poetry.group.worker.dependencies]
+python-libsbml = "^5.20.4"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

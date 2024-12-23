@@ -11,8 +11,8 @@ __all__ = [
     'handle_sbml_exception',
     'printc',
     'visit_datasets',
-    'stdout_colors'
-
+    'stdout_colors',
+    'get_output_stack'
 ]
 
 
@@ -62,35 +62,19 @@ def printc(msg: Any, alert: str = '', error=False):
     print(content)
 
 
-# -- original read report method from bio-check/worker --
-# def __read_report_outputs(report_file_path: str, dataset_label: str = None):
-# from dataclasses import dataclass
-#     @dataclass
-#     class BiosimulationsReportOutput:
-#         dataset_label: str
-#         data: np.ndarray
-#
-#     @dataclass
-#     class BiosimulationsRunOutputData:
-#         report_path: str
-#         data: List[BiosimulationsReportOutput]
-#
-#     outputs = []
-#     with h5py.File(report_file_path, 'r') as f:
-#         k = list(f.keys())
-#         group_path = k[0] + '/report'
-#         if group_path in f:
-#             group = f[group_path]
-#             label = dataset_label or 'sedmlDataSetLabels'
-#             dataset_labels = group.attrs[label]
-#             for label in dataset_labels:
-#                 dataset_index = list(dataset_labels).index(label)
-#                 data = group[()]
-#                 specific_data = data[dataset_index]
-#                 output = BiosimulationsReportOutput(dataset_label=label, data=specific_data)
-#                 outputs.append(output)
-#
-#             return BiosimulationsRunOutputData(report_path=report_file_path, data=outputs)
-#         else:
-#             return {'report_path': report_file_path, 'data': f"Group '{group_path}' not found in the file."}
+# -- formatted observables data -- #
+
+def get_output_stack(spec_name: str, output):
+    # 2. in output_stack: return {simname: output}
+    stack = {}
+    for simulator_name in output.keys():
+        spec_data = output[simulator_name].get(spec_name)
+        if isinstance(spec_data, str):
+            data = None
+        else:
+            data = spec_data
+
+        stack[simulator_name] = data
+
+    return stack
 

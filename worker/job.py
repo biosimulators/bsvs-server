@@ -166,17 +166,6 @@ class Supervisor:
 
         return job is not None
 
-    async def store_registered_addresses(self):
-        # store list of process addresses that is available to the client via mongodb:
-        confirmation = await self.db_connector.write(
-            collection_name="bigraph_registry",
-            registered_addresses=REGISTERED_BIGRAPH_ADDRESSES,
-            timestamp=self.db_connector.timestamp(),
-            version="latest",
-            return_document=True
-        )
-        return confirmation
-
 
 # run singularity in docker 1 batch mode 1 web version
 class Worker(ABC):
@@ -210,109 +199,6 @@ class Worker(ABC):
 
     def result(self) -> tuple[dict, bool]:
         return (self.job_result, self.job_failed)
-
-
-class CompositionRunWorker(Worker):
-    def __init__(self, job: Dict, supervisor: Supervisor = None):
-        super().__init__(job=job, supervisor=supervisor, scope='composition')
-        self.state_result = {}
-
-    async def run(self):
-        spec = self.job_params.get('state_spec')
-        duration = self.job_params.get('duration')
-        await self.generate_composition_result_data(state_spec=spec, duration=duration)
-        return self.job_result
-
-    async def generate_composition_result_data(self, state_spec, duration):
-        result = generate_composition_result_data(state_spec=state_spec, core=APP_PROCESS_REGISTRY, duration=duration)
-        self.job_result = {'results': result['results']}
-        self.state_result = result.get('state_result')
-
-
-class SimulationRunWorker(Worker):
-    def __init__(self, job: Dict):
-        super().__init__(job=job, scope='simulation-run')
-
-    async def run(self):
-        # check which endpoint methodology to implement
-        source_fp = self.job_params.get('path')
-        if source_fp is not None:
-            # case: job requires some sort of input file and is thus either a smoldyn, utc, or verification run
-            out_dir = tempfile.mkdtemp()
-            local_fp = download_file(source_blob_path=source_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
-
-            # case: is a smoldyn job
-            if local_fp.endswith('.txt'):
-                await self.run_smoldyn(local_fp)
-            # case: is utc job
-            elif local_fp.endswith('.xml'):
-                await self.run_utc(local_fp)
-        elif "readdy" in self.job_id:
-            # case: job is configured manually by user request
-            await self.run_readdy()
-
-        return self.job_result
-
-    async def run_smoldyn(self, local_fp: str):
-        # format model file for disabling graphics
-        format_smoldyn_configuration(filename=local_fp)
-
-        # get job params
-        duration = self.job_params.get('duration')
-        dt = self.job_params.get('dt')
-        initial_species_state = self.job_params.get('initial_molecule_state')  # not yet implemented
-
-        # execute simularium, pointing to a filepath that is returned by the run smoldyn call
-        result = run_smoldyn(model_fp=local_fp, duration=duration, dt=dt)
-
-        # TODO: Instead use the composition framework to do this
-
-        # write the aforementioned output file (which is itself locally written to the temp out_dir, to the bucket if applicable
-        results_file = result.get('results_file')
-        if results_file is not None:
-            uploaded_file_location = await write_uploaded_file(job_id=self.job_id, uploaded_file=results_file, bucket_name=BUCKET_NAME, extension='.txt')
-            self.job_result = {'results_file': uploaded_file_location}
-        else:
-            self.job_result = result
-
-    async def run_readdy(self):
-        # get request params
-        duration = self.job_params.get('duration')
-        dt = self.job_params.get('dt')
-        box_size = self.job_params.get('box_size')
-        species_config = self.job_params.get('species_config')
-        particles_config = self.job_params.get('particles_config')
-        reactions_config = self.job_params.get('reactions_config')
-        unit_system_config = self.job_params.get('unit_system_config')
-
-        # run simulations
-        result = run_readdy(
-            box_size=box_size,
-            species_config=species_config,
-            particles_config=particles_config,
-            reactions_config=reactions_config,
-            unit_system_config=unit_system_config,
-            duration=duration,
-            dt=dt
-        )
-
-        # extract results file and write to bucket
-        results_file = result.get('results_file')
-        if results_file is not None:
-            uploaded_file_location = await write_uploaded_file(job_id=self.job_id, uploaded_file=results_file, bucket_name=BUCKET_NAME, extension='.h5')
-            self.job_result = {'results_file': uploaded_file_location}
-            os.remove(results_file)
-        else:
-            self.job_result = result
-
-    async def run_utc(self, local_fp: str):
-        start = self.job_params['start']
-        end = self.job_params['end']
-        steps = self.job_params['steps']
-        simulator = self.job_params.get('simulators')[0]
-
-        result = generate_sbml_utc_outputs(sbml_fp=local_fp, start=start, dur=end, steps=steps, simulators=[simulator])
-        self.job_result = result[simulator]
 
 
 class VerificationWorker(Worker):
@@ -442,70 +328,44 @@ class VerificationWorker(Worker):
 
         return pd.DataFrame(rmse_matrix, columns=simulators, index=simulators).to_dict()
 
-    def __calculate_pairwise_rmse(self) -> dict:
-        # get input data
-        spec_data = self.job_result
-        simulators = self.job_params['simulators']
-        if self.job_params.get('expected_results') is not None:
-            simulators.append('expected_results')
-        n = len(simulators)
+    def _execute_omex_job(self):
+        params = None
+        out_dir = tempfile.mkdtemp()
+        source_fp = self.job_params['path']
+        source_report_fp = self.job_params.get('expected_results')
 
-        # set up empty matrix
-        rmse_matrix = np.zeros((n, n))
+        # download sbml file
+        local_fp = download_file(source_blob_path=source_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
 
-        # enumerate over i,j of simulators in a matrix
-        cols = []
-        mse_values = []
-        for i, sim_i in enumerate(simulators):
-            for j, sim_j in enumerate(simulators):
-                if i != j:
-                    # fetch mse values
-                    for observable, observable_data in spec_data.items():
-                        if not isinstance(observable_data, str):
-                            mse_data = observable_data['mse']
-                            # means that simulator was successful and is in mse matrices
-                            if sim_j in mse_data.keys():
-                                # append sim_j to cols because it is valid (in the mse matrix)
-                                cols.append(sim_j)
+        # get ground truth from bucket if applicable
+        truth_vals = None
+        local_report_fp = None
+        if source_report_fp is not None:
+            local_report_fp = download_file(source_blob_path=source_report_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
+            truth_vals = read_h5_reports(local_report_fp)
 
-                                # mse_data[sim_j] is a dict containing MSEs with other simulators
-                                for comparison_sim, mse_value in mse_data[sim_j].items():
-                                    if comparison_sim == sim_i:
-                                        mse_values.append(mse_value)
+        simulators = self.job_params.get('simulators', [])
+        include_outs = self.job_params.get('include_outputs', False)
+        tol = self.job_params.get('rTol')
+        atol = self.job_params.get('aTol')
+        comparison_id = self.job_params.get('job_id')
 
-                    # # get unique list of valid sim keys and adjust matrix shape accordingly
-                    # cols = list(set(cols))
-                    # n_valid_simulators = len(cols)
-                    # adjusted_matrix_shape = (n_valid_simulators, n_valid_simulators)
-                    # rmse_matrix = np.resize(rmse_matrix, adjusted_matrix_shape)
+        result = self._run_comparison(
+            path=local_fp,
+            simulators=simulators,
+            out_dir=out_dir,
+            include_outputs=include_outs,
+            truth_vals=truth_vals
+        )
 
-                    # # assign mse_values to newly shaped matrix (should be same shape)
-                    # if mse_values:
-                    #     mean_mse = sum(mse_values) / len(mse_values)
-                    #     rmse_matrix[i, j] = math.sqrt(mean_mse)
+        self.job_result = result
+        # except:
+        # error = handle_sbml_exception()
+        # logger.error(error)
+        # self.job_result = {"error": error}
 
-                    # else:
-                    # TODO: make this more robust
-                    # rmse_matrix[i, j] = np.nan
-                # else:
-                # rmse_matrix[i, j] = 0.0
-        # get unique list of valid sim keys and adjust matrix shape accordingly
-        columns = list(set(cols))
-        n_valid_simulators = len(columns)
-        adjusted_matrix_shape = (n_valid_simulators, n_valid_simulators)
-        rmse_matrix = np.resize(rmse_matrix, adjusted_matrix_shape)
 
-        # assign mse_values to newly shaped matrix (should be same shape)
-        if mse_values:
-            for i, sim_i in enumerate(columns):
-                for j, sim_output in enumerate(mse_values):
-                    if i != j:
-                        mse_vals = mse_values[i][j]
-                        mean_mse = sum(mse_vals) / len(mse_vals)
-                        rmse_matrix[i, j] = math.sqrt(mean_mse)
-
-        return pd.DataFrame(rmse_matrix, columns=columns, index=columns).to_dict()
-
+class VerificationExecutor:
     def _select_observables(self, job_result, observables: List[str] = None) -> Dict:
         """Select data from the input data that is passed which should be formatted such that the data has mappings of observable names
             to dicts in which the keys are the simulator names and the values are arrays. The data must have content accessible at: `data['content']['results']`.
@@ -531,82 +391,12 @@ class VerificationWorker(Worker):
 
         return outputs
 
-    def _execute_sbml_job(self):
-        params = None
-        out_dir = tempfile.mkdtemp()
-        source_fp = self.job_params['path']
-        source_report_fp = self.job_params.get('expected_results')
-
-        # download sbml file
-        local_fp = download_file(source_blob_path=source_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
-
-        # get ground truth from bucket if applicable
-        local_report_fp = None
-        if source_report_fp is not None:
-            local_report_fp = download_file(source_blob_path=source_report_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
-
-        simulators = self.job_params.get('simulators', ['amici', 'copasi', 'tellurium'])  # pysces
-        include_outs = self.job_params.get('include_outputs', False)
-        comparison_id = self.job_params.get('job_id')
-        output_start = self.job_params.get('start')
-        end = self.job_params.get('end', 10)
-        steps = self.job_params.get('steps', 100)
-        rtol = self.job_params.get('rTol')
-        atol = self.job_params.get('aTol')
-
-        result = self._run_comparison_from_sbml(
-            sbml_fp=local_fp,
-            start=output_start,
-            dur=end,
-            steps=steps,
-            rTol=rtol,
-            aTol=atol,
-            ground_truth=local_report_fp,
-            simulators=simulators
-        )
-        self.job_result = result
-
-    def _execute_omex_job(self):
-        params = None
-        out_dir = tempfile.mkdtemp()
-        source_fp = self.job_params['path']
-        source_report_fp = self.job_params.get('expected_results')
-
-        # download sbml file
-        local_fp = download_file(source_blob_path=source_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
-
-        # get ground truth from bucket if applicable
-        truth_vals = None
-        local_report_fp = None
-        if source_report_fp is not None:
-            local_report_fp = download_file(source_blob_path=source_report_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
-            truth_vals = read_h5_reports(local_report_fp)
-
-        simulators = self.job_params.get('simulators', [])
-        include_outs = self.job_params.get('include_outputs', False)
-        tol = self.job_params.get('rTol')
-        atol = self.job_params.get('aTol')
-        comparison_id = self.job_params.get('job_id')
-
-        result = self._run_comparison_from_omex(
-            path=local_fp,
-            simulators=simulators,
-            out_dir=out_dir,
-            include_outputs=include_outs,
-            truth_vals=truth_vals
-        )
-
-        self.job_result = result
-        # except:
-        # error = handle_sbml_exception()
-        # logger.error(error)
-        # self.job_result = {"error": error}
-
-    def _run_comparison_from_omex(
+    def _run_comparison(
             self,
             path: str,
             simulators: List[str],
             out_dir: str,
+            data_generator: Callable[[str, str, List[str]], Dict[str, Union[np.ndarray, List[float]]]],
             include_outputs: bool = True,
             truth_vals=None,
             rTol=None,
@@ -630,7 +420,8 @@ class VerificationWorker(Worker):
         results = {}
 
         # generate the data
-        output_data = generate_biosimulator_utc_outputs(omex_fp=path, output_root_dir=out_dir, simulators=simulators, alg_policy="same_framework")
+        # output_data = generate_biosimulator_utc_outputs(omex_fp=path, output_root_dir=out_dir, simulators=simulators, alg_policy="same_framework")
+        output_data = data_generator(path, out_dir, simulators)
         ground_truth_data = truth_vals.to_dict() if not isinstance(truth_vals, type(None)) else truth_vals
 
         # generate the species comparisons
@@ -652,7 +443,7 @@ class VerificationWorker(Worker):
                 #             ground_truth_data = data['data']
                 # generate species comparison
 
-                results[species] = self._generate_omex_utc_species_comparison(
+                results[species] = self._generate_species_comparison(
                     output_data=output_data,
                     species_name=species,
                     simulators=simulators,
@@ -663,33 +454,7 @@ class VerificationWorker(Worker):
 
         return results
 
-    def _run_comparison_from_sbml(self, sbml_fp, start, dur, steps, rTol=None, aTol=None, simulators=None, ground_truth=None) -> Dict:
-        species_mapping = get_sbml_species_mapping(sbml_fp)
-        mapping_names = list(species_mapping.keys())
-        data = self._generate_formatted_sbml_outputs(sbml_filepath=sbml_fp, start=start, dur=dur, steps=steps, simulators=simulators)
-        self.state_result = data.get('state')
-        output_data = data.get('output_data')
-        sims = simulators or list(output_data.keys())
-
-        results = {}
-        for simulator in sims:
-            sim_data = output_data[simulator]
-            spec_names = list(sim_data.keys())
-
-            for i, species_name in enumerate(spec_names):
-                if not species_name == 'error':
-                    species_comparison = self._generate_sbml_utc_species_comparison(
-                        output_data=output_data,
-                        species_name=species_name,
-                        rTol=rTol,
-                        aTol=aTol,
-                        ground_truth=ground_truth
-                    )
-                    results[list(species_mapping.keys())[i]] = species_comparison
-
-        return results
-
-    def _generate_omex_utc_species_comparison(self, output_data, species_name, simulators, ground_truth=None, rTol=None, aTol=None):
+    def _generate_species_comparison(self, output_data, species_name, simulators, ground_truth=None, rTol=None, aTol=None):
         # extract valid comparison data
         stack = get_output_stack(outputs=output_data, spec_name=species_name)
         species_comparison_data = {}
@@ -726,66 +491,6 @@ class VerificationWorker(Worker):
                     data = output_data[simulator_name]
 
                 results['output_data'][simulator_name] = data.tolist() if isinstance(data, np.ndarray) else data
-        return results
-
-    def _generate_formatted_sbml_outputs(self, sbml_filepath, start, dur, steps, simulators, ground_truth=None):
-        # TODO: stable content is commented-out below. Currently placing alternate function in place of stable content.
-        # return generate_sbml_utc_outputs(sbml_fp=sbml_filepath, start=start, dur=dur, steps=steps, simulators=simulators, truth=ground_truth)
-        return generate_time_course_data(
-            input_fp=sbml_filepath,
-            start=start,
-            end=dur,
-            steps=steps,
-            core=APP_PROCESS_REGISTRY,
-            simulators=simulators,
-            expected_results_fp=ground_truth,
-        )
-
-    def _generate_sbml_utc_species_comparison(self, output_data, species_name, ground_truth=None, rTol=None, aTol=None):
-        # outputs = sbml_output_stack(spec_name=species_name, output=output_data)
-        sims = list(output_data.keys())
-        simulators = sims.copy()
-        results = {}
-
-        # extract comparison data
-        stack = sbml_output_stack(spec_name=species_name, output=output_data)
-
-        species_comparison_data = {}
-        for simulator_name in stack.keys():
-            row = stack[simulator_name]
-            if row is None:
-                simulators.remove(simulator_name)
-            else:
-                species_comparison_data[simulator_name] = row
-
-        vals = list(species_comparison_data.values())
-        valid_sims = list(species_comparison_data.keys())
-        methods = ['mse', 'proximity']
-        matrix_vals = list(map(
-            lambda m: self._generate_species_comparison_matrix(outputs=vals, simulators=valid_sims, method=m, ground_truth=ground_truth, rtol=rTol, atol=aTol).to_dict(),
-            methods
-        ))
-        results = dict(zip(methods, matrix_vals))
-
-        # extract output data
-        results['output_data'] = {}
-        for simulator in sims:
-            sim_data = output_data[simulator]
-            key = None
-            if "error" in sim_data.keys():
-                key = 'error'
-            else:
-                key = species_name
-            results['output_data'][simulator] = output_data[simulator].get(key)
-
-        # results['output_data'] = {}
-        # for simulator_name in output_data.keys():
-        #     for spec_name, output in output_data[simulator_name].items():
-        #         data = output_data[simulator_name][spec_name]
-        #         results['output_data'][simulator_name] = data.tolist() if isinstance(data, np.ndarray) else data
-        #         # if species_name in spec_name:
-        #         #     results['output_data'][simulator_name] = data.tolist() if isinstance(data, np.ndarray) else data
-
         return results
 
     def _generate_species_comparison_matrix(
@@ -859,55 +564,3 @@ class VerificationWorker(Worker):
         aTol = atol or max(1e-3, max1 * 1e-5, max2 * 1e-5)
         rTol = rtol or 1e-4
         return np.allclose(arr1, arr2, rtol=rTol, atol=aTol)
-
-
-class FilesWorker(Worker):
-    def __init__(self, job):
-        super().__init__(job, scope='files')
-
-    async def run(self):
-        job_id = self.job_params['job_id']
-        input_path = self.job_params.get('path')
-
-        try:
-            # is a job related to a client file upload
-            if input_path is not None:
-                # download the input file
-                dest = tempfile.mkdtemp()
-                local_input_path = download_file(source_blob_path=input_path, bucket_name=BUCKET_NAME, out_dir=dest)
-
-                # case: is a smoldyn output file and thus a simularium job
-                # if local_input_path.endswith('.txt'):
-                #     await self._run_simularium(job_id=job_id, input_path=local_input_path, dest=dest)
-        except Exception as e:
-            self.job_result = {'results': str(e)}
-
-        return self.job_result
-
-    # async def _run_simularium(self, job_id: str, input_path: str, dest: str):
-    #     from bigraph_steps import generate_simularium_file
-    #     # get parameters from job
-    #     box_size = self.job_params['box_size']
-    #     translate = self.job_params['translate_output']
-    #     validate = self.job_params['validate_output']
-    #     params = self.job_params.get('agent_parameters')
-    #     # generate file
-    #     result = generate_simularium_file(
-    #         input_fp=input_path,
-    #         dest_dir=dest,
-    #         box_size=box_size,
-    #         translate_output=translate,
-    #         run_validation=validate,
-    #         agent_parameters=params
-    #     )
-    #     # upload file to bucket
-    #     results_file = result.get('simularium_file')
-    #     uploaded_file_location = None
-    #     if results_file is not None:
-    #         if not results_file.endswith('.simularium'):
-    #             results_file += '.simularium'
-    #         uploaded_file_location = await write_uploaded_file(job_id=job_id, bucket_name=BUCKET_NAME, uploaded_file=results_file, extension='.simularium')
-    #     # set uploaded file as result
-    #     self.job_result = {'results_file': uploaded_file_location}
-
-

@@ -3,6 +3,9 @@ import asyncio
 import time
 import os
 import uuid
+import warnings
+
+import requests
 from tempfile import mkdtemp
 from shutil import rmtree
 from typing import *
@@ -11,8 +14,7 @@ from pathlib import Path
 import numpy as np
 from dotenv import load_dotenv
 
-from worker.biosimulations_runutils.biosim_pipeline import Simulator
-from bio_compose import get_biomodel_archive
+from worker.biosimulations_runutils.biosim_pipeline.datamodels import Simulator
 
 from worker.utils import *
 from worker.data_model import *
@@ -20,16 +22,52 @@ from worker.data_model import *
 
 __all__ = [
     "DataGenerator",
-    "TimeCourseDataGenerator",
-    "batch_generate_omex_outputs"
+    "batch_generate_omex_outputs",
+    "get_biomodel_archive"
 ]
 
 
 load_dotenv('../tests/.env')
 
 
+def get_biomodel_archive(model_id: str, dest_dir: Optional[str] = None) -> str:
+    """
+    Download all files for a given Biomodel as an OMEX archive from the Biomodels REST API, optionally specifying a download destination. *NOTE*: This file may be opened as a typical zip file.
+
+    :param model_id: (`Union[str, List[str]]`) A single biomodel id as a string or a list of biomodel ids as strings.
+    :param dest_dir: (`str`) destination directory at which to save downloaded file. If `None` is passed, downloads to cwd. Defaults to `None`.
+
+    :return: Filepath of the downloaded biomodel OMEX(zip) archive
+    :rtype: `str`
+    """
+    base_url = "https://www.ebi.ac.uk/biomodels/model/download"
+    url = f"{base_url}/{model_id}"
+    params = {}
+
+    try:
+        resp = requests.get(url, params=params, stream=True)
+
+        if resp.status_code == 200:
+            dest = dest_dir or os.getcwd()
+            fp = os.path.join(dest, f"{model_id}.omex")
+            with open(fp, "wb") as file:
+                for chunk in resp.iter_content(chunk_size=8192):
+                    file.write(chunk)
+            print(f"File downloaded successfully and saved as {fp}")
+
+            return fp
+        elif resp.status_code == 400:
+            warnings.warn("Error 400: File Not Found")
+        elif resp.status_code == 404:
+            warnings.warn("Error 404: Invalid Model ID Supplied")
+        else:
+            warnings.warn(f"Unexpected error: {resp.status_code} - {resp.text}")
+    except requests.RequestException as e:
+        warnings.warn(f"An error occurred: {e}")
+
+
 def batch_generate_omex_outputs(biomodel_ids: list[str], output_dir: str | Path, json_fp: str, simulators, buffer):
-    data_generator = TimeCourseDataGenerator()
+    data_generator = DataGenerator()
     for biomodel_id in biomodel_ids:
         omex_outputs = data_generator.generate_omex_output_data(biomodel_id, output_dir, simulators, buffer, use_instance_dir=True)
 
@@ -40,7 +78,7 @@ def batch_generate_omex_outputs(biomodel_ids: list[str], output_dir: str | Path,
         data_generator.export_data(omex_outputs, json_fp, verbose=True)
 
 
-class DataGenerator(abc.ABC):
+class DataGenerator:
     def __init__(self,
                  out_dir: Optional[str | Path | os.PathLike[str]] = None):
         self.out_dir = out_dir or mkdtemp(self.__repr__())
@@ -51,17 +89,6 @@ class DataGenerator(abc.ABC):
     def __del__(self):
         if self.__repr__() in self.out_dir:
             rmtree(self.out_dir)
-
-    @abc.abstractmethod
-    async def _generate(self):
-        pass
-
-
-class TimeCourseDataGenerator(DataGenerator):
-    def __init__(self,
-                 out_dir: Optional[str | Path | os.PathLike[str]] = None):
-        """Singleton-like data generator used to generate time-series data for verification."""
-        super().__init__(out_dir)
 
     def export_data(self, omex_outputs: dict[str, dict[str, np.ndarray | list[float]]], fp: os.PathLike[str] | str, verbose: bool = False):
         import json
