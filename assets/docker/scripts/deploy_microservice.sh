@@ -19,7 +19,7 @@ docker push "$IMG_NAME"
 
 # push newest latest to GHCR
 docker tag "$IMG_NAME" ghcr.io/biosimulators/verification-server-"$service":latest
-docker push ghcr.io/biosimulators/bio-compose-server-"$service":latest
+docker push ghcr.io/biosimulators/verification-server-"$service":latest
 
 # handle version
 VERSION_FILE=./"$service"/.VERSION
