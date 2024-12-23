@@ -7,7 +7,7 @@ services:
     networks:
       - appnetwork
 
-  api:
+  gateway:
     build:
       context: .
       dockerfile: Dockerfile
