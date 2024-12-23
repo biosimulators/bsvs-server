@@ -1,1 +1,0 @@
-worker microservice for BioCompose verification service.

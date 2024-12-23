@@ -339,4 +339,3 @@ def disable_smoldyn_graphics_in_simulation_configuration(configuration: List[str
     for i_line, line in enumerate(configuration):
         if line.startswith('graphics '):
             configuration[i_line] = re.sub(r'^graphics +[a-z_]+', 'graphics none', line)
-

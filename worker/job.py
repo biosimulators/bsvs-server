@@ -9,11 +9,11 @@ from typing import *
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
-from process_bigraph import ProcessTypes, pp
+from process_bigraph import ProcessTypes
 from pymongo.collection import Collection as MongoCollection
 
-from shared_worker import MongoDbConnector, JobStatus, DatabaseCollections, unique_id, BUCKET_NAME, handle_exception
-from log_config import setup_logging
+from shared.shared_worker import MongoDbConnector, JobStatus, DatabaseCollections, unique_id, BUCKET_NAME, handle_exception
+from shared.log_config import setup_logging
 from io_worker import get_sbml_species_mapping, read_h5_reports, download_file, format_smoldyn_configuration, write_uploaded_file
 from data_generator import (
     generate_time_course_data,

@@ -1,12 +1,11 @@
 import os
 import asyncio
 import logging
-from typing import List, Tuple
 
 from dotenv import load_dotenv
 
-from shared_worker import MongoDbConnector
-from log_config import setup_logging
+from shared.shared_worker import MongoDbConnector
+from shared.log_config import setup_logging
 from job import Supervisor
 
 
