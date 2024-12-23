@@ -13,7 +13,7 @@ services:
 
   api:
     build:
-      context: ./api
+      context: ./gateway
       dockerfile: Dockerfile-api
     image: ghcr.io/biosimulators/verification-server-api:0.0.1
     container_name: api

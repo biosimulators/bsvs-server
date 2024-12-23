@@ -30,6 +30,8 @@ uvicorn = "^0.34.0"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
 pytest = "^8.3.4"
+numpy = "^2.2.1"
+pandas = "^2.2.3"
 
 
 [tool.pytest.ini_options]
