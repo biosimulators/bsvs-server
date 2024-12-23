@@ -7,17 +7,14 @@ readme = "README.md"
 include = ["pyproject.toml"]
 packages = [
     {include = "gateway"},
+    {include = "shared"},
+    {include = "tests"},
     {include = "worker"}
 ]
 
 
 [tool.poetry.dependencies]
 python = "^3.11"
-
-
-# [tool.poetry.group.dev.dependencies]
-# pip-autoremove = "^0.10.0"
-# pytest = "*"
 pip-autoremove = "^0.10.0"
 requests-toolbelt = "^1.0.0"
 python-dotenv = "^1.0.1"
@@ -32,6 +29,7 @@ pydantic = "^2.10.4"
 uvicorn = "^0.34.0"
 pyyaml = "^6.0.2"
 requests = "^2.32.3"
+pytest = "^8.3.4"
 
 
 [tool.pytest.ini_options]
