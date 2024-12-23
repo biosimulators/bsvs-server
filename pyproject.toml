@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "biosim-verifier"
+name = "bsvs-server"
 version = "0.0.1"
-description = "A Biological Simulation Result Verification Service (bsrv)"
+description = "Server for the Biological Simulation Result Verification Service (bsvs)"
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
 include = ["pyproject.toml"]
