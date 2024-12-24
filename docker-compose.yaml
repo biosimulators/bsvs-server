@@ -25,7 +25,7 @@ services:
       - "3001:3001"
     networks:
       - appnetwork
-    command: poetry run uvicorn main:app --host 0.0.0.0 --port 3001 --reload
+    command: poetry run uvicorn gateway.main:app --host 0.0.0.0 --port 3001 --reload
 
   worker:
     build:
@@ -43,10 +43,7 @@ services:
       - CONTENT_DIR=worker
     networks:
       - appnetwork
-    command:
-      sh -c "
-      poetry run python worker/main.py
-      "
+    command: poetry run python worker/main.py
 
 networks:
   appnetwork:
