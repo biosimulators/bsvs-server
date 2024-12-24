@@ -11,7 +11,7 @@ from pydantic import BeforeValidator
 from starlette.middleware.cors import CORSMiddleware
 
 from shared.database import MongoDbConnector
-from shared.io import save_uploaded_file, check_upload_file_extension, download_file_from_bucket, upload_blob
+from shared.io import save_uploaded_file, check_upload_file_extension, upload_blob
 from shared.log_config import setup_logging
 from shared.data_model import (
     VerificationOutput,
