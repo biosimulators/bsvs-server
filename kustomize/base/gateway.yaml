@@ -2,21 +2,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: biochecknet-api
-  name: biochecknet-api
+    app: gateway
+  name: gateway
 spec:
   selector:
     matchLabels:
-      app: biochecknet-api
+      app: gateway
   replicas: 0
   template:
     metadata:
       labels:
-        app: biochecknet-api
+        app: gateway
     spec:
       containers:
-        - name: biochecknet-api
-          image: ghcr.io/biosimulators/bio-compose-server-api  # push to ghcr.io/biosimulators/bio-check-compose_worker
+        - name: gateway
+          image: ghcr.io/biosimulators/verification-server-gateway
           imagePullPolicy: "Always"
           resources:
             requests:
