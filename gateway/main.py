@@ -12,18 +12,21 @@ from pydantic import BeforeValidator
 from starlette.middleware.cors import CORSMiddleware
 
 from shared.database import MongoDbConnector
-from shared.io import save_uploaded_file, check_upload_file_extension, download_file_from_bucket
+from shared.io import save_uploaded_file, check_upload_file_extension, download_file_from_bucket, upload_blob
 from shared.log_config import setup_logging
 from shared.data_model import (
     VerificationOutput,
     OmexVerificationRun,
     DbClientResponse,
     CompatibleSimulators,
-    Simulator
+    Simulator,
+    DB_NAME,
+    DB_TYPE,
+    BUCKET_NAME, DatabaseCollections, JobStatus
 )
 
 from gateway.compatible import COMPATIBLE_VERIFICATION_SIMULATORS
-
+from shared.utils import file_upload_prefix
 
 logger = logging.getLogger("verification-server.api.main.log")
 setup_logging(logger)
@@ -165,7 +168,7 @@ async def verify(
             compare_id = comparison_id
         job_id = "verification-" + compare_id + "-" + str(uuid.uuid4())
         _time = db_connector.timestamp()
-        upload_prefix, bucket_prefix = file_upload_prefix(job_id)
+        upload_prefix, bucket_prefix = file_upload_prefix(job_id, BUCKET_NAME)
         save_dest = mkdtemp()
         fp = await save_uploaded_file(uploaded_file, save_dest)  # save uploaded file to ephemeral store
 
@@ -229,72 +232,12 @@ async def verify(
 
 
 @app.get(
-    "/get-output-file/{job_id}",
-    operation_id='get-output-file',
-    tags=["Results"],
-    summary='Get the results of an existing simulation run from Smoldyn or Readdy as either a downloadable file or job progression status.'
-)
-async def get_output_file(job_id: str):
-    # state-case: job is completed
-    if not job_id.startswith("simulation-execution"):
-        raise HTTPException(status_code=404, detail="This must be an output file job query starting with 'simulation-execution'.")
-
-    job = await db_connector.read(collection_name="completed_jobs", job_id=job_id)
-    if job is not None:
-        # rm mongo index
-        job.pop('_id', None)
-
-        # parse filepath in bucket and create file response
-        job_data = job
-        if isinstance(job_data, dict):
-            remote_fp = job_data.get("results").get("results_file")
-            if remote_fp is not None:
-                temp_dest = mkdtemp()
-                local_fp = download_file_from_bucket(source_blob_path=remote_fp, out_dir=temp_dest, bucket_name=BUCKET_NAME)
-
-                # return downloadable file blob
-                return FileResponse(path=local_fp, media_type="application/octet-stream", filename=local_fp.split("/")[-1])  # TODO: return special smoldyn file instance
-
-    # state-case: job has failed
-    if job is None:
-        job = await db_connector.read(collection_name="failed_jobs", job_id=job_id)
-
-    # state-case: job is not in completed:
-    if job is None:
-        job = await db_connector.read(collection_name="in_progress_jobs", job_id=job_id)
-
-    # state-case: job is not in progress:
-    if job is None:
-        job = await db_connector.read(collection_name="pending_jobs", job_id=job_id)
-
-    # case: job is either failed, in prog, or pending
-    if job is not None:
-        # rm mongo index
-        job.pop('_id', None)
-
-        # specify source safely
-        src = job.get('source', job.get('path'))
-        if src is not None:
-            source = src.split('/')[-1]
-        else:
-            source = None
-
-        # return json job status
-        return IncompleteJob(
-            job_id=job_id,
-            timestamp=job.get('timestamp'),
-            status=job.get('status'),
-            source=source
-        )
-
-
-@app.get(
-    "/get-verification-output/{job_id}",
+    "/get-output/{job_id}",
     response_model=VerificationOutput,
-    operation_id='get-verification-output',
+    operation_id='get-output',
     tags=["Results"],
     summary='Get the results of an existing verification run.')
-async def get_verification_output(job_id: str) -> VerificationOutput:
+async def get_output(job_id: str) -> VerificationOutput:
     if "verification" not in job_id:
         raise HTTPException(status_code=404, detail="This must be a verification job query.")
 

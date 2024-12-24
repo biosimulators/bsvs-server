@@ -25,6 +25,13 @@ def stdout_colors():
     return StdoutColors
 
 
+def file_upload_prefix(job_id: str, BUCKET_NAME: str) -> tuple[str, str]:
+    # bucket params
+    upload_prefix = f"file_uploads/{job_id}/"
+    bucket_prefix = f"gs://{BUCKET_NAME}/" + upload_prefix
+    return upload_prefix, bucket_prefix
+
+
 def visit_datasets(
         group: Union[h5py.File, h5py.Group],
         group_path: Optional[str] = None
