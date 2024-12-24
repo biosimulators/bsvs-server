@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.title="verification-service" \
     org.opencontainers.image.authors="Alexander Patrie <apatrie@uchc.edu>, BioSimulators Team <info@biosimulators.org>" \
     org.opencontainers.image.vendor="BioSimulators Team"
 
-SHELL ["/usr/bin/env", "bash", "-c"]
+# SHELL ["/usr/bin/env", "bash", "-c"]
 
 # shared env
 ENV DEBIAN_FRONTEND=noninteractive \
