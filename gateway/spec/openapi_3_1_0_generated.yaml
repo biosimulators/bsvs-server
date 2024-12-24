@@ -1,0 +1,398 @@
+openapi: 3.1.0
+info:
+  title: verification-server
+  version: 0.0.1
+paths:
+  /:
+    get:
+      summary: Root
+      operationId: root__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /verify:
+    post:
+      tags:
+      - Verification
+      summary: Compare UTC outputs from a deterministic SBML model within an OMEX/COMBINE
+        archive.
+      operationId: verify
+      parameters:
+      - name: simulators
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: List of simulators to compare
+          default:
+          - amici
+          - copasi
+          - pysces
+          - tellurium
+          title: Simulators
+        description: List of simulators to compare
+      - name: include_outputs
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Whether to include the output data on which the comparison
+            is based.
+          default: true
+          title: Include Outputs
+        description: Whether to include the output data on which the comparison is
+          based.
+      - name: selection_list
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: array
+            items:
+              type: string
+          - type: 'null'
+          description: List of observables to include in the return data.
+          title: Selection List
+        description: List of observables to include in the return data.
+      - name: comparison_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Descriptive prefix to be added to this submission's job ID.
+          title: Comparison Id
+        description: Descriptive prefix to be added to this submission's job ID.
+      - name: rTol
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: number
+          - type: 'null'
+          description: Relative tolerance to use for proximity comparison.
+          title: Rtol
+        description: Relative tolerance to use for proximity comparison.
+      - name: aTol
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: number
+          - type: 'null'
+          description: Absolute tolerance to use for proximity comparison.
+          title: Atol
+        description: Absolute tolerance to use for proximity comparison.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_verify'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationRun'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /get-output/{job_id}:
+    get:
+      tags:
+      - Results
+      summary: Get the results of an existing verification run.
+      operationId: get-output
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationOutput'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /get-compatible-for-verification:
+    post:
+      tags:
+      - Files
+      summary: Get the simulators that are compatible with either a given OMEX/COMBINE
+        archive or SBML model simulation.
+      operationId: get-compatible-for-verification
+      parameters:
+      - name: versions
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Whether to include the simulator versions for each compatible
+            simulator.
+          default: false
+          title: Versions
+        description: Whether to include the simulator versions for each compatible
+          simulator.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_get-compatible-for-verification'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompatibleSimulators'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    Body_get-compatible-for-verification:
+      properties:
+        uploaded_file:
+          type: string
+          format: binary
+          title: Uploaded File
+          description: Either a COMBINE/OMEX archive or SBML file to be simulated.
+      type: object
+      required:
+      - uploaded_file
+      title: Body_get-compatible-for-verification
+    Body_verify:
+      properties:
+        uploaded_file:
+          type: string
+          format: binary
+          title: Uploaded File
+          description: OMEX/COMBINE archive containing a deterministic SBML model
+      type: object
+      required:
+      - uploaded_file
+      title: Body_verify
+    CompatibleSimulators:
+      properties:
+        file:
+          type: string
+          title: File
+        simulators:
+          items:
+            $ref: '#/components/schemas/Simulator'
+          type: array
+          title: Simulators
+      type: object
+      required:
+      - file
+      - simulators
+      title: CompatibleSimulators
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ObservableData:
+      properties:
+        observable_name:
+          type: string
+          title: Observable Name
+        mse:
+          type: object
+          title: Mse
+        proximity:
+          type: object
+          title: Proximity
+        output_data:
+          additionalProperties:
+            anyOf:
+            - items:
+                type: number
+              type: array
+            - type: string
+          type: object
+          title: Output Data
+      type: object
+      required:
+      - observable_name
+      - mse
+      - proximity
+      - output_data
+      title: ObservableData
+    Simulator:
+      properties:
+        name:
+          type: string
+          title: Name
+        version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Version
+      type: object
+      required:
+      - name
+      title: Simulator
+    SimulatorRMSE:
+      properties:
+        simulator:
+          type: string
+          title: Simulator
+        rmse_scores:
+          additionalProperties:
+            type: number
+          type: object
+          title: Rmse Scores
+      type: object
+      required:
+      - simulator
+      - rmse_scores
+      title: SimulatorRMSE
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    VerificationOutput:
+      properties:
+        job_id:
+          type: string
+          title: Job Id
+        timestamp:
+          type: string
+          title: Timestamp
+        status:
+          type: string
+          title: Status
+        source:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source
+        requested_simulators:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Requested Simulators
+        results:
+          anyOf:
+          - items:
+              anyOf:
+              - $ref: '#/components/schemas/ObservableData'
+              - $ref: '#/components/schemas/SimulatorRMSE'
+              - {}
+            type: array
+          - type: object
+          - type: 'null'
+          title: Results
+      type: object
+      required:
+      - job_id
+      - timestamp
+      - status
+      title: VerificationOutput
+      description: "Return schema for get-verification-output.\n\nParameters:\n  \
+        \  job_id: str\n    timestamp: str\n    status: str --> may be COMPLETE, IN_PROGRESS,\
+        \ FAILED, or PENDING\n    source: str\n    requested_simulators: List[str]\n\
+        \    results: Optional[dict] = None TODO: parse this"
+    VerificationRun:
+      properties:
+        job_id:
+          type: string
+          title: Job Id
+        timestamp:
+          type: string
+          title: Timestamp
+        status:
+          type: string
+          title: Status
+        path:
+          type: string
+          title: Path
+        simulators:
+          items:
+            type: string
+          type: array
+          title: Simulators
+        include_outputs:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Include Outputs
+          default: true
+        selection_list:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Selection List
+        comparison_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Comparison Id
+        rTol:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Rtol
+        aTol:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Atol
+      type: object
+      required:
+      - job_id
+      - timestamp
+      - status
+      - path
+      - simulators
+      title: VerificationRun

@@ -51,7 +51,7 @@ class MultipleConnectorError(Exception):
 
 # -- jobs --
 
-class VerificationRun:
+class VerificationRun(BaseModel):
     job_id: str
     timestamp: str
     status: str

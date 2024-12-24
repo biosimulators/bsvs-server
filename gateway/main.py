@@ -6,8 +6,7 @@ from tempfile import mkdtemp
 
 import dotenv
 import uvicorn
-from fastapi import FastAPI, File, UploadFile, HTTPException, Query, APIRouter, Body
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, File, UploadFile, HTTPException, Query, APIRouter
 from pydantic import BeforeValidator
 from starlette.middleware.cors import CORSMiddleware
 
@@ -16,17 +15,20 @@ from shared.io import save_uploaded_file, check_upload_file_extension, download_
 from shared.log_config import setup_logging
 from shared.data_model import (
     VerificationOutput,
-    OmexVerificationRun,
     DbClientResponse,
     CompatibleSimulators,
     Simulator,
     DB_NAME,
     DB_TYPE,
-    BUCKET_NAME, DatabaseCollections, JobStatus
+    BUCKET_NAME,
+    DatabaseCollections,
+    JobStatus,
+    VerificationRun
 )
+from shared.utils import file_upload_prefix
 
 from gateway.compatible import COMPATIBLE_VERIFICATION_SIMULATORS
-from shared.utils import file_upload_prefix
+
 
 logger = logging.getLogger("verification-server.api.main.log")
 setup_logging(logger)
@@ -145,7 +147,7 @@ def root():
 
 @app.post(
     "/verify",
-    response_model=OmexVerificationRun,
+    response_model=VerificationRun,
     name="Uniform Time Course Comparison from OMEX/COMBINE archive",
     operation_id="verify",
     tags=["Verification"],
@@ -159,7 +161,7 @@ async def verify(
         # expected_results: Optional[UploadFile] = File(default=None, description="reports.h5 file defining the expected results to be included in the comparison."),
         rTol: Optional[float] = Query(default=None, description="Relative tolerance to use for proximity comparison."),
         aTol: Optional[float] = Query(default=None, description="Absolute tolerance to use for proximity comparison.")
-) -> OmexVerificationRun:
+) -> VerificationRun:
     try:
         # request specific params
         if comparison_id is None:
@@ -192,7 +194,7 @@ async def verify(
         # report_location = report_blob_dest
 
         # instantiate new omex verification
-        omex_verification = OmexVerificationRun(
+        omex_verification = VerificationRun(
             status=JobStatus.PENDING.value,
             job_id=job_id,
             path=uploaded_file_location,
