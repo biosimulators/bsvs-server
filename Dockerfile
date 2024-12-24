@@ -1,9 +1,9 @@
 FROM python:3.11-slim
 
-LABEL org.opencontainers.image.title="verification-service" \
-    org.opencontainers.image.description="Base Docker image for BioCompose REST API management, job processing, and datastorage with MongoDB, ensuring scalable and robust performance." \
+LABEL org.opencontainers.image.title="bsvs-server" \
+    org.opencontainers.image.description="Docker image for REST API management, job processing, and datastorage with MongoDB, ensuring scalable and robust performance." \
     org.opencontainers.image.url="https://biosimulators.org/" \
-    org.opencontainers.image.source="https://github.com/biosimulators/verification-server" \
+    org.opencontainers.image.source="https://github.com/biosimulators/bsvs-server" \
     org.opencontainers.image.authors="Alexander Patrie <apatrie@uchc.edu>, BioSimulators Team <info@biosimulators.org>" \
     org.opencontainers.image.vendor="BioSimulators Team"
 
@@ -11,7 +11,7 @@ LABEL org.opencontainers.image.title="verification-service" \
 
 # shared env
 ENV DEBIAN_FRONTEND=noninteractive \
-    MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=verification-server" \
+    MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=bsvs-server" \
     POETRY_VIRTUALENVS_CREATE=true \
     POETRY_NO_INTERACTION=1
 
@@ -31,6 +31,8 @@ RUN mkdir -p /Pysces \
     && mkdir -p /Pysces/psc \
     && mkdir -p /root/Pysces \
     && mkdir -p /root/Pysces/psc \
+    && apt-get update \
+    && apt-get install libexpat1 -y \
     && python -m pip install --upgrade pip \
     && python -m pip install poetry \
     && poetry lock \
