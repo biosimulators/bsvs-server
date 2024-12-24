@@ -1,16 +1,13 @@
 import asyncio
 import time
 import os
-import uuid
 import warnings
 
 import requests
 from tempfile import mkdtemp
 from shutil import rmtree
-from typing import *
 from pathlib import Path
 
-import numpy as np
 from dotenv import load_dotenv
 
 from shared.biosimulations_runutils.biosim_pipeline.datamodels import Simulator

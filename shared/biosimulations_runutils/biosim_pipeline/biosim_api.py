@@ -6,8 +6,8 @@ from typing import BinaryIO, Union
 import requests
 from pydantic import BaseModel
 
-from datagen.biosimulations_runutils.biosim_pipeline.data_manager import DataManager
-from datagen.biosimulations_runutils.biosim_pipeline.datamodels import SourceOmex, Simulator, SimulationRun, BiosimulationsProject
+from shared.biosimulations_runutils.biosim_pipeline.data_manager import DataManager
+from shared.biosimulations_runutils.biosim_pipeline.datamodels import SimulationRun, SourceOmex, Simulator, BiosimulationsProject
 
 
 class _SimulationRunApiRequest(BaseModel):
