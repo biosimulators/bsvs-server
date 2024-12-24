@@ -14,7 +14,7 @@ services:
     image: ghcr.io/biosimulators/bsvs-server-gateway:0.0.1
     container_name: gateway
     environment:
-      - MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=verification-server"
+      # - MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=verification-server"
       - MONGO_USERNAME=alex
       - MONGO_DB_PWD=123
       - GOOGLE_APPLICATION_CREDENTIALS=/.google/.bio-check.json
@@ -26,6 +26,8 @@ services:
     networks:
       - appnetwork
     command: poetry run uvicorn gateway.main:app --host 0.0.0.0 --port 3001 --reload
+    depends_on:
+      - mongodb
 
   worker:
     build:
@@ -34,7 +36,7 @@ services:
     image: ghcr.io/biosimulators/bsvs-server-worker:0.0.1
     container_name: worker
     environment:
-      - MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=verification-server"
+      # - MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=verification-server"
       - MONGO_USERNAME=alex
       - MONGO_DB_PWD=123
       - GOOGLE_APPLICATION_CREDENTIALS=/.google/.bio-check.json
@@ -44,6 +46,8 @@ services:
     networks:
       - appnetwork
     command: poetry run python worker/main.py
+    depends_on:
+      - mongodb
 
 networks:
   appnetwork:
