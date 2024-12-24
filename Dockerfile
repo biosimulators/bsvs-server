@@ -7,11 +7,10 @@ LABEL org.opencontainers.image.title="bsvs-server" \
     org.opencontainers.image.authors="Alexander Patrie <apatrie@uchc.edu>, BioSimulators Team <info@biosimulators.org>" \
     org.opencontainers.image.vendor="BioSimulators Team"
 
-# SHELL ["/usr/bin/env", "bash", "-c"]
+SHELL ["/usr/bin/env", "bash", "-c"]
 
 # shared env
 ENV DEBIAN_FRONTEND=noninteractive \
-    MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=bsvs-server" \
     POETRY_VIRTUALENVS_CREATE=true \
     POETRY_NO_INTERACTION=1
 
@@ -27,12 +26,9 @@ COPY ./worker /app/worker
 COPY ./shared /app/shared
 COPY pyproject.toml /app/pyproject.toml
 
-RUN mkdir -p /Pysces \
-    && mkdir -p /Pysces/psc \
-    && mkdir -p /root/Pysces \
-    && mkdir -p /root/Pysces/psc \
-    && apt-get update \
+RUN apt-get update \
     && apt-get install libexpat1 -y \
+    && rm -rf /var/lib/apt/lists/* \
     && python -m pip install --upgrade pip \
     && python -m pip install poetry \
     && poetry lock \
