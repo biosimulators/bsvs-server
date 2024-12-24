@@ -8,9 +8,10 @@ from dotenv import load_dotenv
 from pydantic import BaseModel as _BaseModel, ConfigDict
 
 
-# for dev only
-load_dotenv('../assets/dev/config/.env_dev')
+REPO_ROOT = os.path.dirname(os.path.dirname(__file__))
+DEV_ENV_PATH = os.path.join(REPO_ROOT, 'assets', 'dev', 'config', '.dev_env')
 
+load_dotenv(DEV_ENV_PATH)
 
 DB_TYPE = "mongo"  # ie: postgres, etc
 DB_NAME = "service_requests"

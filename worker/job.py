@@ -9,7 +9,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from pymongo.collection import Collection as MongoCollection
 
-from shared.data_model import JobStatus, DatabaseCollections, BUCKET_NAME
+from shared.data_model import JobStatus, DatabaseCollections, BUCKET_NAME, DEV_ENV_PATH
 from shared.database import MongoDbConnector
 from shared.io import download_file
 from shared.log_config import setup_logging
@@ -17,7 +17,7 @@ from shared.utils import unique_id, handle_sbml_exception, get_output_stack
 
 
 # for dev only
-load_dotenv('../assets/dev/config/.env_dev')
+load_dotenv(DEV_ENV_PATH)
 
 
 class Supervisor:

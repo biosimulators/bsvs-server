@@ -23,20 +23,21 @@ from shared.data_model import (
     BUCKET_NAME,
     DatabaseCollections,
     JobStatus,
-    VerificationRun
+    VerificationRun,
+    DEV_ENV_PATH
 )
 from shared.utils import file_upload_prefix
 
 from gateway.compatible import COMPATIBLE_VERIFICATION_SIMULATORS
 
 
-logger = logging.getLogger("verification-server.api.main.log")
+logger = logging.getLogger("bsvs-server.gateway.main.log")
 setup_logging(logger)
 
 
 # -- load dev env -- #
 
-dotenv.load_dotenv("../assets/dev/config/.env_dev")  # NOTE: create an env config at this filepath if dev
+dotenv.load_dotenv(DEV_ENV_PATH)  # NOTE: create an env config at this filepath if dev
 
 
 # -- constraints -- #
@@ -53,7 +54,7 @@ else:
 
 MONGO_URI = os.getenv("MONGO_URI")
 GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-APP_TITLE = "verification-server"
+APP_TITLE = "bsvs-server"
 APP_ORIGINS = [
     'http://127.0.0.1:8000',
     'http://127.0.0.1:4200',
@@ -141,8 +142,9 @@ def stop_mongo_client() -> DbClientResponse:
 
 @app.get("/")
 def root():
-    return {'root': 'https://biochecknet.biosimulations.org',
-            'FOR MORE': 'https://biochecknet.biosimulations.org/docs'}
+    return {
+        'docs': 'https://biochecknet.biosimulations.org/docs'
+    }
 
 
 @app.post(
@@ -317,6 +319,7 @@ async def get_compatible_for_verification(
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # uvicorn.run(app, host="0.0.0.0", port=8000)
+    print()
 
 

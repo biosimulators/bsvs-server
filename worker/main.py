@@ -5,12 +5,14 @@ import logging
 from dotenv import load_dotenv
 
 from shared.database import MongoDbConnector
+from shared.data_model import DEV_ENV_PATH
 from shared.log_config import setup_logging
+
 from job import Supervisor
 
 
 # set up dev env if possible
-load_dotenv('../assets/dev/config/.env_dev')
+load_dotenv(DEV_ENV_PATH)
 
 # logging
 logger = logging.getLogger("biochecknet.worker.main.log")
