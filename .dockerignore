@@ -1,5 +1,5 @@
 assets/dev/config/.env_dev
-bio_check/__pycache__
+__pycache__
 *.pyc
 *.pyo
 *.pyd
