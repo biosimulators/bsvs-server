@@ -28,7 +28,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r assets/pipeline/config/requirements.github.cd.txt
+          python -m pip install poetry
+          poetry lock
+          poetry install
+          poetry run pip install -r assets/pipeline/config/requirements.github.cd.txt
 
       - name: Install Docker Compose
         run: |
@@ -42,7 +45,7 @@ jobs:
       - name: Build API microservice image
         run: |
           rm -f gateway/spec/openapi_3_1_0_generated.yaml 
-          python -B gateway/openapi_spec.py
+          poetry run python -B gateway/openapi_spec.py
           sudo rm -rf gateway/__pycache__
           docker-compose build gateway
 
