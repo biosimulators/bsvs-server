@@ -8,7 +8,7 @@ from shared.database import MongoDbConnector
 from shared.data_model import DEV_ENV_PATH
 from shared.log_config import setup_logging
 
-from job import Supervisor
+from worker.job import Supervisor
 
 
 # set up dev env if possible

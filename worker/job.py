@@ -9,7 +9,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from pymongo.collection import Collection as MongoCollection
 
-from shared.data_model import JobStatus, DatabaseCollections, BUCKET_NAME, DEV_ENV_PATH
+from shared.data_model import JobStatus, DatabaseCollections, BUCKET_NAME, DEV_ENV_PATH, DEFAULT_SIMULATORS
 from shared.database import MongoDbConnector
 from shared.io import download_file
 from shared.log_config import setup_logging
@@ -140,7 +140,7 @@ class Worker:
         """
         :param job: job parameters received from the supervisor (who gets it from the db) which is a document from the pending_jobs collection within mongo.
         """
-        self.logger = logging.getLogger(f"biochecknet.job.worker.log")
+        self.logger = logging.getLogger(f"worker.Worker.log")
         setup_logging(self.logger)
         self.job_params = job
         self.job_id = self.job_params['job_id']
@@ -194,7 +194,7 @@ class Worker:
         #     local_report_fp = download_file(source_blob_path=source_report_fp, out_dir=out_dir, bucket_name=BUCKET_NAME)
         #     truth_vals = read_h5_reports(local_report_fp)
 
-        simulators = self.job_params.get('simulators', [])
+        simulators = self.job_params.get('simulators', DEFAULT_SIMULATORS)
         include_outs = self.job_params.get('include_outputs', False)
         tol = self.job_params.get('rTol')
         atol = self.job_params.get('aTol')

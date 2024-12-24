@@ -2,7 +2,7 @@
 
 set -e
 
-docker system prune -a -f
+# docker system prune -a -f
 
 # build api
 ./assets/docker/scripts/build_microservice.sh gateway

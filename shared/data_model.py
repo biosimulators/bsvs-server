@@ -7,6 +7,8 @@ import numpy as np
 from dotenv import load_dotenv
 from pydantic import BaseModel as _BaseModel, ConfigDict
 
+from shared.biosimulations_runutils.biosim_pipeline.datamodels import Simulator
+
 
 REPO_ROOT = os.path.dirname(os.path.dirname(__file__))
 DEV_ENV_PATH = os.path.join(REPO_ROOT, 'assets', 'dev', 'config', '.dev_env')
@@ -16,6 +18,8 @@ load_dotenv(DEV_ENV_PATH)
 DB_TYPE = "mongo"  # ie: postgres, etc
 DB_NAME = "service_requests"
 BUCKET_NAME = os.getenv("BUCKET_NAME")
+
+DEFAULT_SIMULATORS = list(sorted(Simulator.__members__.keys()))
 
 
 # -- base models --
