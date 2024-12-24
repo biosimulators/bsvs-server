@@ -11,7 +11,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/biosimulators/verification-server-gateway:0.0.1
+    image: ghcr.io/biosimulators/bsvs-server-gateway:0.0.1
     container_name: gateway
     environment:
       - MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=verification-server"
@@ -31,7 +31,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/biosimulators/verification-server-worker:0.0.1
+    image: ghcr.io/biosimulators/bsvs-server-worker:0.0.1
     container_name: worker
     environment:
       - MONGO_URI="mongodb://mongodb/?retryWrites=true&w=majority&appName=verification-server"

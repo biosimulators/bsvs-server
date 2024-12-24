@@ -33,7 +33,7 @@ unused.txt
 # bio_check/worker
 !enter.sh
 !add_deps.sh
-bio_check/.env
+.env
 worker/shared_worker.py
 .env_dev
 tests.ipynb

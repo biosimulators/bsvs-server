@@ -12,14 +12,14 @@ if [ "$version" == "" ]; then
   explicit_version=0
 fi
 
-IMG_NAME=ghcr.io/biosimulators/verification-server-"$service":"$version"
+IMG_NAME=ghcr.io/biosimulators/bsvs-server-"$service":"$version"
 
 # push version to GHCR
 docker push "$IMG_NAME"
 
 # push newest latest to GHCR
-docker tag "$IMG_NAME" ghcr.io/biosimulators/verification-server-"$service":latest
-docker push ghcr.io/biosimulators/verification-server-"$service":latest
+docker tag "$IMG_NAME" ghcr.io/biosimulators/bsvs-server-"$service":latest
+docker push ghcr.io/biosimulators/bsvs-server-"$service":latest
 
 # handle version
 VERSION_FILE=./"$service"/.VERSION
