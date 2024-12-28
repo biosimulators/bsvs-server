@@ -197,3 +197,5 @@ worker/.worker_STABLE
 build
 .DS_Store
 
+
+.python-version

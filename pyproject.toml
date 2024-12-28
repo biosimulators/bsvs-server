@@ -40,6 +40,18 @@ typer = "^0.15.1"
 [tool.poetry.group.worker.dependencies]
 python-libsbml = "^5.20.4"
 
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.5.1"
+types-requests = "^2.32.0"
+google-api-python-client-stubs = "^1.28.0"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+ignore_missing_imports = false
+
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
