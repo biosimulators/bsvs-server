@@ -3,6 +3,42 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
+from pydantic import BaseModel
+
+ATTRIBUTE_VALUE_TYPE = int | float | str | bool | list[str] | list[int] | list[float] | list[bool]
+
+
+class HDF5Attribute(BaseModel):
+    key: str
+    value: ATTRIBUTE_VALUE_TYPE
+
+
+class HDF5Dataset(BaseModel):
+    name: str
+    shape: list[int]
+    attributes: list[HDF5Attribute]
+
+
+class HDF5Group(BaseModel):
+    name: str
+    attributes: list[HDF5Attribute]
+    datasets: list[HDF5Dataset]
+
+
+class HDF5File(BaseModel):
+    filename: str
+    id: str
+    uri: str
+    groups: list[HDF5Group]
+
+
+@dataclass
+class Hdf5DataValues:
+    # simulation_run_id: str
+    # dataset_name: str
+    shape: list[int]
+    values: list[float]
+
 
 class SimulationRunStatus(str, Enum):
     QUEUED = 'QUEUED',

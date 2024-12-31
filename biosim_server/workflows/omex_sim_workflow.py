@@ -6,8 +6,9 @@ from typing import Dict
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from temporal.biosim_api import check_run_status, get_hdf5_metadata, HDF5File, get_hdf5_data, Hdf5DataValues
-from temporal.biosim_models import SimulationRunStatus
+from biosim_server.biosim1.api_client import check_run_status
+from biosim_server.biosim1.models import SimulationRunStatus, HDF5File, Hdf5DataValues
+from biosim_server.biosim1.simdata_api_client import get_hdf5_metadata, get_hdf5_data
 
 
 @dataclass
@@ -17,7 +18,7 @@ class SimulatorWorkflowInput:
 
 
 @workflow.defn
-class SimulatorWorkflow:
+class OmexSimWorkflow:
     @workflow.run
     async def run(self, sim_input: SimulatorWorkflowInput) -> Dict[str, str]:
         """
@@ -43,7 +44,7 @@ class SimulatorWorkflow:
             check_run_status,
             job_id,
             start_to_close_timeout=timedelta(seconds=10),  # Activity timeout
-            retry_policy=RetryPolicy(maximum_attempts=3),)
+            retry_policy=RetryPolicy(maximum_attempts=3), )
         status = SimulationRunStatus.from_str(status_str)
         workflow.logger.info(f"Simulation run status for simulation_run_id: {job_id} is {status.value}")
 

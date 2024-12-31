@@ -5,8 +5,11 @@ import random
 from temporalio.client import Client
 from temporalio.worker import Worker
 
-from temporal import main_workflow, simulator_run_workflow, activities
-from temporal.biosim_api import check_run_status, run_project, get_hdf5_metadata, get_hdf5_data
+from biosim_server.biosim1.api_client import check_run_status, run_project
+from biosim_server.biosim1.simdata_api_client import get_hdf5_metadata, get_hdf5_data
+from biosim_server.workflows.activities import upload_model_to_s3, generate_statistics
+from biosim_server.workflows.omex_sim_workflow import OmexSimWorkflow
+from biosim_server.workflows.omex_verify_workflow import OmexVerifyWorkflow
 
 interrupt_event = asyncio.Event()
 
@@ -23,14 +26,14 @@ async def main():
         client,
         task_queue="verification_tasks",
         # workflows=[main_workflow.MainWorkflow, simulator_run_workflow.SimulatorWorkflow],
-        workflows=[main_workflow.MainWorkflow],
-        activities=[activities.upload_model_to_s3, activities.generate_statistics],
+        workflows=[OmexVerifyWorkflow],
+        activities=[upload_model_to_s3, generate_statistics],
     )
     run_futures.append(handle.run())
     handle = Worker(
         client,
         task_queue="simulation_runs",
-        workflows=[simulator_run_workflow.SimulatorWorkflow],
+        workflows=[OmexSimWorkflow],
         activities=[check_run_status, run_project, get_hdf5_metadata, get_hdf5_data],
     )
     run_futures.append(handle.run())

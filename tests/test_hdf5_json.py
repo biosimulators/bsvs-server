@@ -7,7 +7,7 @@
 # @@@SNIPEND
 import json
 import os
-from temporal.biosim_api import HDF5File
+from biosim_server.biosim1.models import HDF5File
 
 
 def test_hdf5_json():

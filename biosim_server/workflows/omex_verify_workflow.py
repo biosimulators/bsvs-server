@@ -8,13 +8,13 @@ from temporalio.common import RetryPolicy
 from temporalio.workflow import ChildWorkflowHandle
 
 # Import activity functions and child workflows
-from temporal.activities import upload_model_to_s3, generate_statistics
-from temporal.simulator_run_workflow import SimulatorWorkflow, SimulatorWorkflowInput
+from biosim_server.workflows.activities import upload_model_to_s3, generate_statistics
+from biosim_server.workflows.omex_sim_workflow import OmexSimWorkflow, SimulatorWorkflowInput
 
 
 # Define the Main Workflow
 @workflow.defn
-class MainWorkflow:
+class OmexVerifyWorkflow:
     @workflow.run
     async def run(self, model_file_path: str, simulator_names: List[str]) -> str:
         """
@@ -44,7 +44,7 @@ class MainWorkflow:
         for simulator_name in simulator_names:
             child_workflows.append(
                 workflow.start_child_workflow(
-                    SimulatorWorkflow.run,
+                    OmexSimWorkflow.run,
                     args=[SimulatorWorkflowInput(model_path=s3_model_path, simulator_name=simulator_name)],
                     task_queue="simulation_runs",
                     execution_timeout=timedelta(seconds=10),

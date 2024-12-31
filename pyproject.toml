@@ -6,11 +6,8 @@ authors = ["Alex Patrie <alexanderpatrie@gmail.com>"]
 readme = "README.md"
 include = ["pyproject.toml"]
 packages = [
-    {include = "gateway"},
-    {include = "shared"},
+    {include = "biosim_server"},
     {include = "tests"},
-    {include = "worker"},
-    {include = "temporal"}
 ]
 
 
@@ -49,6 +46,7 @@ mypy = "^1.5.1"
 types-requests = "^2.32.0"
 google-api-python-client-stubs = "^1.28.0"
 types-aiofiles = "^24.1.0.20241221"
+types-pyyaml = "^6.0.12.20241230"
 
 [tool.mypy]
 python_version = "3.11"
@@ -57,6 +55,9 @@ warn_unused_configs = true
 warn_unused_ignores = true
 ignore_missing_imports = false
 
+[[tool.mypy.overrides]]
+module = "archive.*"
+ignore_errors = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
