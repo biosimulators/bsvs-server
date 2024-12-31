@@ -1,0 +1,208 @@
+{
+  "filename": "reports.h5",
+  "id": "61fea4968edd56f301e6a803",
+  "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/61fea4968edd56f301e6a803/outputs/reports.h5",
+  "groups": [
+    {
+      "name": "LSODA.sedml",
+      "attributes": [
+        {
+          "key": "combineArchiveLocation",
+          "value": "LSODA.sedml"
+        },
+        {
+          "key": "uri",
+          "value": "LSODA.sedml"
+        }
+      ],
+      "datasets": [
+        {
+          "name": "LSODA.sedml/Figure_2c",
+          "shape": [
+            2,
+            1001
+          ],
+          "attributes": [
+            {
+              "key": "_type",
+              "value": "SedPlot2D"
+            },
+            {
+              "key": "sedmlDataSetDataTypes",
+              "value": [
+                "float64",
+                "float64"
+              ]
+            },
+            {
+              "key": "sedmlDataSetIds",
+              "value": [
+                "data_generator_pmTORC1",
+                "data_generator_time"
+              ]
+            },
+            {
+              "key": "sedmlDataSetLabels",
+              "value": [
+                "data_generator_pmTORC1",
+                "data_generator_time"
+              ]
+            },
+            {
+              "key": "sedmlDataSetNames",
+              "value": [
+                "",
+                "Time"
+              ]
+            },
+            {
+              "key": "sedmlDataSetShapes",
+              "value": [
+                "1001",
+                "1001"
+              ]
+            },
+            {
+              "key": "sedmlId",
+              "value": "Figure_2c"
+            },
+            {
+              "key": "sedmlName",
+              "value": "Figure 2c"
+            },
+            {
+              "key": "uri",
+              "value": "LSODA.sedml/Figure_2c"
+            }
+          ]
+        },
+        {
+          "name": "LSODA.sedml/report",
+          "shape": [
+            16,
+            1001
+          ],
+          "attributes": [
+            {
+              "key": "_type",
+              "value": "SedReport"
+            },
+            {
+              "key": "sedmlDataSetDataTypes",
+              "value": [
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64",
+                "float64"
+              ]
+            },
+            {
+              "key": "sedmlDataSetIds",
+              "value": [
+                "data_set_time",
+                "data_set_Akt",
+                "data_set_DEPTOR",
+                "data_set_iIRS",
+                "data_set_IR",
+                "data_set_IRS",
+                "data_set_mTORC1",
+                "data_set_mTORC1_DEPTOR",
+                "data_set_mTORC2",
+                "data_set_mTORC2_DEPTOR",
+                "data_set_pAkt",
+                "data_set_pDEPTOR",
+                "data_set_pIR",
+                "data_set_pIRS",
+                "data_set_pmTORC1",
+                "data_set_pmTORC2"
+              ]
+            },
+            {
+              "key": "sedmlDataSetLabels",
+              "value": [
+                "Time",
+                "Akt",
+                "DEPTOR",
+                "iIRS",
+                "IR",
+                "IRS",
+                "mTORC1",
+                "mTORC1_DEPTOR",
+                "mTORC2",
+                "mTORC2_DEPTOR",
+                "pAkt",
+                "pDEPTOR",
+                "pIR",
+                "pIRS",
+                "pmTORC1",
+                "pmTORC2"
+              ]
+            },
+            {
+              "key": "sedmlDataSetNames",
+              "value": [
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "key": "sedmlDataSetShapes",
+              "value": [
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001",
+                "1001"
+              ]
+            },
+            {
+              "key": "sedmlId",
+              "value": "report"
+            },
+            {
+              "key": "uri",
+              "value": "LSODA.sedml/report"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

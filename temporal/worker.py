@@ -6,6 +6,7 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from temporal import main_workflow, simulator_run_workflow, activities
+from temporal.biosim_api import check_run_status, run_project, get_hdf5_metadata, get_hdf5_data
 
 interrupt_event = asyncio.Event()
 
@@ -30,7 +31,7 @@ async def main():
         client,
         task_queue="simulation_runs",
         workflows=[simulator_run_workflow.SimulatorWorkflow],
-        activities=[],
+        activities=[check_run_status, run_project, get_hdf5_metadata, get_hdf5_data],
     )
     run_futures.append(handle.run())
     print("Started worker for verification_tasks, ctrl+c to exit")
