@@ -13,12 +13,12 @@ import chardet
 from fastapi import UploadFile
 from google.cloud import storage
 
-from shared.biosimulations_runutils.biosim_pipeline.biosim_api import check_run_status, run_project
-from shared.biosimulations_runutils.biosim_pipeline.data_manager import DataManager
-from shared.biosimulations_runutils.biosim_pipeline.datamodels import Simulator, SimulationRun
-from shared.data_model import BiosimulationsRunOutputData, BiosimulationsReportOutput
-from worker.data_model import SBMLSpeciesMapping, ReportDataSetPath, SimulatorReportData
-from shared.utils import printc, visit_datasets
+from archive.shared.biosimulations_runutils.biosim_pipeline.biosim_api import check_run_status, run_project
+from archive.shared.biosimulations_runutils.biosim_pipeline.data_manager import DataManager
+from archive.shared.biosimulations_runutils.biosim_pipeline.datamodels import Simulator, SimulationRun
+from archive.shared.data_model import BiosimulationsRunOutputData, BiosimulationsReportOutput
+from archive.worker.data_model import SBMLSpeciesMapping, ReportDataSetPath, SimulatorReportData
+from archive.shared.utils import printc, visit_datasets
 
 
 def check_upload_file_extension(file: UploadFile, purpose: str, ext: str, message: str = None) -> bool:

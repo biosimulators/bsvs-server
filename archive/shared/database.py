@@ -1,41 +1,22 @@
 from abc import abstractmethod, ABC
 from datetime import datetime
 from enum import Enum
-from typing import *
+from typing import Dict
 
+import numpy as np
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 
-from shared.data_model import DatabaseCollections, JobStatus
+from archive.shared.data_model import DatabaseCollections, JobStatus, SimulatorSpec
 
 
 class DatabaseConnector(ABC):
     """Abstract class that is both serializable and interacts with the database (of any type). """
-    def __init__(self, connection_uri: str, database_id: str, connector_id: str):
-        self.database_id = database_id
-        self.client = self._get_client(connection_uri)
-        self.db = self._get_database(self.database_id)
 
     @staticmethod
-    def timestamp() -> str:
-        return str(datetime.utcnow())
-
-    def refresh_collection(self, coll):
-        for job in self.db[coll].find():
-            self.db[coll].delete_one(job)
-
-    def refresh_jobs(self):
-        for collname in ['completed_jobs', 'in_progress_jobs', 'pending_jobs']:
-            self.refresh_collection(collname)
-
-    @abstractmethod
-    def _get_client(self, *args):
-        pass
-
-    @abstractmethod
-    def _get_database(self, db_id: str):
-        pass
+    def timestamp() -> datetime:
+        return datetime.utcnow()
 
     @abstractmethod
     def pending_jobs(self):
@@ -50,17 +31,22 @@ class DatabaseConnector(ABC):
         pass
 
     @abstractmethod
-    async def write(self, *args, **kwargs):
+    async def write(self, collection_name: DatabaseCollections,
+                    job_id: str,
+                    timestamp: datetime,
+                    status: JobStatus,
+                    results: dict[str,np.ndarray],
+                    source: str,
+                    requested_simulators: list[SimulatorSpec]):
         pass
 
-    @abstractmethod
-    def get_collection(self, **kwargs):
-        pass
 
 
 class MongoDbConnector(DatabaseConnector):
-    def __init__(self, connection_uri: str, database_id: str, connector_id: str = None):
-        super().__init__(connection_uri, database_id, connector_id)
+    def __init__(self, connection_uri: str, database_id: str, connector_id: str):
+        self.database_id = database_id
+        self.client = self._get_client(connection_uri)
+        self.db = self._get_database(self.database_id)
 
     def _get_client(self, *args):
         return MongoClient(args[0])
@@ -94,15 +80,18 @@ class MongoDbConnector(DatabaseConnector):
         result = coll.find_one(kwargs.copy())
         return result
 
-    async def write(self, collection_name: DatabaseCollections | str, **kwargs):
-        """
-            Args:
-                collection_name: str: collection name in mongodb
-                **kwargs: mongo db `insert_one` query defining the document where the key is as in the key of the document.
-        """
-        coll_name = collection_name
+    async def write(self, collection_name: DatabaseCollections,
+                    job_id: str,
+                    timestamp: datetime,
+                    status: JobStatus,
+                    results: dict[str,np.ndarray],
+                    source: str,
+                    requested_simulators: list[SimulatorSpec]
+                    ):
+        coll_name = collection_name.value
 
         coll = self.get_collection(coll_name)
+
         result = coll.insert_one(kwargs.copy())
         return kwargs
 

@@ -4,11 +4,11 @@ import logging
 
 from dotenv import load_dotenv
 
-from shared.database import MongoDbConnector
-from shared.data_model import DEV_ENV_PATH
-from shared.log_config import setup_logging
+from archive.shared import MongoDbConnector
+from archive.shared import DEV_ENV_PATH
+from archive.shared import setup_logging
 
-from worker.job import Supervisor
+from archive.worker.job import Supervisor
 
 
 # set up dev env if possible

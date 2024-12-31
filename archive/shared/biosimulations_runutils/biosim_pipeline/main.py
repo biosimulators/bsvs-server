@@ -8,11 +8,11 @@ import typer
 from dotenv import load_dotenv
 from typer.core import TyperGroup
 
-from shared.biosimulations_runutils.common.api_utils import download_file
-from shared.biosimulations_runutils.biosim_pipeline.biosim_api import run_project, check_run_status, publish_project
-from shared.biosimulations_runutils.biosim_pipeline.data_manager import DataManager
-from shared.biosimulations_runutils.biosim_pipeline.datamodels import Simulator, SimulationRun, SimulatorComparison
-from shared.biosimulations_runutils.biosim_pipeline.hdf5_compare import compare_datasets, get_results
+from archive.shared.biosimulations_runutils.common.api_utils import download_file
+from archive.shared.biosimulations_runutils.biosim_pipeline.biosim_api import run_project, check_run_status, publish_project
+from archive.shared.biosimulations_runutils.biosim_pipeline.data_manager import DataManager
+from archive.shared.biosimulations_runutils.biosim_pipeline.datamodels import Simulator, SimulationRun, SimulatorComparison
+from archive.shared.biosimulations_runutils.biosim_pipeline.hdf5_compare import compare_datasets, get_results
 
 
 class NaturalOrderGroup(TyperGroup):

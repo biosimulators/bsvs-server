@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from shared.biosimulations_runutils.biosim_pipeline.datamodels import (
+from archive.shared.biosimulations_runutils.biosim_pipeline.datamodels import (
     BiosimulationsProject,
     SourceOmex,
     SimulationRun,
