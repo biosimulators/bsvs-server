@@ -1,11 +1,11 @@
+import pytest
 import asyncio
 from datetime import timedelta
 from typing import List
 
 from temporalio import activity, workflow
-from temporalio.client import Client
-from temporalio.worker import Worker
 
+from temporalio.worker import Worker
 
 @activity.defn
 async def say_hello_activity(name: str) -> str:
@@ -38,27 +38,21 @@ class SayHelloWorkflow:
         return list(sorted(results))
 
 
-async def main():
-    # Start client
-    client = await Client.connect("localhost:7233")
 
+@pytest.mark.asyncio
+async def test_simple_workflow(temporal_client):
     # Run a worker for the workflow
     async with Worker(
-            client,
+            temporal_client,
             task_queue="hello-parallel-activity-task-queue",
             workflows=[SayHelloWorkflow],
             activities=[say_hello_activity],
     ):
-        # While the worker is running, use the client to run the workflow and
-        # print out its result. Note, in many production setups, the client
-        # would be in a completely separate process from the worker.
-        result = await client.execute_workflow(
+        result = await temporal_client.execute_workflow(
             SayHelloWorkflow.run,
+            args=[],
             id="hello-parallel-activity-workflow-id",
             task_queue="hello-parallel-activity-task-queue",
         )
-        print(f"Result: {result}")
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+        expected_results = ['Hello, user1!', 'Hello, user2!', 'Hello, user3!', 'Hello, user4!', 'Hello, user5!']
+        assert result == expected_results
