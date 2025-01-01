@@ -27,6 +27,7 @@ aiohttp = "^3.11.11"
 motor = {extras = ["srv"], version = "^3.6.0"}
 aiobotocore = "^2.16.1"
 pydantic-settings = "^2.7.1"
+python-multipart = "^0.0.20"
 
 
 [tool.poetry.group.worker.dependencies]
@@ -41,6 +42,8 @@ types-pyyaml = "^6.0.12.20241230"
 motor-types = "^1.0.0b4"
 pytest-asyncio = "^0.25.0"
 types-aiobotocore = "^2.16.1"
+testcontainers = {extras = ["mongodb"], version = "^4.9.0"}
+httpx = "^0.28.1"
 
 [tool.mypy]
 python_version = "3.11"
