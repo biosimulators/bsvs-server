@@ -3,7 +3,7 @@ from functools import partial
 from pathlib import Path
 from zipfile import ZipFile
 
-import h5py
+import h5py  # type: ignore
 import numpy as np
 
 

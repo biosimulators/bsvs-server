@@ -7,7 +7,7 @@ import numpy as np
 from dotenv import load_dotenv
 from pydantic import BaseModel as _BaseModel, ConfigDict
 
-from shared.biosimulations_runutils.biosim_pipeline.datamodels import Simulator
+from archive.shared.biosimulations_runutils.biosim_pipeline.datamodels import Simulator
 
 
 REPO_ROOT = os.path.dirname(os.path.dirname(__file__))
@@ -19,8 +19,7 @@ DB_TYPE = "mongo"  # ie: postgres, etc
 DB_NAME = "service_requests"
 BUCKET_NAME = os.getenv("BUCKET_NAME")
 
-DEFAULT_SIMULATORS = list(sorted(Simulator.__members__.keys()))
-
+DEFAULT_SIMULATORS = list(sorted([*Simulator]))
 
 # -- base models --
 
@@ -44,6 +43,7 @@ class JobStatus(Enum):
 
 
 class DatabaseCollections(Enum):
+    FAILED_JOBS = "FAILED_JOBS".lower()
     PENDING_JOBS = "PENDING_JOBS".lower()
     IN_PROGRESS_JOBS = "IN_PROGRESS_JOBS".lower()
     COMPLETED_JOBS = "COMPLETED_JOBS".lower()
@@ -132,7 +132,7 @@ class DbClientResponse(BaseModel):
     timestamp: str
 
 
-class Simulator(BaseModel):
+class SimulatorSpec(BaseModel):
     name: str
     version: Optional[str] = None
 

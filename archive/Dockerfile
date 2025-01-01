@@ -15,16 +15,16 @@ ENV DEBIAN_FRONTEND=noninteractive \
     POETRY_NO_INTERACTION=1
 
 # copy docker assets
-COPY assets/docker/config/.biosimulations.json /.google/.bio-check.json
+COPY archive/assets/docker/config/.biosimulations.json /.google/.bio-check.json
 COPY assets/docker/config/.pys_usercfg.ini /Pysces/.pys_usercfg.ini
 COPY assets/docker/config/.pys_usercfg.ini /root/Pysces/.pys_usercfg.ini
 
 WORKDIR /app
 
-COPY ./gateway /app/gateway
-COPY ./worker /app/worker
-COPY ./shared /app/shared
-COPY pyproject.toml /app/pyproject.toml
+COPY gateway /app/gateway
+COPY worker /app/worker
+COPY shared /app/shared
+COPY ../pyproject.toml /app/pyproject.toml
 
 RUN apt-get update \
     && apt-get install libexpat1 -y \

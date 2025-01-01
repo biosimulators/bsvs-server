@@ -9,11 +9,11 @@ import pandas as pd
 from dotenv import load_dotenv
 from pymongo.collection import Collection as MongoCollection
 
-from shared.data_model import JobStatus, DatabaseCollections, BUCKET_NAME, DEV_ENV_PATH, DEFAULT_SIMULATORS
-from shared.database import MongoDbConnector
-from shared.io import download_file
-from shared.log_config import setup_logging
-from shared.utils import unique_id, handle_sbml_exception, get_output_stack
+from archive.shared import JobStatus, DatabaseCollections, BUCKET_NAME, DEV_ENV_PATH, DEFAULT_SIMULATORS
+from archive.shared import MongoDbConnector
+from archive.shared import download_file
+from archive.shared import setup_logging
+from archive.shared import unique_id, handle_sbml_exception, get_output_stack
 
 
 # for dev only
@@ -92,10 +92,10 @@ class Supervisor:
                     # create new completed job using the worker's job_result
                     result_data = worker.job_result
                     await self.db_connector.write(
-                        collection_name=DatabaseCollections.COMPLETED_JOBS.value,
+                        collection_name=DatabaseCollections.COMPLETED_JOBS,
                         job_id=job_id,
                         timestamp=self.db_connector.timestamp(),
-                        status=JobStatus.COMPLETED.value,
+                        status=JobStatus.COMPLETED,
                         results=result_data,
                         source=source_name,
                         requested_simulators=pending_job.get('simulators')
@@ -108,10 +108,10 @@ class Supervisor:
                     error = handle_sbml_exception()
                     self.logger.error(error)
                     await self.db_connector.write(
-                        collection_name="failed_jobs",
+                        collection_name=DatabaseCollections.FAILED_JOBS,
                         job_id=job_id,
                         timestamp=self.db_connector.timestamp(),
-                        status=JobStatus.FAILED.value,
+                        status=JobStatus.FAILED,
                         results=error,
                         source=source_name
                     )

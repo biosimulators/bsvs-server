@@ -9,7 +9,7 @@ services:
 
   gateway:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile
     image: ghcr.io/biosimulators/bsvs-server-gateway:0.0.1
     container_name: gateway
@@ -23,7 +23,7 @@ services:
 
   worker:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile
     image: ghcr.io/biosimulators/bsvs-server-worker:0.0.1
     container_name: worker

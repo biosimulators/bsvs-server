@@ -5,15 +5,14 @@ from typing import *
 from tempfile import mkdtemp
 
 import dotenv
-import uvicorn
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query, APIRouter
 from pydantic import BeforeValidator
 from starlette.middleware.cors import CORSMiddleware
 
-from shared.database import MongoDbConnector
-from shared.io import save_uploaded_file, check_upload_file_extension, upload_blob
-from shared.log_config import setup_logging
-from shared.data_model import (
+from archive.shared.database import MongoDbConnector
+from archive.shared.io import save_uploaded_file, check_upload_file_extension, upload_blob
+from archive.shared.log_config import setup_logging
+from archive.shared.data_model import (
     VerificationOutput,
     DbClientResponse,
     CompatibleSimulators,
@@ -26,9 +25,9 @@ from shared.data_model import (
     VerificationRun,
     DEV_ENV_PATH
 )
-from shared.utils import file_upload_prefix
+from archive.shared.utils import file_upload_prefix
 
-from gateway.compatible import COMPATIBLE_VERIFICATION_SIMULATORS
+from archive.gateway.compatible import COMPATIBLE_VERIFICATION_SIMULATORS
 
 
 logger = logging.getLogger("bsvs-server.gateway.main.log")
