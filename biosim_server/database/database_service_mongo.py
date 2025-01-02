@@ -9,7 +9,7 @@ from biosim_server.database.database_service import DatabaseService
 from biosim_server.dependencies import get_database, MONGODB_DATABASE_NAME, MONGODB_VERIFICATION_COLLECTION_NAME
 
 
-class MongoDatabaseService(DatabaseService):
+class DatabaseServiceMongo(DatabaseService):
     db_client: AsyncIOMotorClient
     verification_run_col: AsyncIOMotorCollection
 

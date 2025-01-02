@@ -9,7 +9,7 @@ from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
 from archive.shared.data_model import VerificationRun, JobStatus
 from biosim_server.database.database_service import DatabaseService
-from biosim_server.database.mongo_database_service import MongoDatabaseService
+from biosim_server.database.database_service_mongo import DatabaseServiceMongo
 from biosim_server.dependencies import MONGODB_DATABASE_NAME, MONGODB_VERIFICATION_COLLECTION_NAME
 
 @pytest.fixture(scope="session")
@@ -26,7 +26,7 @@ async def mongo_test_client(mongodb_container) -> AsyncGenerator[AsyncIOMotorCli
 
 @pytest_asyncio.fixture(scope="function")
 async def database_service(mongo_test_client) -> DatabaseService:
-    return MongoDatabaseService(mongo_test_client)
+    return DatabaseServiceMongo(mongo_test_client)
 
 @pytest_asyncio.fixture(scope="function")
 async def mongo_test_database(mongo_test_client) -> AsyncIOMotorDatabase:

@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from biosim_server.config import get_settings
-from biosim_server.io.model import ListingItem
+from biosim_server.io.file_service import ListingItem
 from biosim_server.io.s3_aiobotocore import get_s3_modified_date, download_s3_file, get_listing_of_s3_path
 
 ROOT_DIR = Path(__file__).parent.parent.parent
