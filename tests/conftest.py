@@ -15,6 +15,10 @@ from tests.fixtures.temporal_fixtures import (  # noqa: F401
     temporal_env,
     temporal_client
 )
+from tests.fixtures.s3_fixtures import (  # noqa: F401
+    file_service_s3,
+    file_service_local
+)
 
 # Add the --workflow-environment option
 def pytest_addoption(parser):

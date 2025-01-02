@@ -7,13 +7,14 @@ from typing import *
 from typing import List
 
 import dotenv
-from fastapi import FastAPI, File, UploadFile, Query, APIRouter, Depends
+import uvicorn
+from fastapi import FastAPI, File, UploadFile, Query, APIRouter, Depends, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
 from archive.shared.data_model import DEV_ENV_PATH
-from biosim_server.database.database_service_mongo import DatabaseServiceMongo
+from biosim_server.database.database_service import DatabaseService, DocumentNotFoundError
 from biosim_server.database.models import VerificationRun, JobStatus, VerificationOutput
-from biosim_server.dependencies import get_database, get_biosim_service, get_file_service
+from biosim_server.dependencies import get_database_service, get_biosim_service, get_file_service, init_standalone
 from biosim_server.log_config import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -112,7 +113,7 @@ def root():
     name="Uniform Time Course Comparison from OMEX/COMBINE archive",
     operation_id="verify",
     tags=["Verification"],
-    dependencies=[Depends(get_database), Depends(get_biosim_service), Depends(get_file_service)],
+    dependencies=[Depends(get_database_service), Depends(get_biosim_service), Depends(get_file_service)],
     summary="Compare UTC outputs from a deterministic SBML model within an OMEX/COMBINE archive.")
 async def verify(
         uploaded_file: UploadFile = File(..., description="OMEX/COMBINE archive containing a deterministic SBML model"),
@@ -221,75 +222,39 @@ async def verify(
     response_model=VerificationOutput,
     operation_id='get-output',
     tags=["Results"],
-    dependencies=[Depends(get_database), Depends(get_biosim_service), Depends(get_file_service)],
+    dependencies=[Depends(get_database_service), Depends(get_biosim_service), Depends(get_file_service)],
     summary='Get the results of an existing verification run.')
 async def get_output(job_id: str) -> VerificationOutput:
+    logger.info(f"in get /get-output/{job_id}")
+    database_service: DatabaseService | None = get_database_service()
+    assert database_service is not None
 
-    database_service = DatabaseServiceMongo(get_database())
-    verification_run: VerificationRun = await database_service.get_verification_run(job_id)
+    try:
+        verification_run: VerificationRun = await database_service.get_verification_run(job_id)
 
-    return VerificationOutput(
-        job_id=job_id,
-        timestamp=verification_run.timestamp,
-        status=verification_run.status,
-        omex_path=verification_run.omex_path,
-        requested_simulators=verification_run.requested_simulators,
-        observables=verification_run.observables,
-        sim_results=None
-    )
-    # if "verification" not in job_id:
-    #     raise HTTPException(status_code=404, detail="This must be a verification job query.")
-    #
-    # # state-case: job is completed
-    # job = await db_connector.read(collection_name="completed_jobs", job_id=job_id)
-    #
-    # # state-case: job has failed
-    # if job is None:
-    #     job = await db_connector.read(collection_name="failed_jobs", job_id=job_id)
-    #
-    # # state-case: job is not in completed:
-    # if job is None:
-    #     job = await db_connector.read(collection_name="in_progress_jobs", job_id=job_id)
-    #
-    # # state-case: job is not in progress:
-    # if job is None:
-    #     job = await db_connector.read(collection_name="pending_jobs", job_id=job_id)
-    #
-    # if job is not None:
-    #     job.pop('_id', None)
-    #     results = job.get('results')
-    #     # data = []
-    #     # if results is not None:
-    #     #     for name, obs_data in results.items():
-    #     #         if not name == "rmse":
-    #     #             obs = ObservableData(observable_name=name, mse=obs_data['mse'], proximity=obs_data['proximity'], output_data=obs_data['output_data'])
-    #     #             data.append(obs)
-    #     #         else:
-    #     #             for simulator_name, data_table in obs_data.items():
-    #     #                 obs = SimulatorRMSE(simulator=simulator_name, rmse_scores=data_table)
-    #     #                 data.append(obs)
-    #
-    #     output = VerificationOutput(
-    #         job_id=job_id,
-    #         timestamp=job.get('timestamp'),
-    #         status=job.get('status'),
-    #         source=job.get('source', job.get('path')).split('/')[-1],
-    #         # results=data,  # Change this to the results below if there is an issue
-    #         results=results
-    #     )
-    #     requested_simulators = job.get('simulators', job.get('requested_simulators'))
-    #     if requested_simulators is not None:
-    #         output.requested_simulators = requested_simulators
-    #
-    #     return output
-    # else:
-    #     msg = f"Job with id: {job_id} not found. Please check the job_id and try again."
-    #     logger.error(msg)
-    #     raise HTTPException(status_code=404, detail=msg)
-
+        if verification_run is not None:
+            return VerificationOutput(
+                job_id=job_id,
+                timestamp=verification_run.timestamp,
+                status=verification_run.status,
+                omex_path=verification_run.omex_path,
+                requested_simulators=verification_run.requested_simulators,
+                observables=verification_run.observables,
+                sim_results=None
+            )
+    except DocumentNotFoundError as e1:
+        msg = f"Job with id: {job_id} not found. Please check the job_id and try again."
+        logger.warning(msg, exc_info=e1)
+        raise HTTPException(status_code=404, detail=msg)
+    except Exception as e2:
+        exc_message = str(e2)
+        msg = f"error retrieving verification job output with id: {job_id}: {exc_message}"
+        logger.error(msg, exc_info=e2)
+        raise HTTPException(status_code=404, detail=msg)
 
 if __name__ == "__main__":
-    # uvicorn.run(app, host="0.0.0.0", port=8000)
-    print()
+    init_standalone()
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+    logger.info("Server started")
 
 
