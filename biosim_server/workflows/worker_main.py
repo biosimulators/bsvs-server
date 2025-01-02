@@ -5,9 +5,9 @@ import random
 from temporalio.client import Client
 from temporalio.worker import Worker
 
-from biosim_server.biosim1.api_client import check_run_status, run_project
-from biosim_server.biosim1.simdata_api_client import get_hdf5_metadata, get_hdf5_data
 from biosim_server.workflows.activities import upload_model_to_s3, generate_statistics
+from biosim_server.workflows.biosim_activities import check_run_status, run_project
+from biosim_server.workflows.biosim_activities import get_hdf5_metadata, get_hdf5_data
 from biosim_server.workflows.omex_sim_workflow import OmexSimWorkflow
 from biosim_server.workflows.omex_verify_workflow import OmexVerifyWorkflow
 

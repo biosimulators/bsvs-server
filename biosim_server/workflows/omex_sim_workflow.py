@@ -6,9 +6,9 @@ from typing import Dict
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from biosim_server.biosim1.api_client import check_run_status
 from biosim_server.biosim1.models import SimulationRunStatus, HDF5File, Hdf5DataValues
-from biosim_server.biosim1.simdata_api_client import get_hdf5_metadata, get_hdf5_data
+from biosim_server.workflows.biosim_activities import check_run_status
+from biosim_server.workflows.biosim_activities import get_hdf5_metadata, get_hdf5_data
 
 
 @dataclass
@@ -42,15 +42,16 @@ class OmexSimWorkflow:
         workflow.logger.info(f"getting simulation run status for simulation_run_id: {job_id}")
         status_str: str = await workflow.execute_activity(
             check_run_status,
-            job_id,
+            args=[job_id],
             start_to_close_timeout=timedelta(seconds=10),  # Activity timeout
-            retry_policy=RetryPolicy(maximum_attempts=3), )
+            retry_policy=RetryPolicy(maximum_attempts=3),
+        )
         status = SimulationRunStatus.from_str(status_str)
         workflow.logger.info(f"Simulation run status for simulation_run_id: {job_id} is {status.value}")
 
         hdf5_metadata_json: str = await workflow.execute_activity(
             get_hdf5_metadata,
-            job_id,
+            args=[job_id],
             start_to_close_timeout=timedelta(seconds=10),  # Activity timeout
             retry_policy=RetryPolicy(maximum_attempts=3),
         )
