@@ -1,21 +1,18 @@
-from typing import Annotated
-
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 from pymongo.results import InsertOneResult
 from typing_extensions import override
 
-from biosim_server.database.database_service import DatabaseService
+from biosim_server.database.database_service import DatabaseService, DocumentNotFoundError
 from biosim_server.database.models import VerificationRun
-from biosim_server.dependencies import get_database, MONGODB_DATABASE_NAME, MONGODB_VERIFICATION_COLLECTION_NAME
 
 
 class DatabaseServiceMongo(DatabaseService):
     db_client: AsyncIOMotorClient
     verification_run_col: AsyncIOMotorCollection
 
-    def __init__(self, db: Annotated[AsyncIOMotorClient, get_database()]) -> None:
-        self.db = db
-        self.verification_run_col = self.db.get_database(MONGODB_DATABASE_NAME).get_collection(MONGODB_VERIFICATION_COLLECTION_NAME)
+    def __init__(self, db_client: AsyncIOMotorClient, db_name: str, verification_col_name: str) -> None:
+        self.db_client = db_client
+        self.verification_run_col = self.db_client.get_database(db_name).get_collection(verification_col_name)
 
     @override
     async def insert_verification_run(self, verification_run: VerificationRun) -> None:
@@ -31,7 +28,7 @@ class DatabaseServiceMongo(DatabaseService):
         if document is not None:
             return VerificationRun.model_validate(document)
         else:
-            raise Exception("Document not found")
+            raise DocumentNotFoundError("Document not found")
 
     @override
     async def delete_verification_run(self, job_id: str) -> None:
