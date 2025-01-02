@@ -28,7 +28,7 @@ class LocalFileService(FileService):
 
     def cleanup(self):
         # remove all files in the mock s3 file store
-        shutil.rmtree(self.BASE_DIR_PARENT)
+        shutil.rmtree(self.BASE_DIR)
 
     @override
     async def download_file(self, s3_path: str, file_path: Path) -> str:
