@@ -1,6 +1,6 @@
 from abc import abstractmethod, ABC
 
-from archive.shared.data_model import VerificationRun
+from biosim_server.database.models import VerificationRun
 
 
 class DatabaseService(ABC):

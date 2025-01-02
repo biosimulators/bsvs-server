@@ -4,8 +4,8 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 from pymongo.results import InsertOneResult
 from typing_extensions import override
 
-from archive.shared.data_model import VerificationRun
 from biosim_server.database.database_service import DatabaseService
+from biosim_server.database.models import VerificationRun
 from biosim_server.dependencies import get_database, MONGODB_DATABASE_NAME, MONGODB_VERIFICATION_COLLECTION_NAME
 
 

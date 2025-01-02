@@ -7,9 +7,9 @@ import pytest_asyncio
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase, AsyncIOMotorCollection
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from archive.shared.data_model import VerificationRun, JobStatus
 from biosim_server.database.database_service import DatabaseService
 from biosim_server.database.database_service_mongo import DatabaseServiceMongo
+from biosim_server.database.models import JobStatus, VerificationRun
 from biosim_server.dependencies import MONGODB_DATABASE_NAME, MONGODB_VERIFICATION_COLLECTION_NAME
 
 @pytest.fixture(scope="session")
@@ -51,18 +51,17 @@ def verification_run_example(verification_id) -> VerificationRun:
     include_outputs = True
     rTol = 1e-6
     aTol = 1e-9
-    selection_list = ["time", "concentration"]
+    observables = ["time", "concentration"]
 
     return VerificationRun(
-        status=JobStatus.PENDING.value,
+        status=str(JobStatus.PENDING.value),
         job_id=generated_job_id,
-        path=path,
-        simulators=simulators,
+        omex_path=path,
+        requested_simulators=simulators,
         timestamp=timestamp,
         include_outputs=include_outputs,
         rTol=rTol,
         aTol=aTol,
-        selection_list=selection_list,
-        # expected_results=report_location,
+        observables=observables,
     )
 

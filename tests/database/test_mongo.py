@@ -2,8 +2,8 @@ import pytest
 from pymongo.results import InsertOneResult
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from archive.shared.data_model import VerificationRun
 from biosim_server.database.database_service import DatabaseService
+from biosim_server.database.models import VerificationRun
 from tests.fixtures.database_fixtures import verification_collection
 
 
