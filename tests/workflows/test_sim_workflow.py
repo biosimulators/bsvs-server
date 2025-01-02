@@ -14,7 +14,7 @@ async def test_sim_workflow(temporal_client):
     sim_workflow_input = SimulatorWorkflowInput(model_path="path/to/model.obj", simulator_name="simulatorC")
     async with Worker(
             temporal_client,
-            task_queue="simulation_runs",
+            task_queue="verification_tasks",
             workflows=[OmexSimWorkflow],
             activities=[check_run_status, run_project, get_hdf5_metadata, get_hdf5_data],
     ):
@@ -22,7 +22,7 @@ async def test_sim_workflow(temporal_client):
             OmexSimWorkflow.run,
             args=[sim_workflow_input],
             id=uuid.uuid4().hex,
-            task_queue="simulation_runs",
+            task_queue="verification_tasks",
         )
         assert isinstance(workflow_handle, WorkflowHandle)
         workflow_handle_result = await workflow_handle.result()

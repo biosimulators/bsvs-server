@@ -46,7 +46,7 @@ class OmexVerifyWorkflow:
                 workflow.start_child_workflow(
                     OmexSimWorkflow.run,
                     args=[SimulatorWorkflowInput(model_path=s3_model_path, simulator_name=simulator_name)],
-                    task_queue="simulation_runs",
+                    task_queue="verification_tasks",
                     execution_timeout=timedelta(seconds=10),
                 )
             )

@@ -25,16 +25,9 @@ async def main():
     handle = Worker(
         client,
         task_queue="verification_tasks",
-        # workflows=[main_workflow.MainWorkflow, simulator_run_workflow.SimulatorWorkflow],
-        workflows=[OmexVerifyWorkflow],
-        activities=[upload_model_to_s3, generate_statistics],
-    )
-    run_futures.append(handle.run())
-    handle = Worker(
-        client,
-        task_queue="simulation_runs",
-        workflows=[OmexSimWorkflow],
-        activities=[check_run_status, run_project, get_hdf5_metadata, get_hdf5_data],
+        workflows=[OmexVerifyWorkflow, OmexSimWorkflow],
+        activities=[upload_model_to_s3, generate_statistics, check_run_status, run_project, get_hdf5_metadata,
+                    get_hdf5_data],
     )
     run_futures.append(handle.run())
     print("Started worker for verification_tasks, ctrl+c to exit")

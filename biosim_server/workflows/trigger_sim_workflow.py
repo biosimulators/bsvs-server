@@ -12,7 +12,7 @@ async def start_workflow():
     handle = await client.start_workflow(
         OmexSimWorkflow.run,
         args=[sim_workflow_input],
-        task_queue="simulation_runs",
+        task_queue="verification_tasks",
         id=uuid.uuid4().hex,
     )
     print(f"Started workflow with ID: {handle.id}")
