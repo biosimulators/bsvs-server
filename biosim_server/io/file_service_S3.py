@@ -4,8 +4,7 @@ from pathlib import Path
 
 from typing_extensions import override
 
-from biosim_server.io.file_service import FileService
-from biosim_server.io.model import ListingItem
+from biosim_server.io.file_service import FileService, ListingItem
 from biosim_server.io.s3_aiobotocore import (
     download_s3_file,
     get_s3_modified_date,

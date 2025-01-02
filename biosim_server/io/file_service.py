@@ -2,7 +2,14 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
 
-from biosim_server.io.model import ListingItem
+from pydantic import BaseModel
+
+
+class ListingItem(BaseModel):
+    Key: str
+    LastModified: datetime
+    ETag: str
+    Size: int
 
 
 class FileService(ABC):

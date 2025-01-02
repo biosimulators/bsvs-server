@@ -8,7 +8,7 @@ from aiobotocore.session import AioSession
 from botocore.exceptions import ClientError
 
 from biosim_server.config import get_settings
-from biosim_server.io.model import ListingItem
+from biosim_server.io.file_service import ListingItem
 
 logger = logging.getLogger(__name__)
 

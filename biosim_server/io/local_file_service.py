@@ -8,8 +8,7 @@ from typing import List
 import aiofiles
 from typing_extensions import override
 
-from biosim_server.io.file_service import FileService
-from biosim_server.io.model import ListingItem
+from biosim_server.io.file_service import FileService, ListingItem
 
 
 def generate_fake_etag(file_path: Path) -> str:
