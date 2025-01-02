@@ -5,12 +5,12 @@ from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
 from biosim_server.dependencies import get_file_service, set_file_service
 from biosim_server.io.file_service_S3 import FileServiceS3
-from biosim_server.io.local_file_service import LocalFileService
+from biosim_server.io.file_service_local import FileServiceLocal
 
 
 @pytest_asyncio.fixture(scope="session")
-async def file_service_local() -> AsyncGenerator[LocalFileService, None]:
-    file_service_local: LocalFileService = LocalFileService()
+async def file_service_local() -> AsyncGenerator[FileServiceLocal, None]:
+    file_service_local: FileServiceLocal = FileServiceLocal()
     saved_file_service = get_file_service()
 
     yield file_service_local

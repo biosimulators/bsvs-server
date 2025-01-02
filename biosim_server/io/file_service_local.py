@@ -1,4 +1,3 @@
-# implementation of the LocalFileService class using local file system rather than S3
 import shutil
 import uuid
 from datetime import datetime
@@ -15,7 +14,7 @@ def generate_fake_etag(file_path: Path) -> str:
     return file_path.absolute().as_uri()
 
 
-class LocalFileService(FileService):
+class FileServiceLocal(FileService):
     # temporary base directory for the mock s3 file store
     BASE_DIR_PARENT = Path(__file__).parent.parent.parent / "local_data"
     BASE_DIR = BASE_DIR_PARENT / ("s3_" + uuid.uuid4().hex)

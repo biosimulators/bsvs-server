@@ -1,4 +1,3 @@
-# test FileService using LocalFileService and FileServiceS3
 import os
 from pathlib import Path
 
@@ -8,7 +7,7 @@ from biosim_server.config import get_settings
 
 
 @pytest.mark.asyncio
-async def test_upload_download_file_local(file_service_local):
+async def test_file_service_local(file_service_local):
     expected_file_content = b"Hello, World!"
     file_service = file_service_local
     s3_path = "some/s3/path/fname.txt"
@@ -36,7 +35,7 @@ async def test_upload_download_file_local(file_service_local):
 @pytest.mark.skipif(len(get_settings().storage_secret) == 0,
                     reason="S3 config STORAGE_SECRET not supplied")
 @pytest.mark.asyncio
-async def test_upload_download_file_s3(file_service_s3):
+async def test_file_service_s3(file_service_s3):
     expected_file_content = b"Hello, World!"
     file_service = file_service_s3
     s3_path = "some/s3/path/fname.txt"
