@@ -3,6 +3,7 @@ import pytest_asyncio  # noqa: F401
 
 # Import all fixtures from the fixtures modules
 from tests.fixtures.database_fixtures import (  # noqa: F401
+    database_service,
     mongodb_container,
     mongo_test_client,
     mongo_test_database,
