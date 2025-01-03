@@ -15,9 +15,10 @@ from starlette.middleware.cors import CORSMiddleware
 from archive.shared.data_model import DEV_ENV_PATH
 from biosim_server.database.database_service import DatabaseService, DocumentNotFoundError
 from biosim_server.database.models import VerificationRun, JobStatus, VerificationOutput
-from biosim_server.dependencies import get_database_service, get_biosim_service, get_file_service, init_standalone, \
-    shutdown_standalone
+from biosim_server.dependencies import get_database_service, get_biosim_service, get_file_service, get_temporal_client, \
+    init_standalone, shutdown_standalone
 from biosim_server.log_config import setup_logging
+from biosim_server.workflows.omex_verify_workflow import OmexVerifyWorkflow
 
 logger = logging.getLogger(__name__)
 setup_logging(logger)
@@ -114,7 +115,7 @@ def root():
     name="Uniform Time Course Comparison from OMEX/COMBINE archive",
     operation_id="verify",
     tags=["Verification"],
-    dependencies=[Depends(get_database_service), Depends(get_biosim_service), Depends(get_file_service)],
+    dependencies=[Depends(get_database_service), Depends(get_temporal_client), Depends(get_file_service)],
     summary="Compare UTC outputs from a deterministic SBML model within an OMEX/COMBINE archive.")
 async def verify(
         uploaded_file: UploadFile = File(..., description="OMEX/COMBINE archive containing a deterministic SBML model"),
@@ -146,6 +147,7 @@ async def verify(
 
     timestamp = str(datetime.now(UTC))
     generated_job_id = "verification-" + str(uuid.uuid4())
+    workflow_id = uuid.uuid4().hex
     run = VerificationRun(
         job_id=generated_job_id,
         status=str(JobStatus.PENDING.value),
@@ -157,6 +159,7 @@ async def verify(
         include_outputs=include_outputs,
         rTol=rTol,
         aTol=aTol,
+        workflow_id=workflow_id,
         # expected_results=report_location,
     )
 
@@ -164,8 +167,18 @@ async def verify(
     database_service = get_database_service()
     assert database_service is not None
     await database_service.insert_verification_run(run)
+    logger.info(f"saved VerificationRun to database for Job_id {generated_job_id}")
 
-    # TODO: invoke workflow
+    # invoke workflow
+    logger.info(f"starting workflow with id {workflow_id}")
+    temporal_client = get_temporal_client()
+    _handle = await temporal_client.execute_workflow(
+        OmexVerifyWorkflow.run,
+        args=[s3_path, simulators],
+        task_queue="verification_tasks",
+        id=workflow_id,
+    )
+    logger.info(f"started workflow with id {workflow_id}")
 
     return run
 

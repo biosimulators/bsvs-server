@@ -22,6 +22,7 @@ class VerificationRun(BaseModel):
     observables: Optional[list[str]] = None
     # expected_results: Optional[str] = None
     comparison_id: Optional[str] = None
+    workflow_id: Optional[str] = None
     rTol: Optional[float] = None
     aTol: Optional[float] = None
 

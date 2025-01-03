@@ -49,7 +49,7 @@ async def test_get_output(verification_run_example, database_service):
 
 
 @pytest.mark.asyncio
-async def test_verify(verification_run_example, database_service, file_service_local):
+async def test_verify(verification_run_example, database_service, file_service_local, temporal_client):
     root_dir = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     file_path = root_dir / "local_data" / "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
     query_params = {
@@ -73,6 +73,7 @@ async def test_verify(verification_run_example, database_service, file_service_l
             expected_verification_run.timestamp = verification_run.timestamp
             expected_verification_run.job_id = verification_run.job_id
             expected_verification_run.omex_path = verification_run.omex_path
+            expected_verification_run.workflow_id = verification_run.workflow_id
 
             assert expected_verification_run.model_dump_json() == verification_run.model_dump_json()
 
@@ -87,3 +88,11 @@ async def test_verify(verification_run_example, database_service, file_service_l
     assert omex_path.exists()
     with open(omex_path, "rb") as f:
         assert f.read() == file_path.read_bytes()
+
+    # verify the workflow is started
+    assert verification_run.workflow_id is not None
+    workflow_handle = temporal_client.get_workflow_handle(workflow_id=verification_run.workflow_id)
+    assert workflow_handle is not None
+    workflow_handle_result = await workflow_handle.result()
+    assert workflow_handle_result == "s3://bucket-name/reports/final_report.pdf"
+
