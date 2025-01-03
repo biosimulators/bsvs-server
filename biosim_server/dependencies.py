@@ -6,6 +6,7 @@ from biosim_server.database.database_service import DatabaseService
 from biosim_server.database.database_service_mongo import DatabaseServiceMongo
 from biosim_server.io.file_service import FileService
 from biosim_server.io.file_service_S3 import FileServiceS3
+from temporalio.client import Client as TemporalClient
 
 #------ database service (standalone or pytest) ------
 
@@ -47,10 +48,21 @@ def get_biosim_service() -> BiosimService | None:
     global global_biosim_service
     return global_biosim_service
 
+#------ Temporal workflow client ------
+
+global_temporal_client: TemporalClient | None = None
+
+def set_temporal_client(temporal_client: TemporalClient | None):
+    global global_temporal_client
+    global_temporal_client = temporal_client
+
+def get_temporal_client() -> TemporalClient | None:
+    global global_temporal_client
+    return global_temporal_client
 
 #------ initialized standalone application (standalone) ------
 
-def init_standalone():
+async def init_standalone():
     set_database_service(DatabaseServiceMongo(
         db_client=AsyncIOMotorClient(MONGODB_URL),
         db_name=MONGODB_DATABASE_NAME,
@@ -58,3 +70,22 @@ def init_standalone():
     )
     set_file_service(FileServiceS3())
     set_biosim_service(BiosimServiceRest())
+    set_temporal_client(await TemporalClient.connect("localhost:7233"))
+
+async def shutdown_standalone():
+    db_service = get_database_service()
+    if db_service:
+        await db_service.close()
+    file_service = get_file_service()
+    if file_service:
+        await file_service.close()
+    # biosim_service = get_biosim_service()
+    # if biosim_service:
+    #     await biosim_service.close()
+    # temporal_client = get_temporal_client()
+    # if temporal_client:
+    #     await temporal_client.close()
+    set_database_service(None)
+    set_file_service(None)
+    set_biosim_service(None)
+    set_temporal_client(None)

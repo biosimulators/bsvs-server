@@ -41,3 +41,8 @@ class FileServiceS3(FileService):
     @override
     async def get_file_contents(self, s3_path: str) -> bytes:
         return await get_s3_file_contents(s3_path)
+
+    @override
+    async def close(self):
+        # nothing to close here
+        pass

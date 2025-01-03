@@ -21,3 +21,7 @@ class DatabaseService(ABC):
     async def delete_verification_run(self, job_id: str) -> None:
         pass
 
+    @abstractmethod
+    async def close(self):
+        pass
+

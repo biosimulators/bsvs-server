@@ -24,7 +24,8 @@ class FileServiceLocal(FileService):
     def __init__(self):
         self.BASE_DIR.mkdir(parents=True, exist_ok=False)
 
-    def cleanup(self):
+    @override
+    async def close(self):
         # remove all files in the mock s3 file store
         shutil.rmtree(self.BASE_DIR)
 

@@ -16,7 +16,7 @@ async def file_service_local() -> AsyncGenerator[FileServiceLocal, None]:
 
     yield file_service_local
 
-    file_service_local.cleanup()
+    await file_service_local.close()
     set_file_service(saved_file_service)
 
 
@@ -28,4 +28,5 @@ async def file_service_s3() -> AsyncGenerator[FileServiceS3, None]:
 
     yield file_service_s3
 
+    await file_service_s3.close()
     set_file_service(saved_file_service)

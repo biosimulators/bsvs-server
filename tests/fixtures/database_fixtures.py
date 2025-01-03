@@ -34,7 +34,10 @@ async def database_service(mongo_test_client) -> AsyncGenerator[DatabaseService,
         verification_col_name=MONGODB_VERIFICATION_COLLECTION_NAME)
     saved_db_service = get_database_service()
     set_database_service(db_service)
+
     yield db_service
+
+    await db_service.close()
     set_database_service(saved_db_service)
 
 

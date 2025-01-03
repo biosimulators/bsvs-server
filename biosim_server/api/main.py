@@ -15,7 +15,8 @@ from starlette.middleware.cors import CORSMiddleware
 from archive.shared.data_model import DEV_ENV_PATH
 from biosim_server.database.database_service import DatabaseService, DocumentNotFoundError
 from biosim_server.database.models import VerificationRun, JobStatus, VerificationOutput
-from biosim_server.dependencies import get_database_service, get_biosim_service, get_file_service, init_standalone
+from biosim_server.dependencies import get_database_service, get_biosim_service, get_file_service, init_standalone, \
+    shutdown_standalone
 from biosim_server.log_config import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -82,9 +83,9 @@ router = APIRouter()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # set up resources (e.g. create mongodb client)
+    await init_standalone()
     yield
-    # clean up resources (e.g. shutdown mongodb client)
+    await shutdown_standalone()
 
 
 app = FastAPI(title=APP_TITLE, version=APP_VERSION, servers=APP_SERVERS, lifespan=lifespan)
@@ -216,6 +217,5 @@ async def save_uploaded_file(uploaded_file2: UploadFile, save_dest: Path) -> Pat
 
 
 if __name__ == "__main__":
-    init_standalone()
     uvicorn.run(app, host="0.0.0.0", port=8000)
     logger.info("Server started")

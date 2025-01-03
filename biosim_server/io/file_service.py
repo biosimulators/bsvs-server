@@ -37,3 +37,7 @@ class FileService(ABC):
     @abstractmethod
     async def get_file_contents(self, s3_path: str) -> bytes:
         pass
+
+    @abstractmethod
+    async def close(self):
+        pass

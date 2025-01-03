@@ -37,3 +37,7 @@ class DatabaseServiceMongo(DatabaseService):
             return
         else:
             raise Exception("Delete failed")
+
+    @override
+    async def close(self):
+        self.db_client.close()
