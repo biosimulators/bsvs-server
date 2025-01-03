@@ -27,7 +27,7 @@ async def temporal_env(request) -> AsyncGenerator[WorkflowEnvironment, None]:
     await env.shutdown()
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(scope="function")
 async def temporal_client(temporal_env: WorkflowEnvironment) -> AsyncGenerator[Client, None]:
     saved_client = get_temporal_client()
     set_temporal_client(temporal_env.client)
@@ -37,7 +37,7 @@ async def temporal_client(temporal_env: WorkflowEnvironment) -> AsyncGenerator[C
     set_temporal_client(saved_client)
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(scope="function")
 async def temporal_verify_worker(temporal_client: Client) -> AsyncGenerator[Worker, None]:
     async with Worker(
             temporal_client,

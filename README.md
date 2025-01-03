@@ -24,3 +24,4 @@ _The REST API can be accessed via Swagger UI here:_ **[https://biochecknet.biosi
 - This application currently uses MongoDB as the database store in which jobs are read/written. Database access is given to both the `api` and `worker` libraries. Such database access is 
 executed/implemented with the use of a `Supervisor` singleton.
 
+- If running temporal workflows in the pycharm debugger fails, please read https://youtrack.jetbrains.com/issue/PY-62467/TypeError-Task-object-is-not-callable-debugging-uvloop-with-asyncio-support-enabled
