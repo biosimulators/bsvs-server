@@ -12,6 +12,7 @@ from biosim_server.io.file_service_local import FileServiceLocal
 async def file_service_local() -> AsyncGenerator[FileServiceLocal, None]:
     file_service_local: FileServiceLocal = FileServiceLocal()
     saved_file_service = get_file_service()
+    set_file_service(file_service_local)
 
     yield file_service_local
 
@@ -23,6 +24,7 @@ async def file_service_local() -> AsyncGenerator[FileServiceLocal, None]:
 async def file_service_s3() -> AsyncGenerator[FileServiceS3, None]:
     file_service_s3: FileServiceS3 = FileServiceS3()
     saved_file_service = get_file_service()
+    set_file_service(file_service_s3)
 
     yield file_service_s3
 

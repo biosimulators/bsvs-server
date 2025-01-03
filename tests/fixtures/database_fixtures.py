@@ -68,6 +68,7 @@ def verification_run_example(verification_id) -> VerificationRun:
         job_id=generated_job_id,
         omex_path=path,
         requested_simulators=simulators,
+        comparison_id="compare_id",
         timestamp=timestamp,
         include_outputs=include_outputs,
         rTol=rTol,
