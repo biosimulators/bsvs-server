@@ -13,7 +13,8 @@ from tests.fixtures.database_fixtures import (  # noqa: F401
 )
 from tests.fixtures.temporal_fixtures import (  # noqa: F401
     temporal_env,
-    temporal_client
+    temporal_client,
+    temporal_verify_worker
 )
 from tests.fixtures.s3_fixtures import (  # noqa: F401
     file_service_s3,

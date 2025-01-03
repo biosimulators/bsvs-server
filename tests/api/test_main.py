@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from httpx._types import RequestFiles
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
 from biosim_server.api.main import app
@@ -49,7 +48,8 @@ async def test_get_output(verification_run_example, database_service):
 
 
 @pytest.mark.asyncio
-async def test_verify(verification_run_example, database_service, file_service_local, temporal_client):
+async def test_verify(verification_run_example, database_service, file_service_local, temporal_client,
+                      temporal_verify_worker):
     root_dir = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     file_path = root_dir / "local_data" / "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
     query_params = {
@@ -63,7 +63,8 @@ async def test_verify(verification_run_example, database_service, file_service_l
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         with open(file_path, "rb") as file:
-            files = {"uploaded_file": ("BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex", file, "application/zip")}
+            files = {"uploaded_file": (
+            "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex", file, "application/zip")}
             response = await test_client.post("/verify", files=files, params=query_params)
             assert response.status_code == 200
             verification_run = VerificationRun.model_validate(response.json())
@@ -95,4 +96,3 @@ async def test_verify(verification_run_example, database_service, file_service_l
     assert workflow_handle is not None
     workflow_handle_result = await workflow_handle.result()
     assert workflow_handle_result == "s3://bucket-name/reports/final_report.pdf"
-
