@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 import pytest_asyncio
 from temporalio.client import Client
 from temporalio.testing import WorkflowEnvironment
-from temporalio.worker import Worker
+from temporalio.worker import Worker, UnsandboxedWorkflowRunner
 
 from biosim_server.dependencies import get_temporal_client, set_temporal_client
 from biosim_server.workflows.activities import upload_model_to_s3, generate_statistics
@@ -46,5 +46,6 @@ async def temporal_verify_worker(temporal_client: Client) -> AsyncGenerator[Work
             activities=[upload_model_to_s3, generate_statistics, check_run_status, run_project, get_hdf5_metadata,
                         get_hdf5_data],
             debug_mode=True,
+            workflow_runner=UnsandboxedWorkflowRunner()
     ) as worker:
         yield worker
