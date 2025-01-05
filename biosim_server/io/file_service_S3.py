@@ -1,6 +1,10 @@
 import logging
-from datetime import datetime
+import uuid
+from temporalio import workflow
+with workflow.unsafe.imports_passed_through():
+    from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 from typing_extensions import override
 
@@ -19,8 +23,11 @@ logger = logging.getLogger(__name__)
 class FileServiceS3(FileService):
 
     @override
-    async def download_file(self, s3_path: str, file_path: Path) -> str:
-        return await download_s3_file(s3_path, file_path)
+    async def download_file(self, s3_path: str, file_path: Optional[Path]=None) -> tuple[str, str]:
+        if file_path is None:
+            file_path = Path(__file__).parent / ("temp_file_"+uuid.uuid4().hex)
+        full_s3_path = await download_s3_file(s3_path, file_path)
+        return full_s3_path, str(file_path)
 
     @override
     async def upload_file(self, file_path: Path, s3_path: str) -> str:
@@ -43,6 +50,6 @@ class FileServiceS3(FileService):
         return await get_s3_file_contents(s3_path)
 
     @override
-    async def close(self):
+    async def close(self) -> None:
         # nothing to close here
         pass

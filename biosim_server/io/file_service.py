@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+from dataclasses import dataclass
+from temporalio import workflow
+with workflow.unsafe.imports_passed_through():
+    from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
-from pydantic import BaseModel
 
-
-class ListingItem(BaseModel):
+@dataclass
+class ListingItem:
     Key: str
     LastModified: datetime
     ETag: str
@@ -15,7 +18,7 @@ class ListingItem(BaseModel):
 class FileService(ABC):
 
     @abstractmethod
-    async def download_file(self, s3_path: str, file_path: Path) -> str:
+    async def download_file(self, s3_path: str, file_path: Optional[Path] = None) -> tuple[str, str]:
         pass
 
     @abstractmethod
@@ -39,5 +42,5 @@ class FileService(ABC):
         pass
 
     @abstractmethod
-    async def close(self):
+    async def close(self) -> None:
         pass

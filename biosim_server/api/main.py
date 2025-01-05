@@ -2,7 +2,12 @@ import logging
 import os
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, UTC
+from temporalio import workflow
+
+from biosim_server.biosim1.models import SourceOmex, SimulatorSpec
+
+with workflow.unsafe.imports_passed_through():
+    from datetime import datetime, UTC
 from pathlib import Path
 from typing import *
 from typing import List
@@ -12,18 +17,19 @@ import uvicorn
 from fastapi import FastAPI, File, UploadFile, Query, APIRouter, Depends, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from archive.shared.data_model import DEV_ENV_PATH
 from biosim_server.database.database_service import DatabaseService, DocumentNotFoundError
 from biosim_server.database.models import VerificationRun, JobStatus, VerificationOutput
 from biosim_server.dependencies import get_database_service, get_biosim_service, get_file_service, get_temporal_client, \
     init_standalone, shutdown_standalone
 from biosim_server.log_config import setup_logging
-from biosim_server.workflows.omex_verify_workflow import OmexVerifyWorkflow
+from biosim_server.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
 
 logger = logging.getLogger(__name__)
 setup_logging(logger)
 
 # -- load dev env -- #
+REPO_ROOT = os.path.dirname(os.path.dirname(__file__))
+DEV_ENV_PATH = os.path.join(REPO_ROOT, 'assets', 'dev', 'config', '.dev_env')
 dotenv.load_dotenv(DEV_ENV_PATH)  # NOTE: create an env config at this filepath if dev
 
 # -- constraints -- #
@@ -83,7 +89,7 @@ router = APIRouter()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     await init_standalone()
     yield
     await shutdown_standalone()
@@ -103,7 +109,7 @@ app.add_middleware(
 # -- endpoint logic -- #
 
 @app.get("/")
-def root():
+def root() -> dict[str, str]:
     return {
         'docs': 'https://biochecknet.biosimulations.org/docs'
     }
@@ -151,7 +157,7 @@ async def verify(
     run = VerificationRun(
         job_id=generated_job_id,
         status=str(JobStatus.PENDING.value),
-        omex_path=s3_path,
+        omex_s3_path=s3_path,
         requested_simulators=simulators,
         observables=observables,
         comparison_id=comparison_id,
@@ -169,12 +175,15 @@ async def verify(
     await database_service.insert_verification_run(run)
     logger.info(f"saved VerificationRun to database for Job_id {generated_job_id}")
 
+    simulator_specs: list[SimulatorSpec] = [SimulatorSpec(simulator=simulator, version="1.0") for simulator in simulators]
+
     # invoke workflow
     logger.info(f"starting workflow with id {workflow_id}")
     temporal_client = get_temporal_client()
-    _handle = await temporal_client.execute_workflow(
+    assert temporal_client is not None
+    _handle = await temporal_client.start_workflow(
         OmexVerifyWorkflow.run,
-        args=[s3_path, simulators],
+        args=[OmexVerifyWorkflowInput(source_omex=SourceOmex(omex_s3_file=s3_path, name="name"), simulator_specs=simulator_specs)],
         task_queue="verification_tasks",
         id=workflow_id,
     )
@@ -203,7 +212,7 @@ async def get_output(job_id: str) -> VerificationOutput:
                 job_id=job_id,
                 timestamp=verification_run.timestamp,
                 status=verification_run.status,
-                omex_path=verification_run.omex_path,
+                omex_s3_path=verification_run.omex_s3_path,
                 requested_simulators=verification_run.requested_simulators,
                 observables=verification_run.observables,
                 sim_results=None

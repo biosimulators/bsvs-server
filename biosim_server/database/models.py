@@ -16,7 +16,7 @@ class VerificationRun(BaseModel):
     job_id: str
     timestamp: str
     status: str
-    omex_path: str
+    omex_s3_path: str
     requested_simulators: list[str]
     include_outputs: Optional[bool] = True
     observables: Optional[list[str]] = None
@@ -35,7 +35,7 @@ class VerificationOutput(BaseModel):
     job_id: str
     timestamp: str
     status: str
-    omex_path: Optional[str] = None
+    omex_s3_path: Optional[str] = None
     requested_simulators: Optional[list[str]] = None
     observables: Optional[list[str]] = None
     sim_results: Optional[list[dict[str, Hdf5DataValues]]] = None

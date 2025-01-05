@@ -14,7 +14,7 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 @pytest.mark.skipif(len(get_settings().storage_secret) == 0,
                     reason="S3 config STORAGE_SECRET not supplied")
 @pytest.mark.asyncio
-async def test_download_s3_file():
+async def test_download_s3_file() -> None:
     RUN_ID = "61fd573874bc0ce059643515"
     S3_PATH = f"simulations/{RUN_ID}/contents/reports.h5"
     LOCAL_PATH = Path(ROOT_DIR) / "local_data" / f"{RUN_ID}.h5"
@@ -29,7 +29,7 @@ async def test_download_s3_file():
 @pytest.mark.skipif(len(get_settings().storage_secret) == 0,
                     reason="S3 config STORAGE_SECRET not supplied")
 @pytest.mark.asyncio
-async def test_get_s3_modified_date():
+async def test_get_s3_modified_date() -> None:
     RUN_ID = "61fd573874bc0ce059643515"
     S3_PATH = f"simulations/{RUN_ID}/contents/reports.h5"
 
@@ -40,7 +40,7 @@ async def test_get_s3_modified_date():
 @pytest.mark.skipif(len(get_settings().storage_secret) == 0,
                     reason="S3 config STORAGE_SECRET not supplied")
 @pytest.mark.asyncio
-async def test_get_listing_of_s3_path():
+async def test_get_listing_of_s3_path() -> None:
     RUN_ID = "61fd573874bc0ce059643515"
     S3_PATH = f"simulations/{RUN_ID}/contents"
 

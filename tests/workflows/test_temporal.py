@@ -4,8 +4,10 @@ from datetime import timedelta
 from typing import List
 
 from temporalio import activity, workflow
+from temporalio.client import Client
 
-from temporalio.worker import Worker
+from temporalio.worker import Worker, UnsandboxedWorkflowRunner
+
 
 @activity.defn
 async def say_hello_activity(name: str) -> str:
@@ -40,13 +42,14 @@ class SayHelloWorkflow:
 
 
 @pytest.mark.asyncio
-async def test_simple_workflow(temporal_client):
+async def test_simple_workflow(temporal_client: Client) -> None:
     # Run a worker for the workflow
     async with Worker(
             temporal_client,
             task_queue="hello-parallel-activity-task-queue",
             workflows=[SayHelloWorkflow],
             activities=[say_hello_activity],
+            workflow_runner=UnsandboxedWorkflowRunner()
     ):
         result = await temporal_client.execute_workflow(
             SayHelloWorkflow.run,

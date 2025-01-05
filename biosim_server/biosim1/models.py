@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
 from typing import Optional
 
 from pydantic import BaseModel
@@ -63,10 +62,21 @@ class SimulationRunStatus(str, Enum):
 
 
 @dataclass
+class SourceOmex:
+    name: str
+    omex_s3_file: str
+
+
+@dataclass
+class SimulatorSpec:
+    simulator: str
+    version: Optional[str] = None
+
+
+@dataclass
 class SimulationRunApiRequest:
     name: str  # what does this correspond to?
-    simulator: str
-    simulatorVersion: str
+    simulator_spec: SimulatorSpec
     maxTime: int  # in minutes
     # email: Optional[str] = None
     # cpus: Optional[int] = None
@@ -74,25 +84,8 @@ class SimulationRunApiRequest:
 
 
 @dataclass
-class SourceOmex:
-    name: str
-    omex_file: Path
-
-
-@dataclass
-class Simulator(str, Enum):
-    tellurium = "tellurium",
-    copasi = "copasi",
-    amici = "amici",
-    vcell = "vcell",
-    pysces = "pysces",
-    libsbmlsim = "libsbmlsim"
-
-
-@dataclass
 class SimulationRun:
-    simulator: Simulator
-    simulator_version: str
+    simulator_spec: SimulatorSpec
     simulation_id: str
     project_id: str
     status: Optional[str] = "Unknown"

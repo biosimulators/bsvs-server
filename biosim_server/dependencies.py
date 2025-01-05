@@ -16,7 +16,7 @@ MONGODB_VERIFICATION_COLLECTION_NAME = "verification"
 
 global_database_service: DatabaseService | None = None
 
-def set_database_service(db_service: DatabaseService | None):
+def set_database_service(db_service: DatabaseService | None) -> None:
     global global_database_service
     global_database_service = db_service
 
@@ -28,7 +28,7 @@ def get_database_service() -> DatabaseService | None:
 
 global_file_service: FileService | None = None
 
-def set_file_service(file_service: FileService | None):
+def set_file_service(file_service: FileService | None) -> None:
     global global_file_service
     global_file_service = file_service
 
@@ -40,7 +40,7 @@ def get_file_service() -> FileService | None:
 
 global_biosim_service: BiosimService | None = None
 
-def set_biosim_service(biosim_service: BiosimService | None):
+def set_biosim_service(biosim_service: BiosimService | None) -> None:
     global global_biosim_service
     global_biosim_service = biosim_service
 
@@ -52,7 +52,7 @@ def get_biosim_service() -> BiosimService | None:
 
 global_temporal_client: TemporalClient | None = None
 
-def set_temporal_client(temporal_client: TemporalClient | None):
+def set_temporal_client(temporal_client: TemporalClient | None) -> None:
     global global_temporal_client
     global_temporal_client = temporal_client
 
@@ -62,7 +62,7 @@ def get_temporal_client() -> TemporalClient | None:
 
 #------ initialized standalone application (standalone) ------
 
-async def init_standalone():
+async def init_standalone() -> None:
     set_database_service(DatabaseServiceMongo(
         db_client=AsyncIOMotorClient(MONGODB_URL),
         db_name=MONGODB_DATABASE_NAME,
@@ -72,7 +72,7 @@ async def init_standalone():
     set_biosim_service(BiosimServiceRest())
     set_temporal_client(await TemporalClient.connect("localhost:7233"))
 
-async def shutdown_standalone():
+async def shutdown_standalone() -> None:
     db_service = get_database_service()
     if db_service:
         await db_service.close()

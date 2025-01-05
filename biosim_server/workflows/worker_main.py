@@ -3,9 +3,9 @@ import logging
 import random
 
 from temporalio.client import Client
-from temporalio.worker import Worker
+from temporalio.worker import Worker, UnsandboxedWorkflowRunner
 
-from biosim_server.workflows.activities import upload_model_to_s3, generate_statistics
+from biosim_server.workflows.activities import generate_statistics
 from biosim_server.workflows.biosim_activities import check_run_status, run_project
 from biosim_server.workflows.biosim_activities import get_hdf5_metadata, get_hdf5_data
 from biosim_server.workflows.omex_sim_workflow import OmexSimWorkflow
@@ -14,7 +14,7 @@ from biosim_server.workflows.omex_verify_workflow import OmexVerifyWorkflow
 interrupt_event = asyncio.Event()
 
 
-async def main():
+async def main() -> None:
     logging.basicConfig(level=logging.INFO)
 
     random.seed(667)
@@ -26,8 +26,8 @@ async def main():
         client,
         task_queue="verification_tasks",
         workflows=[OmexVerifyWorkflow, OmexSimWorkflow],
-        activities=[upload_model_to_s3, generate_statistics, check_run_status, run_project, get_hdf5_metadata,
-                    get_hdf5_data],
+        activities=[generate_statistics, check_run_status, run_project, get_hdf5_metadata, get_hdf5_data],
+        workflow_runner=UnsandboxedWorkflowRunner()
     )
     run_futures.append(handle.run())
     print("Started worker for verification_tasks, ctrl+c to exit")

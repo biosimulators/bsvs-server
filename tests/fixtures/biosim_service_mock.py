@@ -2,10 +2,10 @@ import uuid
 
 from typing_extensions import override
 
-from archive.shared.data_model import JobStatus
 from biosim_server.biosim1.biosim_service import BiosimService
-from biosim_server.biosim1.models import SourceOmex, Simulator, SimulationRun, HDF5File, Hdf5DataValues, \
-    SimulationRunStatus
+from biosim_server.biosim1.models import SimulationRun, HDF5File, Hdf5DataValues, \
+    SimulationRunStatus, SimulatorSpec
+from biosim_server.database.models import JobStatus
 
 
 class ObjectNotFoundError(Exception):
@@ -41,13 +41,12 @@ class BiosimServiceMock(BiosimService):
             raise ObjectNotFoundError("Simulation run not found")
 
     @override
-    async def run_project(self, source_omex: SourceOmex, simulator: Simulator, simulator_version: str) -> SimulationRun:
+    async def run_project(self, local_omex_path: str, omex_name: str, simulator_spec: SimulatorSpec) -> SimulationRun:
         sim_id = str(uuid.uuid4())
         sim_run = SimulationRun(
-            simulator=simulator,
-            simulator_version=simulator_version,
+            simulator_spec=simulator_spec,
             simulation_id=sim_id,
-            project_id=f"project_id {source_omex.name}",
+            project_id=f"project_id {omex_name}",
             status=JobStatus.PENDING.value
         )
         self.sim_runs[sim_id] = sim_run
@@ -68,3 +67,7 @@ class BiosimServiceMock(BiosimService):
             return all_hdf5_values[dataset_name]
         else:
             raise ObjectNotFoundError("HDF5 metadata not found")
+
+    @override
+    async def close(self) -> None:
+        pass

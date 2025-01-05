@@ -1,4 +1,5 @@
 import pytest
+from motor.motor_asyncio import AsyncIOMotorCollection
 from pymongo.results import InsertOneResult
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
@@ -8,11 +9,12 @@ from tests.fixtures.database_fixtures import verification_collection
 
 
 @pytest.mark.asyncio
-async def test_mongo(verification_collection, verification_run_example):
+async def test_mongo(verification_collection: AsyncIOMotorCollection,
+                     verification_run_example: VerificationRun) -> None:
     expected_verification_run = VerificationRun.model_validate(verification_run_example.model_dump())
 
     # insert a document into the database
-    result: InsertOneResult = await verification_collection.insert_one(expected_verification_run.model_dump()) # type: ignore
+    result: InsertOneResult = await verification_collection.insert_one(expected_verification_run.model_dump())
     assert result.acknowledged
 
     # reread the document from the database
@@ -29,7 +31,7 @@ async def test_mongo(verification_collection, verification_run_example):
 
 
 @pytest.mark.asyncio
-async def test_database_service(database_service: DatabaseService, verification_run_example):
+async def test_database_service(database_service: DatabaseService, verification_run_example: VerificationRun) -> None:
     expected_verification_run = VerificationRun.model_validate(verification_run_example.model_dump())
 
     # insert a document into the database, read it back, make sure it matches
@@ -41,4 +43,3 @@ async def test_database_service(database_service: DatabaseService, verification_
 
     # delete the document from the database
     await database_service.delete_verification_run(verification_run_example.job_id)
-

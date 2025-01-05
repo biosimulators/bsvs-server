@@ -12,7 +12,7 @@ from pathlib import Path
 from biosim_server.biosim1.models import HDF5File
 
 
-def test_hdf5_json():
+def test_hdf5_json() -> None:
     # Load HDF5File object from JSON file at ../test_data/hdf5_file.json
     test_data_dir = Path(os.path.dirname(os.path.dirname(__file__))) / "test_data"
     filename = test_data_dir / 'hdf5_file.json'

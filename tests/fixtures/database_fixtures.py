@@ -21,13 +21,13 @@ def mongodb_container() -> MongoDbContainer:
         yield container
 
 @pytest_asyncio.fixture(scope="function")
-async def mongo_test_client(mongodb_container) -> AsyncGenerator[AsyncIOMotorClient,None]:
+async def mongo_test_client(mongodb_container: MongoDbContainer) -> AsyncGenerator[AsyncIOMotorClient,None]:
     mongo_test_client = AsyncIOMotorClient(mongodb_container.get_connection_url())
     yield mongo_test_client
     mongo_test_client.close()
 
 @pytest_asyncio.fixture(scope="function")
-async def database_service(mongo_test_client) -> AsyncGenerator[DatabaseService,None]:
+async def database_service(mongo_test_client: AsyncIOMotorClient) -> AsyncGenerator[DatabaseService,None]:
     db_service = DatabaseServiceMongo(
         db_client=mongo_test_client,
         db_name=MONGODB_DATABASE_NAME,
@@ -42,12 +42,12 @@ async def database_service(mongo_test_client) -> AsyncGenerator[DatabaseService,
 
 
 @pytest_asyncio.fixture(scope="function")
-async def mongo_test_database(mongo_test_client) -> AsyncIOMotorDatabase:
+async def mongo_test_database(mongo_test_client: AsyncIOMotorClient) -> AsyncIOMotorDatabase:
     test_database: AsyncIOMotorDatabase = mongo_test_client.get_database(name=MONGODB_DATABASE_NAME)
     return test_database
 
 @pytest_asyncio.fixture(scope="function")
-async def verification_collection(mongo_test_database) -> AsyncIOMotorCollection:
+async def verification_collection(mongo_test_database: AsyncIOMotorDatabase) -> AsyncIOMotorCollection:
     test_collection: AsyncIOMotorCollection = mongo_test_database.get_collection(name=MONGODB_VERIFICATION_COLLECTION_NAME)
     return test_collection
 
@@ -56,7 +56,7 @@ def verification_id() -> str:
     return "verification-" + str(uuid.uuid4())
 
 @pytest.fixture(scope="module")
-def verification_run_example(verification_id) -> VerificationRun:
+def verification_run_example(verification_id: str) -> VerificationRun:
     timestamp = str(datetime.now(UTC))
     path = "path/to/omex"
     generated_job_id = verification_id
@@ -69,7 +69,7 @@ def verification_run_example(verification_id) -> VerificationRun:
     return VerificationRun(
         status=str(JobStatus.PENDING.value),
         job_id=generated_job_id,
-        omex_path=path,
+        omex_s3_path=path,
         requested_simulators=simulators,
         comparison_id="compare_id",
         timestamp=timestamp,

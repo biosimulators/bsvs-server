@@ -2,15 +2,15 @@ import json
 import logging
 import os
 from dataclasses import asdict
-from typing import BinaryIO, Union
+from typing import BinaryIO, Union, AsyncGenerator
 
 import aiofiles
 import aiohttp
 from typing_extensions import override
 
 from biosim_server.biosim1.biosim_service import BiosimService
-from biosim_server.biosim1.models import SourceOmex, Simulator, SimulationRun, SimulationRunApiRequest, HDF5File, \
-    Hdf5DataValues, SimulationRunStatus
+from biosim_server.biosim1.models import SimulationRun, SimulationRunApiRequest, HDF5File, \
+    Hdf5DataValues, SimulationRunStatus, SimulatorSpec
 
 logger = logging.getLogger(__name__)
 
@@ -30,42 +30,44 @@ class BiosimServiceRest(BiosimService):
         return SimulationRunStatus(result)
 
     @override
-    async def run_project(self, source_omex: SourceOmex, simulator: Simulator, simulator_version: str) -> SimulationRun:
+    async def run_project(self, local_omex_path: str, omex_name: str, simulator_spec: SimulatorSpec) -> SimulationRun:
         """
         This function runs the project on biosimulations.
         """
         api_base_url = str(os.environ.get('API_BASE_URL')) or "https://api.biosimulations.org"
 
         simulation_run_request = SimulationRunApiRequest(
-            name=source_omex.name,
-            simulator=simulator,
-            simulatorVersion=simulator_version,
+            name=omex_name,
+            simulator_spec=simulator_spec,
             maxTime=600,
         )
 
-        print(source_omex.omex_file)
-        async with aiohttp.ClientSession() as session:
-            multipart_form_data: dict[str, Union[tuple[str, BinaryIO], tuple[None, str]]] = {
-                'file': (source_omex.name + '.omex', file_sender(file_name=source_omex.omex_file)),
-                'simulationRun': (None, json.dumps(asdict(simulation_run_request))),
-            }
-            async with session.post(api_base_url + '/runs', data=multipart_form_data) as resp:
-                resp.raise_for_status()
-                res = await resp.json()
+        print(local_omex_path)
+        async with (aiohttp.ClientSession() as session):
+            with open(local_omex_path, 'rb') as f:
+                multipart_form_data: dict[str, Union[tuple[str, BinaryIO, str], tuple[None, str]]] = {
+                    'file': (omex_name + '.omex', f, "application/zip"),
+                    'simulationRun': (None, json.dumps(asdict(simulation_run_request))),
+                }
+                async with session.post(api_base_url + '/runs', data=multipart_form_data) as resp:
+                    resp.raise_for_status()
+                    res = await resp.json()
 
-        logger.info(f"Ran {source_omex.name} on biosimulations with simulation id: {res['id']}")
+        logger.info(f"Ran {omex_name} on biosimulations with simulation id: {res['id']}")
         logger.info(f"results: {res}")
         simulation_id = res["id"]
 
+        if simulator_spec.version is None:
+            simulator_spec.version = res['simulatorVersion']
+
         sim_run = SimulationRun(
-            simulator=simulator,
-            simulator_version=res['simulatorVersion'],
+            simulator_spec=simulator_spec,
             simulation_id=simulation_id,
-            project_id=source_omex.name,
+            project_id=omex_name,
             status=res['status']
         )
 
-        logger.info("Ran " + source_omex.name + " on biosimulations with simulation id: " + simulation_id)
+        logger.info("Ran " + omex_name + " on biosimulations with simulation id: " + simulation_id)
         logger.info("View:", api_base_url + "/runs/" + simulation_id)
         return sim_run
 
@@ -96,8 +98,12 @@ class BiosimServiceRest(BiosimService):
                 hdf5_data_values = Hdf5DataValues(shape=hdf5_data_dict['shape'], values=hdf5_data_dict['values'])
                 return hdf5_data_values
 
+    @override
+    async def close(self) -> None:
+        pass
 
-async def file_sender(file_name=None):
+
+async def file_sender(file_name: str) -> AsyncGenerator[bytes, None]:
     async with aiofiles.open(file_name, 'rb') as f:
         chunk = await f.read(64 * 1024)
         while chunk:

@@ -1,8 +1,10 @@
 import shutil
 import uuid
-from datetime import datetime
+from temporalio import workflow
+with workflow.unsafe.imports_passed_through():
+    from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import aiofiles
 from typing_extensions import override
@@ -21,16 +23,18 @@ class FileServiceLocal(FileService):
 
     s3_files_written: list[Path] = []
 
-    def __init__(self):
+    def init(self) -> None:
         self.BASE_DIR.mkdir(parents=True, exist_ok=False)
 
     @override
-    async def close(self):
+    async def close(self) -> None:
         # remove all files in the mock s3 file store
         shutil.rmtree(self.BASE_DIR)
 
     @override
-    async def download_file(self, s3_path: str, file_path: Path) -> str:
+    async def download_file(self, s3_path: str, file_path: Optional[Path]=None) -> tuple[str, str]:
+        if file_path is None:
+            file_path = Path(__file__).parent / ("temp_file_"+uuid.uuid4().hex)
         # copy file from mock s3 to local file system
         s3_file_path = self.BASE_DIR / s3_path
         local_file_path = Path(file_path)
@@ -39,7 +43,7 @@ class FileServiceLocal(FileService):
             contents = await f.read()
             async with aiofiles.open(local_file_path, mode='wb') as f2:
                 await f2.write(contents)
-        return str(s3_file_path)
+        return str(s3_file_path), str(local_file_path)
 
     @override
     async def upload_file(self, file_path: Path, s3_path: str) -> str:

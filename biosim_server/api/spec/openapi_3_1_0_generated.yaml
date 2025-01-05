@@ -225,7 +225,7 @@ components:
         status:
           type: string
           title: Status
-        omex_path:
+        omex_s3_path:
           anyOf:
           - type: string
           - type: 'null'
@@ -277,7 +277,7 @@ components:
         status:
           type: string
           title: Status
-        omex_path:
+        omex_s3_path:
           type: string
           title: Omex Path
         requested_simulators:
@@ -318,6 +318,6 @@ components:
       - job_id
       - timestamp
       - status
-      - omex_path
+      - omex_s3_path
       - requested_simulators
       title: VerificationRun

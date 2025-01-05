@@ -1,7 +1,11 @@
 import pytest  # noqa: F401
 import pytest_asyncio  # noqa: F401
+from _pytest.config.argparsing import Parser
 
 # Import all fixtures from the fixtures modules
+from tests.fixtures.biosim_fixtures import (  # noqa: F401
+    biosim_service_mock
+)
 from tests.fixtures.database_fixtures import (  # noqa: F401
     database_service,
     mongodb_container,
@@ -21,9 +25,8 @@ from tests.fixtures.temporal_fixtures import (  # noqa: F401
     temporal_verify_worker
 )
 
-
 # Add the --workflow-environment option
-def pytest_addoption(parser):
+def pytest_addoption(parser: Parser) -> None:
     parser.addoption(
         "--workflow-environment",
         action="store",

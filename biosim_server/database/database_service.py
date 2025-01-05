@@ -22,6 +22,6 @@ class DatabaseService(ABC):
         pass
 
     @abstractmethod
-    async def close(self):
+    async def close(self) -> None:
         pass
 

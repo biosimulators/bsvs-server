@@ -7,7 +7,7 @@ from fastapi.openapi.utils import get_openapi
 from biosim_server.api.main import app
 
 
-def main():
+def main() -> None:
     openapi_spec = get_openapi(
         title=app.title,
         version=app.version,

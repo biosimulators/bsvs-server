@@ -1,8 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 
-from biosim_server.biosim1.models import SourceOmex, Simulator, SimulationRun, HDF5File, Hdf5DataValues, \
-    SimulationRunStatus
+from biosim_server.biosim1.models import SimulationRun, HDF5File, Hdf5DataValues, SimulationRunStatus, SimulatorSpec
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +12,7 @@ class BiosimService(ABC):
         pass
 
     @abstractmethod
-    async def run_project(self, source_omex: SourceOmex, simulator: Simulator, simulator_version: str) -> SimulationRun:
+    async def run_project(self, local_omex_path: str, omex_name: str, simulator_spec: SimulatorSpec) -> SimulationRun:
         pass
 
     @abstractmethod
@@ -22,4 +21,8 @@ class BiosimService(ABC):
 
     @abstractmethod
     async def get_hdf5_data(self, simulation_run_id: str, dataset_name: str) -> Hdf5DataValues:
+        pass
+
+    @abstractmethod
+    async def close(self) -> None:
         pass

@@ -1,28 +1,36 @@
 import asyncio
 import logging
+from dataclasses import dataclass
 from datetime import timedelta
-from typing import List, Coroutine, Any
+from typing import Any
 
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 from temporalio.workflow import ChildWorkflowHandle
 
+from biosim_server.biosim1.models import SimulatorSpec, SourceOmex
 # Import activity functions and child workflows
-from biosim_server.workflows.activities import upload_model_to_s3, generate_statistics
-from biosim_server.workflows.omex_sim_workflow import OmexSimWorkflow, SimulatorWorkflowInput
+from biosim_server.workflows.activities import generate_statistics
+from biosim_server.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput
+
+
+@dataclass
+class OmexVerifyWorkflowInput:
+    source_omex: SourceOmex
+    simulator_specs: list[SimulatorSpec]
 
 
 # Define the Main Workflow
 @workflow.defn
 class OmexVerifyWorkflow:
     @workflow.run
-    async def run(self, model_file_path: str, simulator_names: List[str]) -> str:
+    async def run(self, omex_verify_workflow_input: OmexVerifyWorkflowInput) -> str:
         """
         Main workflow to orchestrate SLURM jobs and generate a report.
 
         Args:
             model_file_path (str): Local path to the model file.
-            simulator_names (List[str]): List of simulator names.
+            simulator_names (list[str]): list of simulator names.
 
         Returns:
             str: Report location or status identifier.
@@ -30,22 +38,15 @@ class OmexVerifyWorkflow:
         workflow.logger.setLevel(level=logging.INFO)
         workflow.logger.info("Main workflow started.")
 
-        # Upload model to S3
-        s3_model_path: str = await workflow.execute_activity(
-            upload_model_to_s3,
-            model_file_path,
-            start_to_close_timeout=timedelta(seconds=10),  # Activity timeout
-            retry_policy=RetryPolicy(maximum_attempts=3),
-        )
-        workflow.logger.info(f"Model uploaded to S3: {s3_model_path}")
-
         # Launch child workflows for each simulator
-        child_workflows: List[Coroutine[Any, Any, ChildWorkflowHandle]] = []
-        for simulator_name in simulator_names:
+        child_workflows: list[Any] = []
+        for simulator_spec in omex_verify_workflow_input.simulator_specs:
             child_workflows.append(
                 workflow.start_child_workflow(
                     OmexSimWorkflow.run,
-                    args=[SimulatorWorkflowInput(model_path=s3_model_path, simulator_name=simulator_name)],
+                    args=[OmexSimWorkflowInput(
+                        source_omex=omex_verify_workflow_input.source_omex,
+                        simulator_spec=simulator_spec)],
                     task_queue="verification_tasks",
                     execution_timeout=timedelta(seconds=10),
                 )
@@ -60,7 +61,7 @@ class OmexVerifyWorkflow:
         #
 
         # Wait for all child workflows to complete
-        child_results: tuple[Any] = await asyncio.gather(*child_workflows)
+        child_results: list[ChildWorkflowHandle[dict[str, str], Any]] = await asyncio.gather(*child_workflows)
         # print types of all members of child_results
         for i in child_results:
             workflow.logger.info(f"child_results member type is {type(i)}")
@@ -71,7 +72,7 @@ class OmexVerifyWorkflow:
         real_results: list[str] = []
         for i in child_results:
             workflow.logger.info(f"child_results member type is {type(i)}")
-            a: ChildWorkflowHandle = i
+            a: ChildWorkflowHandle[dict[str,str], Any] = i
             real_results.append(str(await a))
             workflow.logger.info(f"real_results member type is {type(a.result())}")
 

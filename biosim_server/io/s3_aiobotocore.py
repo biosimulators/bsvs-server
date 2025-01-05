@@ -1,5 +1,7 @@
 import logging
-from datetime import datetime
+from temporalio import workflow
+with workflow.unsafe.imports_passed_through():
+    from datetime import datetime
 from pathlib import Path
 
 import aiofiles
