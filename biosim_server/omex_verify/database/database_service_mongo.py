@@ -2,8 +2,8 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 from pymongo.results import InsertOneResult
 from typing_extensions import override
 
-from biosim_server.database.database_service import DatabaseService, DocumentNotFoundError
-from biosim_server.database.models import VerificationRun
+from biosim_server.omex_verify.database.database_service import DatabaseService, DocumentNotFoundError
+from biosim_server.omex_verify.database.models import VerificationRun
 
 
 class DatabaseServiceMongo(DatabaseService):

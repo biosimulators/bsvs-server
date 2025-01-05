@@ -2,10 +2,10 @@ import uuid
 
 from typing_extensions import override
 
-from biosim_server.biosim1.biosim_service import BiosimService
-from biosim_server.biosim1.models import SimulationRun, HDF5File, Hdf5DataValues, \
-    SimulationRunStatus, SimulatorSpec
-from biosim_server.database.models import JobStatus
+from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
+from biosim_server.omex_sim.biosim1.models import Hdf5DataValues, SimulationRun, HDF5File, SimulationRunStatus, \
+    SimulatorSpec
+from biosim_server.omex_verify.database.models import JobStatus
 
 
 class ObjectNotFoundError(Exception):

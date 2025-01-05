@@ -8,8 +8,8 @@ import aiofiles
 import aiohttp
 from typing_extensions import override
 
-from biosim_server.biosim1.biosim_service import BiosimService
-from biosim_server.biosim1.models import SimulationRun, SimulationRunApiRequest, HDF5File, \
+from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
+from biosim_server.omex_sim.biosim1.models import SimulationRun, SimulationRunApiRequest, HDF5File, \
     Hdf5DataValues, SimulationRunStatus, SimulatorSpec
 
 logger = logging.getLogger(__name__)

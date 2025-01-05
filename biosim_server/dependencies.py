@@ -1,12 +1,12 @@
 from motor.motor_asyncio import AsyncIOMotorClient
+from temporalio.client import Client as TemporalClient
 
-from biosim_server.biosim1.biosim_service import BiosimService
-from biosim_server.biosim1.biosim_service_rest import BiosimServiceRest
-from biosim_server.database.database_service import DatabaseService
-from biosim_server.database.database_service_mongo import DatabaseServiceMongo
 from biosim_server.io.file_service import FileService
 from biosim_server.io.file_service_S3 import FileServiceS3
-from temporalio.client import Client as TemporalClient
+from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
+from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
+from biosim_server.omex_verify.database.database_service import DatabaseService
+from biosim_server.omex_verify.database.database_service_mongo import DatabaseServiceMongo
 
 #------ database service (standalone or pytest) ------
 

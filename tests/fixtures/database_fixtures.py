@@ -7,11 +7,11 @@ import pytest_asyncio
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase, AsyncIOMotorCollection
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from biosim_server.database.database_service import DatabaseService
-from biosim_server.database.database_service_mongo import DatabaseServiceMongo
-from biosim_server.database.models import JobStatus, VerificationRun
 from biosim_server.dependencies import MONGODB_DATABASE_NAME, MONGODB_VERIFICATION_COLLECTION_NAME, \
     get_database_service, set_database_service
+from biosim_server.omex_verify.database.database_service import DatabaseService
+from biosim_server.omex_verify.database.database_service_mongo import DatabaseServiceMongo
+from biosim_server.omex_verify.database.models import JobStatus, VerificationRun
 
 
 @pytest.fixture(scope="session")

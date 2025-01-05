@@ -6,11 +6,11 @@ from typing import Dict
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from biosim_server.biosim1.models import SimulationRunStatus, HDF5File, Hdf5DataValues, SimulatorSpec, \
-    SourceOmex, SimulationRun
-from biosim_server.workflows.biosim_activities import check_run_status, run_project, RunProjectInput, \
+from biosim_server.omex_sim.biosim1.models import SimulationRun, SimulationRunStatus, HDF5File, Hdf5DataValues, \
+    SourceOmex, SimulatorSpec
+from biosim_server.omex_sim.workflows.biosim_activities import check_run_status, run_project, RunProjectInput, \
     CheckRunStatusInput, GetHdf5DataInput, GetHdf5MetadataInput
-from biosim_server.workflows.biosim_activities import get_hdf5_metadata, get_hdf5_data
+from biosim_server.omex_sim.workflows.biosim_activities import get_hdf5_metadata, get_hdf5_data
 
 
 @dataclass

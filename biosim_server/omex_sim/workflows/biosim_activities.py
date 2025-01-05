@@ -4,12 +4,12 @@ from dataclasses import dataclass
 
 from temporalio import activity
 
-from biosim_server.biosim1.biosim_service import BiosimService
-from biosim_server.biosim1.biosim_service_rest import BiosimServiceRest
-from biosim_server.biosim1.models import Hdf5DataValues, HDF5File, SimulatorSpec, SourceOmex
-from biosim_server.biosim1.models import SimulationRun, SimulationRunStatus
+from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
 from biosim_server.dependencies import get_file_service, get_biosim_service
 from biosim_server.io.file_service import FileService
+from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
+from biosim_server.omex_sim.biosim1.models import SimulationRunStatus, SourceOmex, SimulatorSpec, SimulationRun, \
+    HDF5File, Hdf5DataValues
 
 
 @dataclass

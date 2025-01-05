@@ -1,6 +1,6 @@
 from abc import abstractmethod, ABC
 
-from biosim_server.database.models import VerificationRun
+from biosim_server.omex_verify.database.models import VerificationRun
 
 
 class DocumentNotFoundError(Exception):

@@ -5,10 +5,10 @@ import pytest
 from temporalio.client import Client, WorkflowHandle
 from temporalio.worker import Worker
 
-from biosim_server.biosim1.models import SourceOmex, SimulatorSpec
 from biosim_server.io.file_service_local import FileServiceLocal
-from biosim_server.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput
-from biosim_server.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
+from biosim_server.omex_sim.biosim1.models import SourceOmex, SimulatorSpec
+from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput
+from biosim_server.omex_verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
 from tests.fixtures.biosim_service_mock import BiosimServiceMock
 
 

@@ -3,8 +3,8 @@ import uuid
 
 from temporalio.client import Client
 
-from biosim_server.biosim1.models import SourceOmex, SimulatorSpec
-from biosim_server.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput
+from biosim_server.omex_sim.biosim1.models import SourceOmex, SimulatorSpec
+from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput
 
 
 async def start_workflow() -> None:

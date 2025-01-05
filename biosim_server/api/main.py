@@ -2,9 +2,10 @@ import logging
 import os
 import uuid
 from contextlib import asynccontextmanager
+
 from temporalio import workflow
 
-from biosim_server.biosim1.models import SourceOmex, SimulatorSpec
+from biosim_server.omex_sim.biosim1.models import SimulatorSpec, SourceOmex
 
 with workflow.unsafe.imports_passed_through():
     from datetime import datetime, UTC
@@ -17,12 +18,12 @@ import uvicorn
 from fastapi import FastAPI, File, UploadFile, Query, APIRouter, Depends, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from biosim_server.database.database_service import DatabaseService, DocumentNotFoundError
-from biosim_server.database.models import VerificationRun, JobStatus, VerificationOutput
+from biosim_server.omex_verify.database.database_service import DatabaseService, DocumentNotFoundError
+from biosim_server.omex_verify.database.models import VerificationRun, JobStatus, VerificationOutput
 from biosim_server.dependencies import get_database_service, get_biosim_service, get_file_service, get_temporal_client, \
     init_standalone, shutdown_standalone
 from biosim_server.log_config import setup_logging
-from biosim_server.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
+from biosim_server.omex_verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
 
 logger = logging.getLogger(__name__)
 setup_logging(logger)

@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from biosim_server.biosim1.models import Hdf5DataValues
+from biosim_server.omex_sim.biosim1.models import Hdf5DataValues
 
 
 class JobStatus(Enum):

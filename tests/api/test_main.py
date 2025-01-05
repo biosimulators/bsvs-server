@@ -8,8 +8,8 @@ from temporalio.worker import Worker
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
 from biosim_server.api.main import app
-from biosim_server.database.database_service import DatabaseService
-from biosim_server.database.models import VerificationOutput, VerificationRun
+from biosim_server.omex_verify.database.database_service import DatabaseService
+from biosim_server.omex_verify.database.models import VerificationOutput, VerificationRun
 from biosim_server.io.file_service_local import FileServiceLocal
 from tests.fixtures.biosim_service_mock import BiosimServiceMock
 
