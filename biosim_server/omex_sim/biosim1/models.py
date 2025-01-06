@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Optional
 
 from pydantic import BaseModel
@@ -39,26 +39,13 @@ class Hdf5DataValues:
     values: list[float]
 
 
-class SimulationRunStatus(str, Enum):
+class BiosimSimulationRunStatus(StrEnum):
     QUEUED = 'QUEUED',
     RUNNING = 'RUNNING',
     SKIPPED = 'SKIPPED',
     SUCCEEDED = 'SUCCEEDED',
     FAILED = 'FAILED',
     UNKNOWN = 'UNKNOWN'
-
-    # add method to get status from string
-    @classmethod
-    def from_str(cls, status: str) -> 'SimulationRunStatus':
-        switcher = {
-            "QUEUED": cls.QUEUED,
-            "RUNNING": cls.RUNNING,
-            "SKIPPED": cls.SKIPPED,
-            "SUCCEEDED": cls.SUCCEEDED,
-            "FAILED": cls.FAILED,
-            "UNKNOWN": cls.UNKNOWN
-        }
-        return switcher.get(status, cls.UNKNOWN)
 
 
 @dataclass
@@ -68,15 +55,15 @@ class SourceOmex:
 
 
 @dataclass
-class SimulatorSpec:
+class BiosimSimulatorSpec:
     simulator: str
     version: Optional[str] = None
 
 
 @dataclass
-class SimulationRunApiRequest:
+class BiosimSimulationRunApiRequest:
     name: str  # what does this correspond to?
-    simulator_spec: SimulatorSpec
+    simulator_spec: BiosimSimulatorSpec
     maxTime: int  # in minutes
     # email: Optional[str] = None
     # cpus: Optional[int] = None
@@ -84,16 +71,14 @@ class SimulationRunApiRequest:
 
 
 @dataclass
-class SimulationRun:
-    simulator_spec: SimulatorSpec
+class BiosimSimulationRun:
+    simulator_spec: BiosimSimulatorSpec
     simulation_id: str
-    project_id: str
-    status: Optional[str] = "Unknown"
+    status: Optional[BiosimSimulationRunStatus] = BiosimSimulationRunStatus.UNKNOWN
 
 
 @dataclass
 class SimulatorComparison:
-    project_id: str
-    simRun1: SimulationRun
-    simRun2: SimulationRun
+    simRun1: BiosimSimulationRun
+    simRun2: BiosimSimulationRun
     equivalent: bool

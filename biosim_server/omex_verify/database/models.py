@@ -15,7 +15,7 @@ class JobStatus(Enum):
 class VerificationRun(BaseModel):
     job_id: str
     timestamp: str
-    status: str
+    job_status: str
     omex_s3_path: str
     requested_simulators: list[str]
     include_outputs: Optional[bool] = True
@@ -34,7 +34,7 @@ class SimulatorRMSE(BaseModel):
 class VerificationOutput(BaseModel):
     job_id: str
     timestamp: str
-    status: str
+    job_status: str
     omex_s3_path: Optional[str] = None
     requested_simulators: Optional[list[str]] = None
     observables: Optional[list[str]] = None

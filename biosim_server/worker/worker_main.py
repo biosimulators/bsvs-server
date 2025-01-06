@@ -6,7 +6,7 @@ from temporalio.client import Client
 from temporalio.worker import Worker, UnsandboxedWorkflowRunner
 
 from biosim_server.omex_verify.workflows.activities import generate_statistics
-from biosim_server.omex_sim.workflows.biosim_activities import check_run_status, run_project
+from biosim_server.omex_sim.workflows.biosim_activities import check_run_status, submit_biosim_sim
 from biosim_server.omex_sim.workflows.biosim_activities import get_hdf5_metadata, get_hdf5_data
 from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow
 from biosim_server.omex_verify.workflows.omex_verify_workflow import OmexVerifyWorkflow
@@ -26,7 +26,7 @@ async def main() -> None:
         client,
         task_queue="verification_tasks",
         workflows=[OmexVerifyWorkflow, OmexSimWorkflow],
-        activities=[generate_statistics, check_run_status, run_project, get_hdf5_metadata, get_hdf5_data],
+        activities=[generate_statistics, check_run_status, submit_biosim_sim, get_hdf5_metadata, get_hdf5_data],
         workflow_runner=UnsandboxedWorkflowRunner()
     )
     run_futures.append(handle.run())

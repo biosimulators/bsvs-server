@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from temporalio import workflow
 
-from biosim_server.omex_sim.biosim1.models import SimulatorSpec, SourceOmex
+from biosim_server.omex_sim.biosim1.models import BiosimSimulatorSpec, SourceOmex
 
 with workflow.unsafe.imports_passed_through():
     from datetime import datetime, UTC
@@ -157,7 +157,7 @@ async def verify(
     workflow_id = uuid.uuid4().hex
     run = VerificationRun(
         job_id=generated_job_id,
-        status=str(JobStatus.PENDING.value),
+        job_status=str(JobStatus.PENDING.value),
         omex_s3_path=s3_path,
         requested_simulators=simulators,
         observables=observables,
@@ -176,7 +176,7 @@ async def verify(
     await database_service.insert_verification_run(run)
     logger.info(f"saved VerificationRun to database for Job_id {generated_job_id}")
 
-    simulator_specs: list[SimulatorSpec] = [SimulatorSpec(simulator=simulator, version="1.0") for simulator in simulators]
+    simulator_specs: list[BiosimSimulatorSpec] = [BiosimSimulatorSpec(simulator=simulator, version="1.0") for simulator in simulators]
 
     # invoke workflow
     logger.info(f"starting workflow with id {workflow_id}")
@@ -212,7 +212,7 @@ async def get_output(job_id: str) -> VerificationOutput:
             return VerificationOutput(
                 job_id=job_id,
                 timestamp=verification_run.timestamp,
-                status=verification_run.status,
+                job_status=verification_run.job_status,
                 omex_s3_path=verification_run.omex_s3_path,
                 requested_simulators=verification_run.requested_simulators,
                 observables=verification_run.observables,

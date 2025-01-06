@@ -30,7 +30,7 @@ async def test_get_output(verification_run_example: VerificationRun, database_se
     expected_verification_output = VerificationOutput(
         job_id=verification_id,
         timestamp=verification_run_example.timestamp,
-        status=verification_run_example.status,
+        job_status=verification_run_example.job_status,
         omex_s3_path=verification_run_example.omex_s3_path,
         requested_simulators=verification_run_example.requested_simulators,
         observables=verification_run_example.observables,

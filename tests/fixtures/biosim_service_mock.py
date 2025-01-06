@@ -3,8 +3,8 @@ import uuid
 from typing_extensions import override
 
 from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
-from biosim_server.omex_sim.biosim1.models import Hdf5DataValues, SimulationRun, HDF5File, SimulationRunStatus, \
-    SimulatorSpec
+from biosim_server.omex_sim.biosim1.models import Hdf5DataValues, BiosimSimulationRun, HDF5File, BiosimSimulationRunStatus, \
+    BiosimSimulatorSpec
 from biosim_server.omex_verify.database.models import JobStatus
 
 
@@ -14,12 +14,12 @@ class ObjectNotFoundError(Exception):
 
 
 class BiosimServiceMock(BiosimService):
-    sim_runs: dict[str, SimulationRun] = {}
+    sim_runs: dict[str, BiosimSimulationRun] = {}
     hdf5_files: dict[str, HDF5File] = {}
     hdf5_data: dict[str, dict[str, Hdf5DataValues]] = {}
 
     def __init__(self,
-                 sim_runs: dict[str, SimulationRun] | None = None,
+                 sim_runs: dict[str, BiosimSimulationRun] | None = None,
                  hdf5_files: dict[str, HDF5File] | None = None,
                  hdf5_data: dict[str, dict[str, Hdf5DataValues]] | None = None) -> None:
         if sim_runs:
@@ -30,24 +30,23 @@ class BiosimServiceMock(BiosimService):
             self.hdf5_data = hdf5_data
 
     @override
-    async def check_run_status(self, simulation_run_id: str) -> SimulationRunStatus:
+    async def check_biosim_sim_run_status(self, simulation_run_id: str) -> BiosimSimulationRunStatus:
         sim_run = self.sim_runs[simulation_run_id]
         if sim_run:
             if sim_run.status:
-                return SimulationRunStatus(sim_run.status)
+                return BiosimSimulationRunStatus(sim_run.status)
             else:
-                return SimulationRunStatus.UNKNOWN
+                return BiosimSimulationRunStatus.UNKNOWN
         else:
             raise ObjectNotFoundError("Simulation run not found")
 
     @override
-    async def run_project(self, local_omex_path: str, omex_name: str, simulator_spec: SimulatorSpec) -> SimulationRun:
+    async def run_biosim_sim(self, local_omex_path: str, omex_name: str, simulator_spec: BiosimSimulatorSpec) -> BiosimSimulationRun:
         sim_id = str(uuid.uuid4())
-        sim_run = SimulationRun(
+        sim_run = BiosimSimulationRun(
             simulator_spec=simulator_spec,
             simulation_id=sim_id,
-            project_id=f"project_id {omex_name}",
-            status=JobStatus.PENDING.value
+            status=BiosimSimulationRunStatus.RUNNING
         )
         self.sim_runs[sim_id] = sim_run
         return sim_run

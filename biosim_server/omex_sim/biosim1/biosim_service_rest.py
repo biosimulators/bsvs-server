@@ -9,15 +9,15 @@ import aiohttp
 from typing_extensions import override
 
 from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
-from biosim_server.omex_sim.biosim1.models import SimulationRun, SimulationRunApiRequest, HDF5File, \
-    Hdf5DataValues, SimulationRunStatus, SimulatorSpec
+from biosim_server.omex_sim.biosim1.models import BiosimSimulationRun, BiosimSimulationRunApiRequest, HDF5File, \
+    Hdf5DataValues, BiosimSimulationRunStatus, BiosimSimulatorSpec
 
 logger = logging.getLogger(__name__)
 
 
 class BiosimServiceRest(BiosimService):
     @override
-    async def check_run_status(self, simulation_run_id: str) -> SimulationRunStatus:
+    async def check_biosim_sim_run_status(self, simulation_run_id: str) -> BiosimSimulationRunStatus:
         api_base_url = os.environ.get('API_BASE_URL') or "https://api.biosimulations.org"
         assert (api_base_url is not None)
 
@@ -27,16 +27,16 @@ class BiosimServiceRest(BiosimService):
                 getrun_dict = await resp.json()
 
         result = str(getrun_dict['status'])
-        return SimulationRunStatus(result)
+        return BiosimSimulationRunStatus(result)
 
     @override
-    async def run_project(self, local_omex_path: str, omex_name: str, simulator_spec: SimulatorSpec) -> SimulationRun:
+    async def run_biosim_sim(self, local_omex_path: str, omex_name: str, simulator_spec: BiosimSimulatorSpec) -> BiosimSimulationRun:
         """
         This function runs the project on biosimulations.
         """
         api_base_url = str(os.environ.get('API_BASE_URL')) or "https://api.biosimulations.org"
 
-        simulation_run_request = SimulationRunApiRequest(
+        simulation_run_request = BiosimSimulationRunApiRequest(
             name=omex_name,
             simulator_spec=simulator_spec,
             maxTime=600,
@@ -60,10 +60,9 @@ class BiosimServiceRest(BiosimService):
         if simulator_spec.version is None:
             simulator_spec.version = res['simulatorVersion']
 
-        sim_run = SimulationRun(
+        sim_run = BiosimSimulationRun(
             simulator_spec=simulator_spec,
             simulation_id=simulation_id,
-            project_id=omex_name,
             status=res['status']
         )
 

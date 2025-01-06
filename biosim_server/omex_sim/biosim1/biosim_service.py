@@ -1,18 +1,18 @@
 import logging
 from abc import ABC, abstractmethod
 
-from biosim_server.omex_sim.biosim1.models import SimulationRun, HDF5File, Hdf5DataValues, SimulationRunStatus, SimulatorSpec
+from biosim_server.omex_sim.biosim1.models import BiosimSimulationRun, HDF5File, Hdf5DataValues, BiosimSimulationRunStatus, BiosimSimulatorSpec
 
 logger = logging.getLogger(__name__)
 
 class BiosimService(ABC):
 
     @abstractmethod
-    async def check_run_status(self, simulation_run_id: str) -> SimulationRunStatus:
+    async def check_biosim_sim_run_status(self, simulation_run_id: str) -> BiosimSimulationRunStatus:
         pass
 
     @abstractmethod
-    async def run_project(self, local_omex_path: str, omex_name: str, simulator_spec: SimulatorSpec) -> SimulationRun:
+    async def run_biosim_sim(self, local_omex_path: str, omex_name: str, simulator_spec: BiosimSimulatorSpec) -> BiosimSimulationRun:
         pass
 
     @abstractmethod

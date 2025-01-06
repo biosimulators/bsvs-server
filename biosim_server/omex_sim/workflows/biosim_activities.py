@@ -8,7 +8,7 @@ from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
 from biosim_server.dependencies import get_file_service, get_biosim_service
 from biosim_server.io.file_service import FileService
 from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
-from biosim_server.omex_sim.biosim1.models import SimulationRunStatus, SourceOmex, SimulatorSpec, SimulationRun, \
+from biosim_server.omex_sim.biosim1.models import BiosimSimulationRunStatus, SourceOmex, BiosimSimulatorSpec, BiosimSimulationRun, \
     HDF5File, Hdf5DataValues
 
 
@@ -18,21 +18,21 @@ class CheckRunStatusInput:
 
 
 @activity.defn
-async def check_run_status(check_run_status: CheckRunStatusInput) -> str:
+async def check_run_status(input: CheckRunStatusInput) -> BiosimSimulationRunStatus:
     activity.logger.setLevel(logging.INFO)
     biosim_service = BiosimServiceRest()
-    status: SimulationRunStatus = await biosim_service.check_run_status(check_run_status.simulation_run_id)
-    return str(status.value)
+    status: BiosimSimulationRunStatus = await biosim_service.check_biosim_sim_run_status(input.simulation_run_id)
+    return status
 
 
 @dataclass
-class RunProjectInput:
+class SubmitBiosimSimInput:
     source_omex: SourceOmex
-    simulator_spec: SimulatorSpec
+    simulator_spec: BiosimSimulatorSpec
 
 
 @activity.defn
-async def run_project(run_project_input: RunProjectInput) -> SimulationRun:
+async def submit_biosim_sim(input: SubmitBiosimSimInput) -> BiosimSimulationRun:
     activity.logger.setLevel(logging.INFO)
     biosim_service: BiosimService | None = get_biosim_service()
     if biosim_service is None:
@@ -40,9 +40,9 @@ async def run_project(run_project_input: RunProjectInput) -> SimulationRun:
     file_service: FileService | None = get_file_service()
     if file_service is None:
         raise Exception("File service is not initialized")
-    (_, local_omex_path) = await file_service.download_file(run_project_input.source_omex.omex_s3_file)
-    simulation_run = await biosim_service.run_project(local_omex_path, run_project_input.source_omex.name,
-                                                      run_project_input.simulator_spec)
+    (_, local_omex_path) = await file_service.download_file(input.source_omex.omex_s3_file)
+    simulation_run = await biosim_service.run_biosim_sim(local_omex_path, input.source_omex.name,
+                                                         input.simulator_spec)
     os.remove(local_omex_path)
     return simulation_run
 
@@ -53,10 +53,10 @@ class GetHdf5MetadataInput:
 
 
 @activity.defn
-async def get_hdf5_metadata(get_hdf5_metadata_input: GetHdf5MetadataInput) -> str:
+async def get_hdf5_metadata(input: GetHdf5MetadataInput) -> str:
     activity.logger.setLevel(logging.INFO)
     biosim_service = BiosimServiceRest()
-    hdf5_file: HDF5File = await biosim_service.get_hdf5_metadata(get_hdf5_metadata_input.simulation_run_id)
+    hdf5_file: HDF5File = await biosim_service.get_hdf5_metadata(input.simulation_run_id)
     return hdf5_file.model_dump_json()
 
 
@@ -67,9 +67,9 @@ class GetHdf5DataInput:
 
 
 @activity.defn
-async def get_hdf5_data(get_hdf5_data_input: GetHdf5DataInput) -> Hdf5DataValues:
+async def get_hdf5_data(input: GetHdf5DataInput) -> Hdf5DataValues:
     activity.logger.setLevel(logging.INFO)
     biosim_service = BiosimServiceRest()
-    hdf5_data_values: Hdf5DataValues = await biosim_service.get_hdf5_data(simulation_run_id=get_hdf5_data_input.simulation_run_id,
-                                                                          dataset_name=get_hdf5_data_input.dataset_name)
+    hdf5_data_values: Hdf5DataValues = await biosim_service.get_hdf5_data(simulation_run_id=input.simulation_run_id,
+                                                                          dataset_name=input.dataset_name)
     return hdf5_data_values

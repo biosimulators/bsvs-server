@@ -67,7 +67,7 @@ def verification_run_example(verification_id: str) -> VerificationRun:
     observables = ["time", "concentration"]
 
     return VerificationRun(
-        status=str(JobStatus.PENDING.value),
+        job_status=str(JobStatus.PENDING.value),
         job_id=generated_job_id,
         omex_s3_path=path,
         requested_simulators=simulators,
