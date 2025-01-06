@@ -1,3 +1,4 @@
+import logging
 import shutil
 import uuid
 from temporalio import workflow
@@ -56,6 +57,7 @@ class FileServiceLocal(FileService):
             async with aiofiles.open(s3_file_path, mode='wb') as f2:
                 await f2.write(contents)
         self.s3_files_written.append(s3_file_path)
+        logging.info(f"Uploaded file to S3 at {s3_file_path}")
         return str(s3_file_path)
 
     @override

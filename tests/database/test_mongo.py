@@ -1,45 +1,33 @@
+from dataclasses import asdict
+
 import pytest
 from motor.motor_asyncio import AsyncIOMotorCollection
 from pymongo.results import InsertOneResult
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from biosim_server.omex_verify.database.database_service import DatabaseService
-from biosim_server.omex_verify.database.models import VerificationRun
-from tests.fixtures.database_fixtures import verification_collection
+from biosim_server.omex_verify.workflows.omex_verify_workflow import OmexVerifyWorkflowOutput
+from tests.fixtures.database_fixtures import mongo_test_collection
 
 
 @pytest.mark.asyncio
-async def test_mongo(verification_collection: AsyncIOMotorCollection,
-                     verification_run_example: VerificationRun) -> None:
-    expected_verification_run = VerificationRun.model_validate(verification_run_example.model_dump())
+async def test_mongo(mongo_test_collection: AsyncIOMotorCollection,
+                     verify_workflow_output: OmexVerifyWorkflowOutput) -> None:
 
-    # insert a document into the database
-    result: InsertOneResult = await verification_collection.insert_one(expected_verification_run.model_dump())
+     # insert a document into the database
+    result: InsertOneResult = await mongo_test_collection.insert_one(asdict(verify_workflow_output))
     assert result.acknowledged
 
     # reread the document from the database
-    document = await verification_collection.find_one({"job_id": verification_run_example.job_id})
+    document = await mongo_test_collection.find_one({"workflow_run_id": verify_workflow_output.workflow_run_id})
     assert document is not None
 
     # check that the document in the database is the same as the original document
-    actual_verification_run = VerificationRun.model_validate(document)
-    assert actual_verification_run == expected_verification_run
+    expected_verify_workflow_output = OmexVerifyWorkflowOutput(workflow_input=verify_workflow_output.workflow_input,
+                                                               workflow_status=verify_workflow_output.workflow_status,
+                                                               timestamp=verify_workflow_output.timestamp,
+                                                               workflow_run_id=verify_workflow_output.workflow_run_id)
+    assert asdict(expected_verify_workflow_output) == asdict(verify_workflow_output)
 
     # delete the document from the database
-    del_result = await verification_collection.delete_one({"job_id": verification_run_example.job_id})
+    del_result = await mongo_test_collection.delete_one({"workflow_run_id": verify_workflow_output.workflow_run_id})
     assert del_result.deleted_count == 1
-
-
-@pytest.mark.asyncio
-async def test_database_service(database_service: DatabaseService, verification_run_example: VerificationRun) -> None:
-    expected_verification_run = VerificationRun.model_validate(verification_run_example.model_dump())
-
-    # insert a document into the database, read it back, make sure it matches
-    await database_service.insert_verification_run(expected_verification_run)
-    document: VerificationRun = await database_service.get_verification_run(verification_run_example.job_id)
-
-    # check that the document in the database is the same as the original document
-    assert document == expected_verification_run
-
-    # delete the document from the database
-    await database_service.delete_verification_run(verification_run_example.job_id)

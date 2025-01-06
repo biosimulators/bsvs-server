@@ -5,7 +5,7 @@ from temporalio.client import Client
 
 from biosim_server.omex_sim.biosim1.models import SourceOmex, BiosimSimulatorSpec
 from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput, \
-    OmexSimWorkflowRun
+    OmexSimWorkflowOutput
 
 
 async def start_workflow() -> None:
@@ -22,7 +22,7 @@ async def start_workflow() -> None:
     )
     print(f"Started workflow with ID: {handle.id}")
 
-    query_result: OmexSimWorkflowRun = await handle.query(OmexSimWorkflow.get_omex_sim_workflow_run, args=[])
+    query_result: OmexSimWorkflowOutput = await handle.query(OmexSimWorkflow.get_omex_sim_workflow_run, args=[])
     print(f"Workflow status: {query_result.workflow_status}")
 
 

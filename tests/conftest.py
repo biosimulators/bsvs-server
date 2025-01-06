@@ -2,18 +2,14 @@ import pytest  # noqa: F401
 import pytest_asyncio  # noqa: F401
 from _pytest.config.argparsing import Parser
 
-# Import all fixtures from the fixtures modules
 from tests.fixtures.biosim_fixtures import (  # noqa: F401
     biosim_service_mock
 )
 from tests.fixtures.database_fixtures import (  # noqa: F401
-    database_service,
     mongodb_container,
     mongo_test_client,
     mongo_test_database,
-    verification_collection,
-    verification_id,
-    verification_run_example
+    mongo_test_collection,
 )
 from tests.fixtures.s3_fixtures import (  # noqa: F401
     file_service_s3,
@@ -24,6 +20,12 @@ from tests.fixtures.temporal_fixtures import (  # noqa: F401
     temporal_client,
     temporal_verify_worker
 )
+from tests.fixtures.workflow_fixtures import (  # noqa: F401
+    verify_workflow_id,
+    verify_workflow_input,
+    verify_workflow_output,
+)
+
 
 # Add the --workflow-environment option
 def pytest_addoption(parser: Parser) -> None:

@@ -3,9 +3,8 @@ import uuid
 from typing_extensions import override
 
 from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
-from biosim_server.omex_sim.biosim1.models import Hdf5DataValues, BiosimSimulationRun, HDF5File, BiosimSimulationRunStatus, \
-    BiosimSimulatorSpec
-from biosim_server.omex_verify.database.models import JobStatus
+from biosim_server.omex_sim.biosim1.models import Hdf5DataValues, BiosimSimulationRun, HDF5File, \
+    BiosimSimulationRunStatus, BiosimSimulatorSpec
 
 
 class ObjectNotFoundError(Exception):
