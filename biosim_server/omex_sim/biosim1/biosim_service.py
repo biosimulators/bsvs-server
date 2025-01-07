@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 class BiosimService(ABC):
 
     @abstractmethod
-    async def check_biosim_sim_run_status(self, simulation_run_id: str) -> BiosimSimulationRunStatus:
+    async def get_sim_run(self, simulation_run_id: str) -> BiosimSimulationRun:
         pass
 
     @abstractmethod

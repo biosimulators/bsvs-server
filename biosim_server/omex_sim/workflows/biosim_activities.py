@@ -13,16 +13,16 @@ from biosim_server.omex_sim.biosim1.models import BiosimSimulationRunStatus, Sou
 
 
 @dataclass
-class CheckRunStatusInput:
-    simulation_run_id: str
+class GetSimRunInput:
+    biosim_run_id: str
 
 
 @activity.defn
-async def check_run_status(input: CheckRunStatusInput) -> BiosimSimulationRunStatus:
+async def get_sim_run(get_sim_run_input: GetSimRunInput) -> BiosimSimulationRun:
     activity.logger.setLevel(logging.INFO)
     biosim_service = BiosimServiceRest()
-    status: BiosimSimulationRunStatus = await biosim_service.check_biosim_sim_run_status(input.simulation_run_id)
-    return status
+    biosim_sim_run: BiosimSimulationRun = await biosim_service.get_sim_run(get_sim_run_input.biosim_run_id)
+    return biosim_sim_run
 
 
 @dataclass

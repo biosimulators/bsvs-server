@@ -3,7 +3,8 @@ import pytest_asyncio  # noqa: F401
 from _pytest.config.argparsing import Parser
 
 from tests.fixtures.biosim_fixtures import (  # noqa: F401
-    biosim_service_mock
+    biosim_service_mock,
+    biosim_service_rest
 )
 from tests.fixtures.database_fixtures import (  # noqa: F401
     mongodb_container,

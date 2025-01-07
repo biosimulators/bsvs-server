@@ -90,7 +90,7 @@ class OmexVerifyWorkflow:
                         source_omex=verify_input.source_omex,
                         simulator_spec=simulator_spec)],
                     task_queue="verification_tasks",
-                    execution_timeout=timedelta(seconds=10),
+                    execution_timeout=timedelta(minutes=10),
                 )
             )
 
@@ -123,7 +123,7 @@ class OmexVerifyWorkflow:
             generate_statistics,
             arg=real_results,
             start_to_close_timeout=timedelta(seconds=10),
-            retry_policy=RetryPolicy(maximum_attempts=3),
+            retry_policy=RetryPolicy(maximum_attempts=100, backoff_coefficient=2.0, maximum_interval=timedelta(seconds=10)),
         )
         workflow.logger.info(f"Report generated at: {report_location}")
 

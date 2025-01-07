@@ -40,9 +40,11 @@ class Hdf5DataValues:
 
 
 class BiosimSimulationRunStatus(StrEnum):
+    CREATED = 'CREATED'
     QUEUED = 'QUEUED',
     RUNNING = 'RUNNING',
     SKIPPED = 'SKIPPED',
+    PROCESSING = 'PROCESSING',
     SUCCEEDED = 'SUCCEEDED',
     FAILED = 'FAILED',
     UNKNOWN = 'UNKNOWN'
@@ -63,7 +65,8 @@ class BiosimSimulatorSpec:
 @dataclass
 class BiosimSimulationRunApiRequest:
     name: str  # what does this correspond to?
-    simulator_spec: BiosimSimulatorSpec
+    simulator: str
+    simulatorVersion: str
     maxTime: int  # in minutes
     # email: Optional[str] = None
     # cpus: Optional[int] = None
@@ -72,9 +75,12 @@ class BiosimSimulationRunApiRequest:
 
 @dataclass
 class BiosimSimulationRun:
-    simulator_spec: BiosimSimulatorSpec
-    simulation_id: str
-    status: Optional[BiosimSimulationRunStatus] = BiosimSimulationRunStatus.UNKNOWN
+    id: str
+    name: str
+    simulator: str
+    simulator_version: str
+    simulator_digest: str
+    status: BiosimSimulationRunStatus
 
 
 @dataclass

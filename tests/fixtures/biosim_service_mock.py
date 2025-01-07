@@ -29,13 +29,10 @@ class BiosimServiceMock(BiosimService):
             self.hdf5_data = hdf5_data
 
     @override
-    async def check_biosim_sim_run_status(self, simulation_run_id: str) -> BiosimSimulationRunStatus:
+    async def get_sim_run(self, simulation_run_id: str) -> BiosimSimulationRun:
         sim_run = self.sim_runs[simulation_run_id]
         if sim_run:
-            if sim_run.status:
-                return BiosimSimulationRunStatus(sim_run.status)
-            else:
-                return BiosimSimulationRunStatus.UNKNOWN
+            return sim_run
         else:
             raise ObjectNotFoundError("Simulation run not found")
 
@@ -43,8 +40,11 @@ class BiosimServiceMock(BiosimService):
     async def run_biosim_sim(self, local_omex_path: str, omex_name: str, simulator_spec: BiosimSimulatorSpec) -> BiosimSimulationRun:
         sim_id = str(uuid.uuid4())
         sim_run = BiosimSimulationRun(
-            simulator_spec=simulator_spec,
-            simulation_id=sim_id,
+            id=sim_id,
+            name=omex_name,
+            simulator=simulator_spec.simulator,
+            simulator_version=simulator_spec.version or "1.0",
+            simulator_digest="sha256:5d1595553608436a2a343f8ab7e650798ef5ba5dab007b9fe31cd342bf18ec81",
             status=BiosimSimulationRunStatus.RUNNING
         )
         self.sim_runs[sim_id] = sim_run
