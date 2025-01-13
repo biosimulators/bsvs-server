@@ -11,7 +11,7 @@ from temporalio.workflow import ChildWorkflowHandle
 
 from biosim_server.omex_sim.biosim1.models import BiosimSimulatorSpec, SourceOmex, Hdf5DataValues
 from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput
-from biosim_server.omex_verify.workflows.activities import generate_statistics
+from biosim_server.verify.workflows.activities import generate_statistics
 
 
 class OmexVerifyWorkflowStatus(StrEnum):

@@ -20,7 +20,7 @@ from starlette.middleware.cors import CORSMiddleware
 from biosim_server.dependencies import get_biosim_service, get_file_service, get_temporal_client, \
     init_standalone, shutdown_standalone
 from biosim_server.log_config import setup_logging
-from biosim_server.omex_verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
+from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus
 
 logger = logging.getLogger(__name__)

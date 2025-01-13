@@ -12,7 +12,7 @@ from biosim_server.api.main import app
 from biosim_server.io.file_service_local import FileServiceLocal
 from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
 from biosim_server.omex_sim.biosim1.models import SourceOmex
-from biosim_server.omex_verify.workflows.omex_verify_workflow import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, \
+from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, \
     OmexVerifyWorkflowStatus
 
 

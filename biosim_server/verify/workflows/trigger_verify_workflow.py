@@ -4,7 +4,7 @@ import uuid
 from temporalio.client import Client
 
 from biosim_server.omex_sim.biosim1.models import SourceOmex, BiosimSimulatorSpec
-from biosim_server.omex_verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
+from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
 from biosim_server.temporal_utils.converter import pydantic_data_converter
 
 

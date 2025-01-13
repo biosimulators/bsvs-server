@@ -12,7 +12,7 @@ from biosim_server.omex_sim.biosim1.models import SourceOmex, BiosimSimulatorSpe
     BiosimSimulationRun
 from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput, \
     OmexSimWorkflowOutput, OmexSimWorkflowStatus
-from biosim_server.omex_verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
+from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput
 from tests.fixtures.biosim_service_mock import BiosimServiceMock
 
