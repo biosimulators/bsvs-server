@@ -1,5 +1,3 @@
-from dataclasses import asdict
-
 import pytest
 from motor.motor_asyncio import AsyncIOMotorCollection
 from pymongo.results import InsertOneResult
@@ -14,7 +12,7 @@ async def test_mongo(mongo_test_collection: AsyncIOMotorCollection,
                      verify_workflow_output: OmexVerifyWorkflowOutput) -> None:
 
      # insert a document into the database
-    result: InsertOneResult = await mongo_test_collection.insert_one(asdict(verify_workflow_output))
+    result: InsertOneResult = await mongo_test_collection.insert_one(verify_workflow_output.model_dump())
     assert result.acknowledged
 
     # reread the document from the database
@@ -26,7 +24,7 @@ async def test_mongo(mongo_test_collection: AsyncIOMotorCollection,
                                                                workflow_status=verify_workflow_output.workflow_status,
                                                                timestamp=verify_workflow_output.timestamp,
                                                                workflow_run_id=verify_workflow_output.workflow_run_id)
-    assert asdict(expected_verify_workflow_output) == asdict(verify_workflow_output)
+    assert expected_verify_workflow_output == verify_workflow_output
 
     # delete the document from the database
     del_result = await mongo_test_collection.delete_one({"workflow_run_id": verify_workflow_output.workflow_run_id})

@@ -1,8 +1,8 @@
 import logging
-from dataclasses import dataclass
 from datetime import timedelta
 from enum import StrEnum
 
+from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
@@ -13,8 +13,7 @@ from biosim_server.omex_sim.workflows.biosim_activities import get_sim_run, subm
     SubmitBiosimSimInput, GetSimRunInput, GetHdf5DataInput, GetHdf5MetadataInput
 
 
-@dataclass
-class OmexSimWorkflowInput:
+class OmexSimWorkflowInput(BaseModel):
     source_omex: SourceOmex
     simulator_spec: BiosimSimulatorSpec
 
@@ -26,8 +25,7 @@ class OmexSimWorkflowStatus(StrEnum):
     FAILED = "FAILED"
 
 
-@dataclass
-class OmexSimWorkflowOutput:
+class OmexSimWorkflowOutput(BaseModel):
     workflow_id: str
     workflow_input: OmexSimWorkflowInput
     workflow_status: OmexSimWorkflowStatus
@@ -49,7 +47,7 @@ class OmexSimWorkflow:
             workflow_status=OmexSimWorkflowStatus.IN_PROGRESS)
 
     @workflow.query
-    async def get_omex_sim_workflow_run(self) -> OmexSimWorkflowOutput:
+    def get_omex_sim_workflow_run(self) -> OmexSimWorkflowOutput:
         return self.sim_output
 
     @workflow.run

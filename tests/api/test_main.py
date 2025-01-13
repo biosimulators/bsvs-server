@@ -1,6 +1,5 @@
 import os
 from copy import copy
-from dataclasses import asdict
 from pathlib import Path
 
 import pytest
@@ -63,22 +62,22 @@ async def test_verify_and_get_output(verify_workflow_input: OmexVerifyWorkflowIn
             response = await test_client.post("/verify", files=files, params=query_params)
             assert response.status_code == 200
 
-            dict_response = response.json()
+            workflow_output = OmexVerifyWorkflowOutput.model_validate(response.json())
             output = OmexVerifyWorkflowOutput(
                 workflow_input=OmexVerifyWorkflowInput(
-                    workflow_id=dict_response["workflow_input"]["workflow_id"],
-                    source_omex=SourceOmex(omex_s3_file=dict_response["workflow_input"]["source_omex"]["omex_s3_file"],
-                                           name=dict_response["workflow_input"]["source_omex"]["name"]),
-                    user_description=dict_response["workflow_input"]["user_description"],
-                    requested_simulators=dict_response["workflow_input"]["requested_simulators"],
-                    include_outputs=dict_response["workflow_input"]["include_outputs"],
-                    rTol=dict_response["workflow_input"]["rTol"],
-                    aTol=dict_response["workflow_input"]["aTol"],
-                    observables=dict_response["workflow_input"]["observables"]
+                    workflow_id=workflow_output.workflow_input.workflow_id,
+                    source_omex=SourceOmex(omex_s3_file=workflow_output.workflow_input.source_omex.omex_s3_file,
+                                           name=workflow_output.workflow_input.source_omex.name),
+                    user_description=workflow_output.workflow_input.user_description,
+                    requested_simulators=workflow_output.workflow_input.requested_simulators,
+                    include_outputs=workflow_output.workflow_input.include_outputs,
+                    rTol=workflow_output.workflow_input.rTol,
+                    aTol=workflow_output.workflow_input.aTol,
+                    observables=workflow_output.workflow_input.observables
                 ),
-                workflow_status=dict_response["workflow_status"],
-                timestamp=dict_response["timestamp"],
-                workflow_run_id=dict_response["workflow_run_id"]
+                workflow_status=workflow_output.workflow_status,
+                timestamp=workflow_output.timestamp,
+                workflow_run_id=workflow_output.workflow_run_id
             )
 
             # set timestamp, job_id, and omex_s3_path before comparison (these are set on server)
@@ -92,7 +91,7 @@ async def test_verify_and_get_output(verify_workflow_input: OmexVerifyWorkflowIn
             expected_verify_workflow_output.workflow_input.workflow_id = output.workflow_input.workflow_id
             expected_verify_workflow_output.timestamp = output.timestamp
             expected_verify_workflow_output.workflow_run_id = output.workflow_run_id
-            assert asdict(expected_verify_workflow_output) == asdict(output)
+            assert expected_verify_workflow_output == output
 
     # verify the omex_s3_path file to the original file_path
     # this works because we are using the local file service instead of S3
@@ -103,11 +102,11 @@ async def test_verify_and_get_output(verify_workflow_input: OmexVerifyWorkflowIn
 
     # verify the workflow is started
     # assert output.workflow_run_id is not None
-    workflow_handle = temporal_client.get_workflow_handle(workflow_id=output.workflow_input.workflow_id)
+    workflow_handle = temporal_client.get_workflow_handle(workflow_id=output.workflow_input.workflow_id, result_type=OmexVerifyWorkflowOutput)
     assert workflow_handle is not None
-    workflow_handle_result = await workflow_handle.result()
-    expected_verify_workflow_output.timestamp = workflow_handle_result['timestamp']
-    expected_verify_workflow_output.workflow_run_id = workflow_handle_result['workflow_run_id']
-    expected_verify_workflow_output.workflow_status = workflow_handle_result['workflow_status']
+    workflow_handle_result: OmexVerifyWorkflowOutput = await workflow_handle.result()
+    expected_verify_workflow_output.timestamp = workflow_handle_result.timestamp
+    expected_verify_workflow_output.workflow_run_id = workflow_handle_result.workflow_run_id
+    expected_verify_workflow_output.workflow_status = workflow_handle_result.workflow_status
 
-    assert workflow_handle_result == asdict(expected_verify_workflow_output)
+    assert workflow_handle_result == expected_verify_workflow_output

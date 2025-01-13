@@ -1,10 +1,10 @@
 import asyncio
 import logging
-from dataclasses import dataclass
 from datetime import timedelta
 from enum import StrEnum
 from typing import Any, Optional
 
+from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 from temporalio.workflow import ChildWorkflowHandle
@@ -21,8 +21,7 @@ class OmexVerifyWorkflowStatus(StrEnum):
     FAILED = "FAILED"
 
 
-@dataclass
-class OmexVerifyWorkflowInput:
+class OmexVerifyWorkflowInput(BaseModel):
     workflow_id: str
     source_omex: SourceOmex
     user_description: str
@@ -33,21 +32,18 @@ class OmexVerifyWorkflowInput:
     observables: Optional[list[str]] = None
 
 
-@dataclass
-class SimulatorRMSE:
+class SimulatorRMSE(BaseModel):
     simulator1: str
     simulator2: str
     rmse_scores: dict[str, float]
 
 
-@dataclass
-class OmexVerifyWorkflowResults:
+class OmexVerifyWorkflowResults(BaseModel):
     sim_results: Optional[list[dict[str, Hdf5DataValues]]] = None
     compare_results: Optional[list[SimulatorRMSE]] = None
 
 
-@dataclass
-class OmexVerifyWorkflowOutput:
+class OmexVerifyWorkflowOutput(BaseModel):
     workflow_input: OmexVerifyWorkflowInput
     workflow_status: OmexVerifyWorkflowStatus
     timestamp: str
