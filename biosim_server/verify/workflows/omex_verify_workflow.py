@@ -2,16 +2,15 @@ import asyncio
 import logging
 from datetime import timedelta
 from enum import StrEnum
-from typing import Any, Optional
+from typing import Any, Optional, Coroutine
 
 from pydantic import BaseModel
 from temporalio import workflow
-from temporalio.common import RetryPolicy
 from temporalio.workflow import ChildWorkflowHandle
 
 from biosim_server.omex_sim.biosim1.models import BiosimSimulatorSpec, SourceOmex, Hdf5DataValues
-from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput
-from biosim_server.verify.workflows.activities import generate_statistics
+from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput, \
+    OmexSimWorkflowOutput
 
 
 class OmexVerifyWorkflowStatus(StrEnum):
@@ -77,16 +76,14 @@ class OmexVerifyWorkflow:
         workflow.logger.info("Main workflow started.")
 
         # Launch child workflows for each simulator
-        child_workflows: list[Any] = []
+        child_workflows: list[
+            Coroutine[Any, Any, ChildWorkflowHandle[OmexSimWorkflowInput, OmexSimWorkflowOutput]]] = []
         for simulator_spec in verify_input.requested_simulators:
             child_workflows.append(
-                workflow.start_child_workflow(
-                    OmexSimWorkflow.run,
-                    args=[OmexSimWorkflowInput(
-                        source_omex=verify_input.source_omex,
-                        simulator_spec=simulator_spec)],
-                    task_queue="verification_tasks",
-                    execution_timeout=timedelta(minutes=10),
+                workflow.start_child_workflow(OmexSimWorkflow.run,  # type: ignore
+                    args=[OmexSimWorkflowInput(source_omex=verify_input.source_omex, simulator_spec=simulator_spec)],
+                    result_type=OmexSimWorkflowOutput,
+                    task_queue="verification_tasks", execution_timeout=timedelta(minutes=10),
                 )
             )
 
@@ -99,7 +96,8 @@ class OmexVerifyWorkflow:
         #
 
         # Wait for all child workflows to complete
-        child_results: list[ChildWorkflowHandle[dict[str, str], Any]] = await asyncio.gather(*child_workflows)
+        child_results: list[ChildWorkflowHandle[OmexSimWorkflowInput, OmexSimWorkflowOutput]] = await asyncio.gather(
+            *child_workflows)
         # print types of all members of child_results
         for i in child_results:
             workflow.logger.info(f"child_results member type is {type(i)}")
@@ -110,18 +108,19 @@ class OmexVerifyWorkflow:
         real_results: list[str] = []
         for i in child_results:
             workflow.logger.info(f"child_results member type is {type(i)}")
-            a: ChildWorkflowHandle[dict[str,str], Any] = i
+            a = i
             real_results.append(str(await a))
             workflow.logger.info(f"real_results member type is {type(a.result())}")
 
         # Generate comparison report
-        report_location = await workflow.execute_activity(
-            generate_statistics,
-            arg=real_results,
-            start_to_close_timeout=timedelta(seconds=10),
-            retry_policy=RetryPolicy(maximum_attempts=100, backoff_coefficient=2.0, maximum_interval=timedelta(seconds=10)),
-        )
-        workflow.logger.info(f"Report generated at: {report_location}")
+        # report_location = await workflow.execute_activity(
+        #     generate_statistics,
+        #     arg=real_results,
+        #     result_type=GenerateStatisticsOutput,
+        #     start_to_close_timeout=timedelta(seconds=10),
+        #     retry_policy=RetryPolicy(maximum_attempts=100, backoff_coefficient=2.0, maximum_interval=timedelta(seconds=10)),
+        # )
+        # workflow.logger.info(f"Report generated at: {report_location}")
 
         self.verify_output.workflow_status = OmexVerifyWorkflowStatus.COMPLETED
         return self.verify_output

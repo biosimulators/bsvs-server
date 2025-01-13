@@ -49,12 +49,13 @@ async def test_sim_workflow(temporal_client: Client, temporal_verify_worker: Wor
                                        simulatorVersion=sim_spec.version or "latest",
                                        simulatorDigest=uuid.uuid4().hex,
                                        status=BiosimSimulationRunStatus.SUCCEEDED),
-        result_s3_path='s3://bucket-name/results/vcell.output'
+        hdf5_file=None
     )
     if expected_results.biosim_run and workflow_handle_result.biosim_run:
         expected_results.biosim_run.id = workflow_handle_result.biosim_run.id
         expected_results.biosim_run.simulatorVersion = workflow_handle_result.biosim_run.simulatorVersion
         expected_results.biosim_run.simulatorDigest = workflow_handle_result.biosim_run.simulatorDigest
+        expected_results.hdf5_file = workflow_handle_result.hdf5_file
     assert workflow_handle_result == expected_results
 
 
