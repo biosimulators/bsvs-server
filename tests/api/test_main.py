@@ -1,3 +1,5 @@
+import asyncio
+import logging
 import os
 from copy import copy
 from pathlib import Path
@@ -30,7 +32,7 @@ async def test_get_output_not_found(verify_workflow_input: OmexVerifyWorkflowInp
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         # test with non-existent verification_id
-        response = await test_client.get(f"/get-output/non-existent-id")
+        response = await test_client.get(f"/verify_omex/non-existent-id")
         assert response.status_code == 404
 
 
@@ -59,7 +61,7 @@ async def test_verify_and_get_output(verify_workflow_input: OmexVerifyWorkflowIn
         with open(file_path, "rb") as file:
             files = {"uploaded_file": (
                 "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex", file, "application/zip")}
-            response = await test_client.post("/verify", files=files, params=query_params)
+            response = await test_client.post("/verify_omex", files=files, params=query_params)
             assert response.status_code == 200
 
             workflow_output = OmexVerifyWorkflowOutput.model_validate(response.json())
@@ -80,6 +82,13 @@ async def test_verify_and_get_output(verify_workflow_input: OmexVerifyWorkflowIn
                 workflow_run_id=workflow_output.workflow_run_id
             )
 
+            while output.workflow_status != OmexVerifyWorkflowStatus.COMPLETED:
+                await asyncio.sleep(5)
+                response = await test_client.get(f"/verify_omex/{output.workflow_input.workflow_id}")
+                if response.status_code == 200:
+                    output = OmexVerifyWorkflowOutput.model_validate(response.json())
+                    logging.info(f"polling, job status is: {output.workflow_status}")
+
             # set timestamp, job_id, and omex_s3_path before comparison (these are set on server)
             expected_verify_workflow_output = OmexVerifyWorkflowOutput(
                 workflow_input=copy(verify_workflow_input),
@@ -91,6 +100,7 @@ async def test_verify_and_get_output(verify_workflow_input: OmexVerifyWorkflowIn
             expected_verify_workflow_output.workflow_input.workflow_id = output.workflow_input.workflow_id
             expected_verify_workflow_output.timestamp = output.timestamp
             expected_verify_workflow_output.workflow_run_id = output.workflow_run_id
+            expected_verify_workflow_output.workflow_status = OmexVerifyWorkflowStatus.COMPLETED
             assert expected_verify_workflow_output == output
 
     # verify the omex_s3_path file to the original file_path

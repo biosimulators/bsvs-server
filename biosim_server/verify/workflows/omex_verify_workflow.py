@@ -123,5 +123,5 @@ class OmexVerifyWorkflow:
         )
         workflow.logger.info(f"Report generated at: {report_location}")
 
-        # Return the report location
+        self.verify_output.workflow_status = OmexVerifyWorkflowStatus.COMPLETED
         return self.verify_output

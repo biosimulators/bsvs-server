@@ -115,14 +115,14 @@ def root() -> dict[str, str]:
 
 
 @app.post(
-    "/verify",
+    "/verify_omex",
     response_model=OmexVerifyWorkflowOutput,
     name="Uniform Time Course Comparison from OMEX/COMBINE archive",
-    operation_id="verify",
+    operation_id="start-verify-omex",
     tags=["Verification"],
     dependencies=[Depends(get_temporal_client), Depends(get_file_service)],
     summary="Compare UTC outputs from a deterministic SBML model within an OMEX/COMBINE archive.")
-async def verify(
+async def start_verify_omex(
         uploaded_file: UploadFile = File(..., description="OMEX/COMBINE archive containing a deterministic SBML model"),
         workflow_id_prefix: str = Query(default="verification-", description="Prefix for the workflow id."),
         simulators: list[str] = Query(default=["amici", "copasi", "pysces", "tellurium", "vcell"],
@@ -190,14 +190,14 @@ async def verify(
 
 
 @app.get(
-    "/get-output/{workflow_id}",
+    "/verify_omex/{workflow_id}",
     response_model=OmexVerifyWorkflowOutput,
-    operation_id='get-output',
+    operation_id='get-verify-omex',
     tags=["Results"],
     dependencies=[Depends(get_biosim_service), Depends(get_file_service)],
     summary='Get the results of an existing verification run.')
-async def get_output(workflow_id: str) -> OmexVerifyWorkflowOutput:
-    logger.info(f"in get /get-output/{workflow_id}")
+async def get_verify_omex(workflow_id: str) -> OmexVerifyWorkflowOutput:
+    logger.info(f"in get /verify_omex/{workflow_id}")
 
     try:
         # query temporal for the workflow output
