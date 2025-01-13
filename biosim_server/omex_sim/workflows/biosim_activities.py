@@ -50,11 +50,11 @@ class GetHdf5MetadataInput(BaseModel):
 
 
 @activity.defn
-async def get_hdf5_metadata(input: GetHdf5MetadataInput) -> str:
+async def get_hdf5_metadata(input: GetHdf5MetadataInput) -> HDF5File:
     activity.logger.setLevel(logging.INFO)
     biosim_service = BiosimServiceRest()
     hdf5_file: HDF5File = await biosim_service.get_hdf5_metadata(input.simulation_run_id)
-    return hdf5_file.model_dump_json()
+    return hdf5_file
 
 
 class GetHdf5DataInput(BaseModel):

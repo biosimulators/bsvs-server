@@ -89,17 +89,15 @@ class OmexSimWorkflow:
                 self.sim_output.workflow_status = OmexSimWorkflowStatus.FAILED
                 return self.sim_output
 
-        hdf5_metadata_json: str = await workflow.execute_activity(
+        hdf5_file: HDF5File = await workflow.execute_activity(
             get_hdf5_metadata,
             args=[GetHdf5MetadataInput(simulation_run_id=self.sim_output.biosim_run.id)],
             start_to_close_timeout=timedelta(seconds=60),  # Activity timeout
             retry_policy=RetryPolicy(maximum_attempts=100, maximum_interval=timedelta(seconds=5), backoff_coefficient=2.0),
         )
 
-        workflow.logger.info(
-            f"Simulation run metadata for simulation_run_id: {self.sim_output.biosim_run.id} is {hdf5_metadata_json}")
+        workflow.logger.info(f"retrieved HDF5File for simulation_run_id: {self.sim_output.biosim_run.id}")
 
-        hdf5_file: HDF5File = HDF5File.model_validate_json(hdf5_metadata_json)
         results_dict: dict[str, Hdf5DataValues] = {}
         for group in hdf5_file.groups:
             for dataset in group.datasets:
