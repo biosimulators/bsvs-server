@@ -7,11 +7,17 @@ from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
 from biosim_server.omex_sim.biosim1.models import SourceOmex, BiosimSimulatorSpec
 from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflowOutput, OmexVerifyWorkflowInput
+from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput
 
 
 @pytest.fixture(scope="function")
 def omex_verify_workflow_id() -> str:
-    return "verification-" + str(uuid.uuid4())
+    return "omex-verification-" + str(uuid.uuid4())
+
+
+@pytest.fixture(scope="function")
+def runs_verify_workflow_id() -> str:
+    return "runs-verification-" + str(uuid.uuid4())
 
 
 @pytest.fixture(scope="function")
@@ -35,4 +41,26 @@ def omex_verify_workflow_output(omex_verify_workflow_input: OmexVerifyWorkflowIn
     with open(root_dir / "local_data" / "OmexVerifyWorkflowOutput_expected.json") as f:
         workflow_output = OmexVerifyWorkflowOutput.model_validate_json(f.read())
         workflow_output.workflow_id = omex_verify_workflow_id
+        return workflow_output
+
+
+@pytest.fixture(scope="function")
+def runs_verify_workflow_input() -> RunsVerifyWorkflowInput:
+    include_outputs = False
+    rTol = 1e-6
+    aTol = 1e-9
+    observables = ["time", "concentration"]
+    run_ids = ["67817a2e1f52f47f628af971", "67817a2eba5a3f02b9f2938d"]
+    omex_input = RunsVerifyWorkflowInput(user_description="description", biosimulations_run_ids=run_ids,
+                                         include_outputs=include_outputs, rTol=rTol, aTol=aTol, observables=observables)
+    return omex_input
+
+
+@pytest.fixture(scope="function")
+def runs_verify_workflow_output(runs_verify_workflow_input: RunsVerifyWorkflowInput,
+                                runs_verify_workflow_id: str) -> RunsVerifyWorkflowOutput:
+    root_dir = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    with open(root_dir / "local_data" / "RunsVerifyWorkflowOutput_expected.json") as f:
+        workflow_output = RunsVerifyWorkflowOutput.model_validate_json(f.read())
+        workflow_output.workflow_id = runs_verify_workflow_id
         return workflow_output

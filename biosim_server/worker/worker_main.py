@@ -11,6 +11,7 @@ from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow
 from biosim_server.verify.workflows.activities import generate_statistics
 from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflow
 from biosim_server.temporal_utils.converter import pydantic_data_converter
+from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflow
 
 interrupt_event = asyncio.Event()
 
@@ -26,7 +27,7 @@ async def main() -> None:
     handle = Worker(
         client,
         task_queue="verification_tasks",
-        workflows=[OmexVerifyWorkflow, OmexSimWorkflow],
+        workflows=[OmexVerifyWorkflow, OmexSimWorkflow, RunsVerifyWorkflow],
         activities=[generate_statistics, get_sim_run, submit_biosim_sim, get_hdf5_metadata, get_hdf5_data],
         workflow_runner=UnsandboxedWorkflowRunner(),
     )

@@ -14,6 +14,8 @@ from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow, 
 from biosim_server.verify.workflows.activities import ComparisonStatistics
 from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput
+from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
+    RunsVerifyWorkflowOutput
 from tests.fixtures.biosim_service_mock import BiosimServiceMock
 
 
@@ -49,28 +51,49 @@ async def test_sim_workflow(temporal_client: Client, temporal_verify_worker: Wor
 
 
 @pytest.mark.asyncio
-async def test_verify_workflow(temporal_client: Client, temporal_verify_worker: Worker,
+async def test_omex_verify_workflow(temporal_client: Client, temporal_verify_worker: Worker,
                                omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                omex_verify_workflow_output: OmexVerifyWorkflowOutput,
                                biosim_service_rest: BiosimServiceRest, file_service_local: FileServiceLocal) -> None:
     assert biosim_service_rest is not None
 
-    # set up the omex file to mock S3
+    # set up the omex file to mock S3 (uploads on the fly)
     path_from_root = Path("local_data/BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex")
     test_omex_file = Path(__file__).parent.parent.parent / path_from_root
     s3_path = "path/to/model.omex"
     await file_service_local.upload_file(file_path=test_omex_file, s3_path=s3_path)
     workflow_id = uuid.uuid4().hex
     omex_verify_workflow_input.source_omex = SourceOmex(omex_s3_file=s3_path, name="name")
-    # omex_verify_workflow_output.workflow_id = workflow_id
 
-    observed_results: OmexVerifyWorkflowOutput = await temporal_client.execute_workflow(OmexVerifyWorkflow.run, args=[omex_verify_workflow_input],
-        id=workflow_id, task_queue="verification_tasks", )
+    observed_results: OmexVerifyWorkflowOutput = await temporal_client.execute_workflow(
+        OmexVerifyWorkflow.run, args=[omex_verify_workflow_input],
+        # result_type=OmexVerifyWorkflowOutput,
+        id=workflow_id, task_queue="verification_tasks")
 
     # with open(Path(__file__).parent.parent.parent / "local_data" / "OmexVerifyWorkflowOutput_expected.json", "w") as f:
     #     f.write(observed_results.model_dump_json())
 
     assert_omex_verify_results(observed_results=observed_results, expected_results_template=omex_verify_workflow_output)
+
+
+@pytest.mark.asyncio
+async def test_run_verify_workflow(temporal_client: Client, temporal_verify_worker: Worker,
+                               runs_verify_workflow_input: RunsVerifyWorkflowInput,
+                               runs_verify_workflow_output: RunsVerifyWorkflowOutput,
+                               biosim_service_rest: BiosimServiceRest, file_service_local: FileServiceLocal) -> None:
+    assert biosim_service_rest is not None
+
+    workflow_id = uuid.uuid4().hex
+
+    observed_results: RunsVerifyWorkflowOutput = await temporal_client.execute_workflow(
+        RunsVerifyWorkflow.run, args=[runs_verify_workflow_input],
+        # result_type=RunsVerifyWorkflowOutput,
+        id=workflow_id, task_queue="verification_tasks")
+
+    # with open(Path(__file__).parent.parent.parent / "local_data" / "RunsVerifyWorkflowOutput_expected.json", "w") as f:
+    #     f.write(observed_results.model_dump_json())
+
+    assert_runs_verify_results(observed_results=observed_results, expected_results_template=runs_verify_workflow_output)
 
 
 def assert_omex_verify_results(observed_results: OmexVerifyWorkflowOutput,
@@ -101,6 +124,52 @@ def assert_omex_verify_results(observed_results: OmexVerifyWorkflowOutput,
     assert observed_results.workflow_results is not None
     ds_names = list(expected_results.workflow_results.comparison_statistics.keys())
     num_simulators = len(expected_results_template.workflow_input.requested_simulators)
+    for ds_name in ds_names:
+        for i in range(num_simulators):
+            for j in range(num_simulators):
+                assert observed_results.workflow_results is not None
+                observed_compare_i_j: ComparisonStatistics = \
+                observed_results.workflow_results.comparison_statistics[ds_name][i][j]
+                expected_compare_i_j: ComparisonStatistics = \
+                expected_results.workflow_results.comparison_statistics[ds_name][i][j]
+                # assert observed_compare_i_j.mse == expected_compare_i_j.mse
+                assert observed_compare_i_j.is_close == expected_compare_i_j.is_close
+                assert observed_compare_i_j.error_message == expected_compare_i_j.error_message
+                assert observed_compare_i_j.simulator_version_i == expected_compare_i_j.simulator_version_i
+                assert observed_compare_i_j.simulator_version_j == expected_compare_i_j.simulator_version_j
+    expected_results.workflow_results.comparison_statistics = observed_results.workflow_results.comparison_statistics
+
+    # compare everything else which has not been hardwired to match
+    assert observed_results == expected_results
+
+
+def assert_runs_verify_results(observed_results: RunsVerifyWorkflowOutput,
+                               expected_results_template: RunsVerifyWorkflowOutput) -> None:
+
+    # customize expected results to match those things which vary between runs
+    expected_results = expected_results_template.model_copy(deep=True)
+    expected_results.workflow_id = observed_results.workflow_id
+    expected_results.workflow_run_id = observed_results.workflow_run_id
+    expected_results.timestamp = observed_results.timestamp
+    expected_results.workflow_status = observed_results.workflow_status
+    if expected_results.workflow_results and observed_results.workflow_results:
+        for i in range(len(expected_results.workflow_results.sims_run_info)):
+            expected_biosim_sim_run = expected_results.workflow_results.sims_run_info[i].biosim_sim_run
+            expected_hdf5_file = expected_results.workflow_results.sims_run_info[i].hdf5_file
+            result_biosim_sim_run = observed_results.workflow_results.sims_run_info[i].biosim_sim_run
+            result_hdf5_file = observed_results.workflow_results.sims_run_info[i].hdf5_file
+
+            expected_hdf5_file.uri = result_hdf5_file.uri
+            expected_hdf5_file.id = result_hdf5_file.id
+            expected_biosim_sim_run.id = result_biosim_sim_run.id
+            expected_biosim_sim_run.simulatorVersion = result_biosim_sim_run.simulatorVersion
+            expected_biosim_sim_run.simulatorDigest = result_biosim_sim_run.simulatorDigest
+
+    # compare the comparison statistics separately, seems not to be 100% deterministic
+    assert expected_results.workflow_results is not None
+    assert observed_results.workflow_results is not None
+    ds_names = list(expected_results.workflow_results.comparison_statistics.keys())
+    num_simulators = len(expected_results_template.workflow_input.biosimulations_run_ids)
     for ds_name in ds_names:
         for i in range(num_simulators):
             for j in range(num_simulators):
