@@ -1,0 +1,1710 @@
+{
+  "workflow_id": "f2bc149fad0848bd921b3d9cae18d353",
+  "workflow_input": {
+    "user_description": "description",
+    "biosimulations_run_ids": [
+      "67817a2e1f52f47f628af971",
+      "67817a2eba5a3f02b9f2938d"
+    ],
+    "include_outputs": false,
+    "rTol": 1e-6,
+    "aTol": 1e-9,
+    "observables": [
+      "time",
+      "concentration"
+    ]
+  },
+  "workflow_status": "COMPLETED",
+  "timestamp": "2025-01-14 04:57:26.711638+00:00",
+  "actual_simulators": null,
+  "workflow_run_id": "46b56093-a4ac-4129-b69e-1e96a4054c66",
+  "workflow_results": {
+    "sims_run_info": [
+      {
+        "biosim_sim_run": {
+          "id": "67817a2e1f52f47f628af971",
+          "name": "name",
+          "simulator": "vcell",
+          "simulatorVersion": "7.7.0.13",
+          "status": "SUCCEEDED",
+          "simulatorDigest": "sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216",
+          "cpus": null,
+          "memory": null,
+          "maxTime": null,
+          "envVars": null,
+          "purpose": null,
+          "submitted": null,
+          "updated": null,
+          "projectSize": null,
+          "resultsSize": null,
+          "runtime": null,
+          "email": null
+        },
+        "hdf5_file": {
+          "filename": "reports.h5",
+          "id": "67817a2e1f52f47f628af971",
+          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/67817a2e1f52f47f628af971/outputs/reports.h5",
+          "groups": [
+            {
+              "name": "BIOMD0000000010_url.sedml",
+              "attributes": [
+                {
+                  "key": "combineArchiveLocation",
+                  "value": "BIOMD0000000010_url.sedml"
+                },
+                {
+                  "key": "uri",
+                  "value": "BIOMD0000000010_url.sedml"
+                }
+              ],
+              "datasets": [
+                {
+                  "name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+                  "shape": [
+                    20,
+                    1001
+                  ],
+                  "attributes": [
+                    {
+                      "key": "_type",
+                      "value": "SedReport"
+                    },
+                    {
+                      "key": "sedmlDataSetDataTypes",
+                      "value": [
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetIds",
+                      "value": [
+                        "autogen_time_for_task_fig2a",
+                        "autogen_task_fig2a_MAPK_PP",
+                        "autogen_task_fig2a_MAPK",
+                        "autogen_task_fig2a_MKKK",
+                        "autogen_task_fig2a_MKKK_P",
+                        "autogen_task_fig2a_MKK",
+                        "autogen_task_fig2a_MKK_P",
+                        "autogen_task_fig2a_MKK_PP",
+                        "autogen_task_fig2a_MAPK_P",
+                        "autogen_task_fig2a_uVol",
+                        "autogen_task_fig2a_J0",
+                        "autogen_task_fig2a_J1",
+                        "autogen_task_fig2a_J2",
+                        "autogen_task_fig2a_J3",
+                        "autogen_task_fig2a_J4",
+                        "autogen_task_fig2a_J5",
+                        "autogen_task_fig2a_J6",
+                        "autogen_task_fig2a_J7",
+                        "autogen_task_fig2a_J8",
+                        "autogen_task_fig2a_J9"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "Time",
+                        "MAPK_PP",
+                        "MAPK",
+                        "MKKK",
+                        "MKKK_P",
+                        "MKK",
+                        "MKK_P",
+                        "MKK_PP",
+                        "MAPK_P",
+                        "uVol",
+                        "J0",
+                        "J1",
+                        "J2",
+                        "J3",
+                        "J4",
+                        "J5",
+                        "J6",
+                        "J7",
+                        "J8",
+                        "J9"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetNames",
+                      "value": [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetShapes",
+                      "value": [
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001"
+                      ]
+                    },
+                    {
+                      "key": "sedmlId",
+                      "value": "autogen_report_for_task_fig2a"
+                    },
+                    {
+                      "key": "sedmlName",
+                      "value": "Auto-generated report for task_fig2a, including all symbols in SBML with mathematical meaning, both constant and variable."
+                    },
+                    {
+                      "key": "uri",
+                      "value": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a"
+                    }
+                  ]
+                },
+                {
+                  "name": "BIOMD0000000010_url.sedml/plot_0",
+                  "shape": [
+                    3,
+                    1001
+                  ],
+                  "attributes": [
+                    {
+                      "key": "_type",
+                      "value": "SedPlot2D"
+                    },
+                    {
+                      "key": "sedmlDataSetDataTypes",
+                      "value": [
+                        "float64",
+                        "float64",
+                        "float64"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetIds",
+                      "value": [
+                        "0_0",
+                        "0_1",
+                        "1_1"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "plot_0_0_0",
+                        "plot_0_0_1",
+                        "plot_0_1_1"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetNames",
+                      "value": [
+                        "task_fig2a.time/60",
+                        "task_fig2a.MAPK_PP",
+                        "task_fig2a.MAPK"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetShapes",
+                      "value": [
+                        "1001",
+                        "1001",
+                        "1001"
+                      ]
+                    },
+                    {
+                      "key": "sedmlId",
+                      "value": "plot_0"
+                    },
+                    {
+                      "key": "sedmlName",
+                      "value": "Figure 2A"
+                    },
+                    {
+                      "key": "uri",
+                      "value": "BIOMD0000000010_url.sedml/plot_0"
+                    }
+                  ]
+                },
+                {
+                  "name": "BIOMD0000000010_url.sedml/plot_1",
+                  "shape": [
+                    3,
+                    1001
+                  ],
+                  "attributes": [
+                    {
+                      "key": "_type",
+                      "value": "SedPlot2D"
+                    },
+                    {
+                      "key": "sedmlDataSetDataTypes",
+                      "value": [
+                        "float64",
+                        "float64",
+                        "float64"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetIds",
+                      "value": [
+                        "0_0",
+                        "0_1",
+                        "1_1"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "plot_1_0_0",
+                        "plot_1_0_1",
+                        "plot_1_1_1"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetNames",
+                      "value": [
+                        "task_fig2b.time/60",
+                        "task_fig2b.MAPK_PP",
+                        "task_fig2b.MAPK"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetShapes",
+                      "value": [
+                        "1001",
+                        "1001",
+                        "1001"
+                      ]
+                    },
+                    {
+                      "key": "sedmlId",
+                      "value": "plot_1"
+                    },
+                    {
+                      "key": "sedmlName",
+                      "value": "Figure 2B"
+                    },
+                    {
+                      "key": "uri",
+                      "value": "BIOMD0000000010_url.sedml/plot_1"
+                    }
+                  ]
+                },
+                {
+                  "name": "BIOMD0000000010_url.sedml/report_2",
+                  "shape": [
+                    3,
+                    1001
+                  ],
+                  "attributes": [
+                    {
+                      "key": "_type",
+                      "value": "SedReport"
+                    },
+                    {
+                      "key": "sedmlDataSetDataTypes",
+                      "value": [
+                        "float64",
+                        "float64",
+                        "float64"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetIds",
+                      "value": [
+                        "plot_0_0_0_dataset",
+                        "plot_0_0_1_dataset",
+                        "plot_0_1_1_dataset"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "task_fig2a.time/60",
+                        "task_fig2a.MAPK_PP",
+                        "task_fig2a.MAPK"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetNames",
+                      "value": [
+                        "",
+                        "",
+                        ""
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetShapes",
+                      "value": [
+                        "1001",
+                        "1001",
+                        "1001"
+                      ]
+                    },
+                    {
+                      "key": "sedmlId",
+                      "value": "report_2"
+                    },
+                    {
+                      "key": "sedmlName",
+                      "value": "Figure 2A"
+                    },
+                    {
+                      "key": "uri",
+                      "value": "BIOMD0000000010_url.sedml/report_2"
+                    }
+                  ]
+                },
+                {
+                  "name": "BIOMD0000000010_url.sedml/report_3",
+                  "shape": [
+                    3,
+                    1001
+                  ],
+                  "attributes": [
+                    {
+                      "key": "_type",
+                      "value": "SedReport"
+                    },
+                    {
+                      "key": "sedmlDataSetDataTypes",
+                      "value": [
+                        "float64",
+                        "float64",
+                        "float64"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetIds",
+                      "value": [
+                        "plot_1_0_0_dataset",
+                        "plot_1_0_1_dataset",
+                        "plot_1_1_1_dataset"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "task_fig2b.time/60",
+                        "task_fig2b.MAPK_PP",
+                        "task_fig2b.MAPK"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetNames",
+                      "value": [
+                        "",
+                        "",
+                        ""
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetShapes",
+                      "value": [
+                        "1001",
+                        "1001",
+                        "1001"
+                      ]
+                    },
+                    {
+                      "key": "sedmlId",
+                      "value": "report_3"
+                    },
+                    {
+                      "key": "sedmlName",
+                      "value": "Figure 2B"
+                    },
+                    {
+                      "key": "uri",
+                      "value": "BIOMD0000000010_url.sedml/report_3"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "biosim_sim_run": {
+          "id": "67817a2eba5a3f02b9f2938d",
+          "name": "name",
+          "simulator": "copasi",
+          "simulatorVersion": "4.45.296",
+          "status": "SUCCEEDED",
+          "simulatorDigest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df",
+          "cpus": null,
+          "memory": null,
+          "maxTime": null,
+          "envVars": null,
+          "purpose": null,
+          "submitted": null,
+          "updated": null,
+          "projectSize": null,
+          "resultsSize": null,
+          "runtime": null,
+          "email": null
+        },
+        "hdf5_file": {
+          "filename": "reports.h5",
+          "id": "67817a2eba5a3f02b9f2938d",
+          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/67817a2eba5a3f02b9f2938d/outputs/reports.h5",
+          "groups": [
+            {
+              "name": "BIOMD0000000010_url.sedml",
+              "attributes": [
+                {
+                  "key": "combineArchiveLocation",
+                  "value": "BIOMD0000000010_url.sedml"
+                },
+                {
+                  "key": "uri",
+                  "value": "BIOMD0000000010_url.sedml"
+                }
+              ],
+              "datasets": [
+                {
+                  "name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+                  "shape": [
+                    20,
+                    1001
+                  ],
+                  "attributes": [
+                    {
+                      "key": "_type",
+                      "value": "SedReport"
+                    },
+                    {
+                      "key": "sedmlDataSetDataTypes",
+                      "value": [
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64",
+                        "float64"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetIds",
+                      "value": [
+                        "autogen_time_for_task_fig2a",
+                        "autogen_task_fig2a_MAPK_PP",
+                        "autogen_task_fig2a_MAPK",
+                        "autogen_task_fig2a_MKKK",
+                        "autogen_task_fig2a_MKKK_P",
+                        "autogen_task_fig2a_MKK",
+                        "autogen_task_fig2a_MKK_P",
+                        "autogen_task_fig2a_MKK_PP",
+                        "autogen_task_fig2a_MAPK_P",
+                        "autogen_task_fig2a_uVol",
+                        "autogen_task_fig2a_J0",
+                        "autogen_task_fig2a_J1",
+                        "autogen_task_fig2a_J2",
+                        "autogen_task_fig2a_J3",
+                        "autogen_task_fig2a_J4",
+                        "autogen_task_fig2a_J5",
+                        "autogen_task_fig2a_J6",
+                        "autogen_task_fig2a_J7",
+                        "autogen_task_fig2a_J8",
+                        "autogen_task_fig2a_J9"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "Time",
+                        "MAPK_PP",
+                        "MAPK",
+                        "MKKK",
+                        "MKKK_P",
+                        "MKK",
+                        "MKK_P",
+                        "MKK_PP",
+                        "MAPK_P",
+                        "uVol",
+                        "J0",
+                        "J1",
+                        "J2",
+                        "J3",
+                        "J4",
+                        "J5",
+                        "J6",
+                        "J7",
+                        "J8",
+                        "J9"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetNames",
+                      "value": [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetShapes",
+                      "value": [
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001",
+                        "1001"
+                      ]
+                    },
+                    {
+                      "key": "sedmlId",
+                      "value": "autogen_report_for_task_fig2a"
+                    },
+                    {
+                      "key": "sedmlName",
+                      "value": "Auto-generated report for task_fig2a, including all symbols in SBML with mathematical meaning, both constant and variable."
+                    },
+                    {
+                      "key": "uri",
+                      "value": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a"
+                    }
+                  ]
+                },
+                {
+                  "name": "BIOMD0000000010_url.sedml/plot_0",
+                  "shape": [
+                    3,
+                    1001
+                  ],
+                  "attributes": [
+                    {
+                      "key": "_type",
+                      "value": "SedPlot2D"
+                    },
+                    {
+                      "key": "sedmlDataSetDataTypes",
+                      "value": [
+                        "float64",
+                        "float64",
+                        "float64"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetIds",
+                      "value": [
+                        "plot_0_0_0",
+                        "plot_0_0_1",
+                        "plot_0_1_1"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "task_fig2a.time/60",
+                        "MAPK_PP",
+                        "MAPK"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetNames",
+                      "value": [
+                        "task_fig2a.time/60",
+                        "MAPK_PP",
+                        "MAPK"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetShapes",
+                      "value": [
+                        "1001",
+                        "1001",
+                        "1001"
+                      ]
+                    },
+                    {
+                      "key": "sedmlId",
+                      "value": "plot_0"
+                    },
+                    {
+                      "key": "sedmlName",
+                      "value": "Figure 2A"
+                    },
+                    {
+                      "key": "uri",
+                      "value": "BIOMD0000000010_url.sedml/plot_0"
+                    }
+                  ]
+                },
+                {
+                  "name": "BIOMD0000000010_url.sedml/plot_1",
+                  "shape": [
+                    3,
+                    1001
+                  ],
+                  "attributes": [
+                    {
+                      "key": "_type",
+                      "value": "SedPlot2D"
+                    },
+                    {
+                      "key": "sedmlDataSetDataTypes",
+                      "value": [
+                        "float64",
+                        "float64",
+                        "float64"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetIds",
+                      "value": [
+                        "plot_1_0_0",
+                        "plot_1_0_1",
+                        "plot_1_1_1"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "task_fig2b.time/60",
+                        "MAPK_PP",
+                        "MAPK"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetNames",
+                      "value": [
+                        "task_fig2b.time/60",
+                        "MAPK_PP",
+                        "MAPK"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetShapes",
+                      "value": [
+                        "1001",
+                        "1001",
+                        "1001"
+                      ]
+                    },
+                    {
+                      "key": "sedmlId",
+                      "value": "plot_1"
+                    },
+                    {
+                      "key": "sedmlName",
+                      "value": "Figure 2B"
+                    },
+                    {
+                      "key": "uri",
+                      "value": "BIOMD0000000010_url.sedml/plot_1"
+                    }
+                  ]
+                },
+                {
+                  "name": "BIOMD0000000010_url.sedml/report_2",
+                  "shape": [
+                    3,
+                    1001
+                  ],
+                  "attributes": [
+                    {
+                      "key": "_type",
+                      "value": "SedReport"
+                    },
+                    {
+                      "key": "sedmlDataSetDataTypes",
+                      "value": [
+                        "float64",
+                        "float64",
+                        "float64"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetIds",
+                      "value": [
+                        "plot_0_0_0_dataset",
+                        "plot_0_0_1_dataset",
+                        "plot_0_1_1_dataset"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "task_fig2a.time/60",
+                        "task_fig2a.MAPK_PP",
+                        "task_fig2a.MAPK"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetNames",
+                      "value": [
+                        "",
+                        "",
+                        ""
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetShapes",
+                      "value": [
+                        "1001",
+                        "1001",
+                        "1001"
+                      ]
+                    },
+                    {
+                      "key": "sedmlId",
+                      "value": "report_2"
+                    },
+                    {
+                      "key": "sedmlName",
+                      "value": "Figure 2A"
+                    },
+                    {
+                      "key": "uri",
+                      "value": "BIOMD0000000010_url.sedml/report_2"
+                    }
+                  ]
+                },
+                {
+                  "name": "BIOMD0000000010_url.sedml/report_3",
+                  "shape": [
+                    3,
+                    1001
+                  ],
+                  "attributes": [
+                    {
+                      "key": "_type",
+                      "value": "SedReport"
+                    },
+                    {
+                      "key": "sedmlDataSetDataTypes",
+                      "value": [
+                        "float64",
+                        "float64",
+                        "float64"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetIds",
+                      "value": [
+                        "plot_1_0_0_dataset",
+                        "plot_1_0_1_dataset",
+                        "plot_1_1_1_dataset"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "task_fig2b.time/60",
+                        "task_fig2b.MAPK_PP",
+                        "task_fig2b.MAPK"
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetNames",
+                      "value": [
+                        "",
+                        "",
+                        ""
+                      ]
+                    },
+                    {
+                      "key": "sedmlDataSetShapes",
+                      "value": [
+                        "1001",
+                        "1001",
+                        "1001"
+                      ]
+                    },
+                    {
+                      "key": "sedmlId",
+                      "value": "report_3"
+                    },
+                    {
+                      "key": "sedmlName",
+                      "value": "Figure 2B"
+                    },
+                    {
+                      "key": "uri",
+                      "value": "BIOMD0000000010_url.sedml/report_3"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "all_dataset_vars": [
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "Time"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "MAPK_PP"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "MAPK"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "MKKK"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "MKKK_P"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "MKK"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "MKK_P"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "MKK_PP"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "MAPK_P"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "uVol"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "J0"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "J1"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "J2"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "J3"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "J4"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "J5"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "J6"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "J7"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "J8"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+        "var_name": "J9"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
+        "var_name": "plot_0_0_0"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
+        "var_name": "plot_0_0_1"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
+        "var_name": "plot_0_1_1"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
+        "var_name": "plot_1_0_0"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
+        "var_name": "plot_1_0_1"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
+        "var_name": "plot_1_1_1"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/report_2",
+        "var_name": "task_fig2a.time/60"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/report_2",
+        "var_name": "task_fig2a.MAPK_PP"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/report_2",
+        "var_name": "task_fig2a.MAPK"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/report_3",
+        "var_name": "task_fig2b.time/60"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/report_3",
+        "var_name": "task_fig2b.MAPK_PP"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/report_3",
+        "var_name": "task_fig2b.MAPK"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
+        "var_name": "task_fig2a.time/60"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
+        "var_name": "MAPK_PP"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
+        "var_name": "MAPK"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
+        "var_name": "task_fig2b.time/60"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
+        "var_name": "MAPK_PP"
+      },
+      {
+        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
+        "var_name": "MAPK"
+      }
+    ],
+    "comparison_statistics": {
+      "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a": [
+        [
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_j": "vcell:7.7.0.13",
+            "var_names": [
+              "Time",
+              "MAPK_PP",
+              "MAPK",
+              "MKKK",
+              "MKKK_P",
+              "MKK",
+              "MKK_P",
+              "MKK_PP",
+              "MAPK_P",
+              "uVol",
+              "J0",
+              "J1",
+              "J2",
+              "J3",
+              "J4",
+              "J5",
+              "J6",
+              "J7",
+              "J8",
+              "J9"
+            ],
+            "mse": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "is_close": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "error_message": null
+          },
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_j": "copasi:4.45.296",
+            "var_names": [
+              "Time",
+              "MAPK_PP",
+              "MAPK",
+              "MKKK",
+              "MKKK_P",
+              "MKK",
+              "MKK_P",
+              "MKK_PP",
+              "MAPK_P",
+              "uVol",
+              "J0",
+              "J1",
+              "J2",
+              "J3",
+              "J4",
+              "J5",
+              "J6",
+              "J7",
+              "J8",
+              "J9"
+            ],
+            "mse": [
+              0.0,
+              7.097697246396396e-7,
+              5.110469628719001e-7,
+              2.2237781484773953e-8,
+              2.2237781486639205e-8,
+              3.3889607362392187e-7,
+              7.782008849031928e-8,
+              1.5679127548463692e-7,
+              1.3706254149174402e-7,
+              0.0,
+              1.5881773337124945e-12,
+              1.3895411912291321e-13,
+              1.1779563746402498e-11,
+              1.0380096913490996e-11,
+              5.254222333788001e-12,
+              2.9423970011423606e-12,
+              1.058900732228916e-10,
+              1.0980533233472733e-10,
+              1.7533320791487247e-13,
+              3.4764108749004296e-12
+            ],
+            "is_close": [
+              true,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              true,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "error_message": null
+          }
+        ],
+        [
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+            "simulator_version_i": "copasi:4.45.296",
+            "simulator_version_j": "vcell:7.7.0.13",
+            "var_names": [
+              "Time",
+              "MAPK_PP",
+              "MAPK",
+              "MKKK",
+              "MKKK_P",
+              "MKK",
+              "MKK_P",
+              "MKK_PP",
+              "MAPK_P",
+              "uVol",
+              "J0",
+              "J1",
+              "J2",
+              "J3",
+              "J4",
+              "J5",
+              "J6",
+              "J7",
+              "J8",
+              "J9"
+            ],
+            "mse": [
+              0.0,
+              7.097697246396396e-7,
+              5.110469628719001e-7,
+              2.2237781484773953e-8,
+              2.2237781486639205e-8,
+              3.3889607362392187e-7,
+              7.782008849031928e-8,
+              1.5679127548463692e-7,
+              1.3706254149174402e-7,
+              0.0,
+              1.5881773337124945e-12,
+              1.3895411912291321e-13,
+              1.1779563746402498e-11,
+              1.0380096913490996e-11,
+              5.254222333788001e-12,
+              2.9423970011423606e-12,
+              1.058900732228916e-10,
+              1.0980533233472733e-10,
+              1.7533320791487247e-13,
+              3.4764108749004296e-12
+            ],
+            "is_close": [
+              true,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              true,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "error_message": null
+          },
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
+            "simulator_version_i": "copasi:4.45.296",
+            "simulator_version_j": "copasi:4.45.296",
+            "var_names": [
+              "Time",
+              "MAPK_PP",
+              "MAPK",
+              "MKKK",
+              "MKKK_P",
+              "MKK",
+              "MKK_P",
+              "MKK_PP",
+              "MAPK_P",
+              "uVol",
+              "J0",
+              "J1",
+              "J2",
+              "J3",
+              "J4",
+              "J5",
+              "J6",
+              "J7",
+              "J8",
+              "J9"
+            ],
+            "mse": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "is_close": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "error_message": null
+          }
+        ]
+      ],
+      "BIOMD0000000010_url.sedml/plot_0": [
+        [
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
+            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_j": "vcell:7.7.0.13",
+            "var_names": [
+              "plot_0_0_0",
+              "plot_0_0_1",
+              "plot_0_1_1"
+            ],
+            "mse": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
+          },
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
+            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_j": "copasi:4.45.296",
+            "var_names": [
+              "plot_0_0_0",
+              "plot_0_0_1",
+              "plot_0_1_1"
+            ],
+            "mse": null,
+            "is_close": null,
+            "error_message": "Variables of vcell:7.7.0.13 and copasi:4.45.296 do not match, ['plot_0_0_0', 'plot_0_0_1', 'plot_0_1_1'] != ['task_fig2a.time/60', 'MAPK_PP', 'MAPK']"
+          }
+        ],
+        [
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
+            "simulator_version_i": "copasi:4.45.296",
+            "simulator_version_j": "vcell:7.7.0.13",
+            "var_names": [
+              "task_fig2a.time/60",
+              "MAPK_PP",
+              "MAPK"
+            ],
+            "mse": null,
+            "is_close": null,
+            "error_message": "Variables of copasi:4.45.296 and vcell:7.7.0.13 do not match, ['task_fig2a.time/60', 'MAPK_PP', 'MAPK'] != ['plot_0_0_0', 'plot_0_0_1', 'plot_0_1_1']"
+          },
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
+            "simulator_version_i": "copasi:4.45.296",
+            "simulator_version_j": "copasi:4.45.296",
+            "var_names": [
+              "task_fig2a.time/60",
+              "MAPK_PP",
+              "MAPK"
+            ],
+            "mse": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
+          }
+        ]
+      ],
+      "BIOMD0000000010_url.sedml/plot_1": [
+        [
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
+            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_j": "vcell:7.7.0.13",
+            "var_names": [
+              "plot_1_0_0",
+              "plot_1_0_1",
+              "plot_1_1_1"
+            ],
+            "mse": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
+          },
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
+            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_j": "copasi:4.45.296",
+            "var_names": [
+              "plot_1_0_0",
+              "plot_1_0_1",
+              "plot_1_1_1"
+            ],
+            "mse": null,
+            "is_close": null,
+            "error_message": "Variables of vcell:7.7.0.13 and copasi:4.45.296 do not match, ['plot_1_0_0', 'plot_1_0_1', 'plot_1_1_1'] != ['task_fig2b.time/60', 'MAPK_PP', 'MAPK']"
+          }
+        ],
+        [
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
+            "simulator_version_i": "copasi:4.45.296",
+            "simulator_version_j": "vcell:7.7.0.13",
+            "var_names": [
+              "task_fig2b.time/60",
+              "MAPK_PP",
+              "MAPK"
+            ],
+            "mse": null,
+            "is_close": null,
+            "error_message": "Variables of copasi:4.45.296 and vcell:7.7.0.13 do not match, ['task_fig2b.time/60', 'MAPK_PP', 'MAPK'] != ['plot_1_0_0', 'plot_1_0_1', 'plot_1_1_1']"
+          },
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
+            "simulator_version_i": "copasi:4.45.296",
+            "simulator_version_j": "copasi:4.45.296",
+            "var_names": [
+              "task_fig2b.time/60",
+              "MAPK_PP",
+              "MAPK"
+            ],
+            "mse": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
+          }
+        ]
+      ],
+      "BIOMD0000000010_url.sedml/report_2": [
+        [
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/report_2",
+            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_j": "vcell:7.7.0.13",
+            "var_names": [
+              "task_fig2a.time/60",
+              "task_fig2a.MAPK_PP",
+              "task_fig2a.MAPK"
+            ],
+            "mse": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
+          },
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/report_2",
+            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_j": "copasi:4.45.296",
+            "var_names": [
+              "task_fig2a.time/60",
+              "task_fig2a.MAPK_PP",
+              "task_fig2a.MAPK"
+            ],
+            "mse": [
+              7.832064826486234e-30,
+              7.097697246396396e-7,
+              5.110469628719001e-7
+            ],
+            "is_close": [
+              true,
+              false,
+              false
+            ],
+            "error_message": null
+          }
+        ],
+        [
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/report_2",
+            "simulator_version_i": "copasi:4.45.296",
+            "simulator_version_j": "vcell:7.7.0.13",
+            "var_names": [
+              "task_fig2a.time/60",
+              "task_fig2a.MAPK_PP",
+              "task_fig2a.MAPK"
+            ],
+            "mse": [
+              7.832064826486234e-30,
+              7.097697246396396e-7,
+              5.110469628719001e-7
+            ],
+            "is_close": [
+              true,
+              false,
+              false
+            ],
+            "error_message": null
+          },
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/report_2",
+            "simulator_version_i": "copasi:4.45.296",
+            "simulator_version_j": "copasi:4.45.296",
+            "var_names": [
+              "task_fig2a.time/60",
+              "task_fig2a.MAPK_PP",
+              "task_fig2a.MAPK"
+            ],
+            "mse": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
+          }
+        ]
+      ],
+      "BIOMD0000000010_url.sedml/report_3": [
+        [
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/report_3",
+            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_j": "vcell:7.7.0.13",
+            "var_names": [
+              "task_fig2b.time/60",
+              "task_fig2b.MAPK_PP",
+              "task_fig2b.MAPK"
+            ],
+            "mse": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
+          },
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/report_3",
+            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_j": "copasi:4.45.296",
+            "var_names": [
+              "task_fig2b.time/60",
+              "task_fig2b.MAPK_PP",
+              "task_fig2b.MAPK"
+            ],
+            "mse": [
+              5.734806001292011e-30,
+              4.4899338910569416e-7,
+              4.250409686092151e-7
+            ],
+            "is_close": [
+              true,
+              false,
+              false
+            ],
+            "error_message": null
+          }
+        ],
+        [
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/report_3",
+            "simulator_version_i": "copasi:4.45.296",
+            "simulator_version_j": "vcell:7.7.0.13",
+            "var_names": [
+              "task_fig2b.time/60",
+              "task_fig2b.MAPK_PP",
+              "task_fig2b.MAPK"
+            ],
+            "mse": [
+              5.734806001292011e-30,
+              4.4899338910569416e-7,
+              4.250409686092151e-7
+            ],
+            "is_close": [
+              true,
+              false,
+              false
+            ],
+            "error_message": null
+          },
+          {
+            "dataset_name": "BIOMD0000000010_url.sedml/report_3",
+            "simulator_version_i": "copasi:4.45.296",
+            "simulator_version_j": "copasi:4.45.296",
+            "var_names": [
+              "task_fig2b.time/60",
+              "task_fig2b.MAPK_PP",
+              "task_fig2b.MAPK"
+            ],
+            "mse": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
+          }
+        ]
+      ]
+    },
+    "sim_run_data": null
+  }
+}

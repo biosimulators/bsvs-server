@@ -4,17 +4,17 @@ import uuid
 from temporalio.client import Client
 
 from biosim_server.omex_sim.biosim1.models import SourceOmex, BiosimSimulatorSpec
-from biosim_server.omex_verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
+from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
+from biosim_server.temporal_utils.converter import pydantic_data_converter
 
 
 async def start_workflow() -> None:
-    client = await Client.connect("localhost:7233")
+    client = await Client.connect("localhost:7233", data_converter=pydantic_data_converter)
     source_omex = SourceOmex(omex_s3_file="path/to/model.omex", name="model_name")
     workflow_id = uuid.uuid4().hex
     handle = await client.start_workflow(
         OmexVerifyWorkflow.run,
         args=[OmexVerifyWorkflowInput(
-            workflow_id=workflow_id,
             source_omex=source_omex,
             user_description="description",
             requested_simulators=[BiosimSimulatorSpec(simulator="vcell", version="latest"),

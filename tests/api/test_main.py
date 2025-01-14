@@ -1,20 +1,21 @@
+import asyncio
+import logging
 import os
-from copy import copy
-from dataclasses import asdict
 from pathlib import Path
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 from temporalio.client import Client
 from temporalio.worker import Worker
-from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
 from biosim_server.api.main import app
 from biosim_server.io.file_service_local import FileServiceLocal
 from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
-from biosim_server.omex_sim.biosim1.models import SourceOmex
-from biosim_server.omex_verify.workflows.omex_verify_workflow import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, \
+from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, \
     OmexVerifyWorkflowStatus
+from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, \
+    RunsVerifyWorkflowStatus
+from tests.workflows.test_verify_workflows import assert_omex_verify_results, assert_runs_verify_results
 
 
 @pytest.mark.asyncio
@@ -26,88 +27,88 @@ async def test_root() -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_output_not_found(verify_workflow_input: OmexVerifyWorkflowInput,
-                          verify_workflow_output: OmexVerifyWorkflowOutput) -> None:
+async def test_get_output_not_found(omex_verify_workflow_input: OmexVerifyWorkflowInput,
+                                    omex_verify_workflow_output: OmexVerifyWorkflowOutput) -> None:
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         # test with non-existent verification_id
-        response = await test_client.get(f"/get-output/non-existent-id")
+        response = await test_client.get(f"/verify_omex/non-existent-id")
         assert response.status_code == 404
 
 
-
 @pytest.mark.asyncio
-async def test_verify_and_get_output(verify_workflow_input: OmexVerifyWorkflowInput,
-                                     verify_workflow_output: OmexVerifyWorkflowOutput,
-                                     file_service_local: FileServiceLocal,
-                                     temporal_client: Client,
-                                     temporal_verify_worker: Worker,
-                                     biosim_service_rest: BiosimServiceRest) -> None:
+async def test_omex_verify_and_get_output(omex_verify_workflow_input: OmexVerifyWorkflowInput,
+                                         omex_verify_workflow_output: OmexVerifyWorkflowOutput,
+                                         file_service_local: FileServiceLocal,
+                                         temporal_client: Client,
+                                         temporal_verify_worker: Worker,
+                                         biosim_service_rest: BiosimServiceRest) -> None:
     root_dir = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     file_path = root_dir / "local_data" / "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
-    assert verify_workflow_input.observables is not None
+    assert omex_verify_workflow_input.observables is not None
     query_params: dict[str, float | str | list[str]] = {
         "workflow_id_prefix": "verification-",
-        "simulators": [sim.simulator for sim in verify_workflow_input.requested_simulators],
-        "include_outputs": verify_workflow_input.include_outputs,
-        "user_description": verify_workflow_input.user_description,
-        "observables": verify_workflow_input.observables,
-        "rTol": verify_workflow_input.rTol,
-        "aTol": verify_workflow_input.aTol
+        "simulators": [sim.simulator for sim in omex_verify_workflow_input.requested_simulators],
+        "include_outputs": omex_verify_workflow_input.include_outputs,
+        "user_description": omex_verify_workflow_input.user_description,
+        "observables": omex_verify_workflow_input.observables,
+        "rTol": omex_verify_workflow_input.rTol,
+        "aTol": omex_verify_workflow_input.aTol
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         with open(file_path, "rb") as file:
-            files = {"uploaded_file": (
-                "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex", file, "application/zip")}
-            response = await test_client.post("/verify", files=files, params=query_params)
+            upload_filename = "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
+            files = {"uploaded_file": (upload_filename, file, "application/zip")}
+            response = await test_client.post("/verify_omex", files=files, params=query_params)
             assert response.status_code == 200
 
-            dict_response = response.json()
-            output = OmexVerifyWorkflowOutput(
-                workflow_input=OmexVerifyWorkflowInput(
-                    workflow_id=dict_response["workflow_input"]["workflow_id"],
-                    source_omex=SourceOmex(omex_s3_file=dict_response["workflow_input"]["source_omex"]["omex_s3_file"],
-                                           name=dict_response["workflow_input"]["source_omex"]["name"]),
-                    user_description=dict_response["workflow_input"]["user_description"],
-                    requested_simulators=dict_response["workflow_input"]["requested_simulators"],
-                    include_outputs=dict_response["workflow_input"]["include_outputs"],
-                    rTol=dict_response["workflow_input"]["rTol"],
-                    aTol=dict_response["workflow_input"]["aTol"],
-                    observables=dict_response["workflow_input"]["observables"]
-                ),
-                workflow_status=dict_response["workflow_status"],
-                timestamp=dict_response["timestamp"],
-                workflow_run_id=dict_response["workflow_run_id"]
-            )
+        output = OmexVerifyWorkflowOutput.model_validate(response.json())
 
-            # set timestamp, job_id, and omex_s3_path before comparison (these are set on server)
-            expected_verify_workflow_output = OmexVerifyWorkflowOutput(
-                workflow_input=copy(verify_workflow_input),
-                workflow_status=OmexVerifyWorkflowStatus.PENDING,
-                timestamp=output.timestamp,
-                workflow_run_id=output.workflow_run_id
-            )
-            expected_verify_workflow_output.workflow_input.source_omex.omex_s3_file = output.workflow_input.source_omex.omex_s3_file
-            expected_verify_workflow_output.workflow_input.workflow_id = output.workflow_input.workflow_id
-            expected_verify_workflow_output.timestamp = output.timestamp
-            expected_verify_workflow_output.workflow_run_id = output.workflow_run_id
-            assert asdict(expected_verify_workflow_output) == asdict(output)
+        # poll api until job is completed
+        while output.workflow_status != OmexVerifyWorkflowStatus.COMPLETED:
+            await asyncio.sleep(5)
+            response = await test_client.get(f"/verify_omex/{output.workflow_id}")
+            if response.status_code == 200:
+                output = OmexVerifyWorkflowOutput.model_validate(response.json())
+                logging.info(f"polling, job status is: {output.workflow_status}")
 
-    # verify the omex_s3_path file to the original file_path
-    # this works because we are using the local file service instead of S3
-    omex_s3_path = Path(output.workflow_input.source_omex.omex_s3_file)
-    assert omex_s3_path.exists()
-    with open(omex_s3_path, "rb") as f:
-        assert f.read() == file_path.read_bytes()
+        assert_omex_verify_results(observed_results=output, expected_results_template=omex_verify_workflow_output)
 
-    # verify the workflow is started
-    # assert output.workflow_run_id is not None
-    workflow_handle = temporal_client.get_workflow_handle(workflow_id=output.workflow_input.workflow_id)
-    assert workflow_handle is not None
-    workflow_handle_result = await workflow_handle.result()
-    expected_verify_workflow_output.timestamp = workflow_handle_result['timestamp']
-    expected_verify_workflow_output.workflow_run_id = workflow_handle_result['workflow_run_id']
-    expected_verify_workflow_output.workflow_status = workflow_handle_result['workflow_status']
 
-    assert workflow_handle_result == asdict(expected_verify_workflow_output)
+@pytest.mark.asyncio
+async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerifyWorkflowInput,
+                                         runs_verify_workflow_output: RunsVerifyWorkflowOutput,
+                                         file_service_local: FileServiceLocal,
+                                         temporal_client: Client,
+                                         temporal_verify_worker: Worker,
+                                         biosim_service_rest: BiosimServiceRest) -> None:
+    root_dir = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    file_path = root_dir / "local_data" / "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
+    assert runs_verify_workflow_input.observables is not None
+    query_params: dict[str, float | str | list[str]] = {
+        "workflow_id_prefix": "verification-",
+        "biosimulations_run_ids": runs_verify_workflow_input.biosimulations_run_ids,
+        "include_outputs": runs_verify_workflow_input.include_outputs,
+        "user_description": runs_verify_workflow_input.user_description,
+        "observables": runs_verify_workflow_input.observables,
+        "rTol": runs_verify_workflow_input.rTol,
+        "aTol": runs_verify_workflow_input.aTol
+    }
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
+        with open(file_path, "rb") as file:
+            response = await test_client.post("/verify_runs", params=query_params)
+            assert response.status_code == 200
+
+        output = RunsVerifyWorkflowOutput.model_validate(response.json())
+
+        # poll api until job is completed
+        while output.workflow_status != RunsVerifyWorkflowStatus.COMPLETED:
+            await asyncio.sleep(5)
+            response = await test_client.get(f"/verify_runs/{output.workflow_id}")
+            if response.status_code == 200:
+                output = RunsVerifyWorkflowOutput.model_validate(response.json())
+                logging.info(f"polling, job status is: {output.workflow_status}")
+
+        assert_runs_verify_results(observed_results=output, expected_results_template=runs_verify_workflow_output)
