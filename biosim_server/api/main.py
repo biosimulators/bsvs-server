@@ -9,7 +9,7 @@ from temporalio import workflow
 from biosim_server.omex_sim.biosim1.models import BiosimSimulatorSpec, SourceOmex
 
 with workflow.unsafe.imports_passed_through():
-    from datetime import datetime, UTC
+    from datetime import datetime, UTC, timedelta
 from pathlib import Path
 
 import dotenv
@@ -157,7 +157,6 @@ async def start_verify_omex(
     source_omex = SourceOmex(omex_s3_file=s3_path, name="name")
     workflow_id = f"{workflow_id_prefix}{uuid.uuid4()}"
     omex_verify_workflow_input = OmexVerifyWorkflowInput(
-        workflow_id=workflow_id,
         source_omex=SourceOmex(omex_s3_file=s3_path, name="name"),
         user_description=user_description,
         requested_simulators=simulator_specs,
@@ -184,6 +183,7 @@ async def start_verify_omex(
         workflow_input=omex_verify_workflow_input,
         workflow_status=OmexVerifyWorkflowStatus.PENDING,
         timestamp=str(datetime.now(UTC)),
+        workflow_id=workflow_id,
         workflow_run_id=workflow_handle.run_id
     )
     return omex_verify_workflow_output
@@ -203,9 +203,11 @@ async def get_verify_omex(workflow_id: str) -> OmexVerifyWorkflowOutput:
         # query temporal for the workflow output
         temporal_client = get_temporal_client()
         assert temporal_client is not None
-        workflow_handle = temporal_client.get_workflow_handle(workflow_id=workflow_id)
+        workflow_handle = temporal_client.get_workflow_handle(workflow_id=workflow_id,
+                                                              result_type=OmexVerifyWorkflowOutput)
         workflow_output: OmexVerifyWorkflowOutput = await workflow_handle.query("get_output",
-                                                                                result_type=OmexVerifyWorkflowOutput)
+                                                                                result_type=OmexVerifyWorkflowOutput,
+                                                                                rpc_timeout=timedelta(seconds=5))
         return workflow_output
     except Exception as e2:
         exc_message = str(e2)

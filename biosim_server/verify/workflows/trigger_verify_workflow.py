@@ -15,7 +15,6 @@ async def start_workflow() -> None:
     handle = await client.start_workflow(
         OmexVerifyWorkflow.run,
         args=[OmexVerifyWorkflowInput(
-            workflow_id=workflow_id,
             source_omex=source_omex,
             user_description="description",
             requested_simulators=[BiosimSimulatorSpec(simulator="vcell", version="latest"),
