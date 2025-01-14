@@ -55,7 +55,7 @@ class RunsVerifyWorkflow:
             workflow_status=RunsVerifyWorkflowStatus.IN_PROGRESS, timestamp=str(workflow.now()))
 
     @workflow.query(name="get_output")
-    async def get_runs_sim_workflow_output(self) -> RunsVerifyWorkflowOutput:
+    def get_runs_sim_workflow_output(self) -> RunsVerifyWorkflowOutput:
         return self.verify_output
 
     @workflow.run
@@ -95,4 +95,5 @@ class RunsVerifyWorkflow:
             retry_policy=RetryPolicy(maximum_attempts=100, backoff_coefficient=2.0,
                                      maximum_interval=timedelta(seconds=10)))
         self.verify_output.workflow_results = generate_statistics_output
+        self.verify_output.workflow_status = RunsVerifyWorkflowStatus.COMPLETED
         return self.verify_output

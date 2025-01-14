@@ -13,7 +13,9 @@ from biosim_server.io.file_service_local import FileServiceLocal
 from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
 from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, \
     OmexVerifyWorkflowStatus
-from tests.workflows.test_verify_workflows import assert_omex_verify_results
+from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, \
+    RunsVerifyWorkflowStatus
+from tests.workflows.test_verify_workflows import assert_omex_verify_results, assert_runs_verify_results
 
 
 @pytest.mark.asyncio
@@ -34,14 +36,13 @@ async def test_get_output_not_found(omex_verify_workflow_input: OmexVerifyWorkfl
         assert response.status_code == 404
 
 
-
 @pytest.mark.asyncio
-async def test_verify_and_get_output(omex_verify_workflow_input: OmexVerifyWorkflowInput,
-                                     omex_verify_workflow_output: OmexVerifyWorkflowOutput,
-                                     file_service_local: FileServiceLocal,
-                                     temporal_client: Client,
-                                     temporal_verify_worker: Worker,
-                                     biosim_service_rest: BiosimServiceRest) -> None:
+async def test_omex_verify_and_get_output(omex_verify_workflow_input: OmexVerifyWorkflowInput,
+                                         omex_verify_workflow_output: OmexVerifyWorkflowOutput,
+                                         file_service_local: FileServiceLocal,
+                                         temporal_client: Client,
+                                         temporal_verify_worker: Worker,
+                                         biosim_service_rest: BiosimServiceRest) -> None:
     root_dir = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     file_path = root_dir / "local_data" / "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
     assert omex_verify_workflow_input.observables is not None
@@ -73,3 +74,41 @@ async def test_verify_and_get_output(omex_verify_workflow_input: OmexVerifyWorkf
                 logging.info(f"polling, job status is: {output.workflow_status}")
 
         assert_omex_verify_results(observed_results=output, expected_results_template=omex_verify_workflow_output)
+
+
+@pytest.mark.asyncio
+async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerifyWorkflowInput,
+                                         runs_verify_workflow_output: RunsVerifyWorkflowOutput,
+                                         file_service_local: FileServiceLocal,
+                                         temporal_client: Client,
+                                         temporal_verify_worker: Worker,
+                                         biosim_service_rest: BiosimServiceRest) -> None:
+    root_dir = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    file_path = root_dir / "local_data" / "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
+    assert runs_verify_workflow_input.observables is not None
+    query_params: dict[str, float | str | list[str]] = {
+        "workflow_id_prefix": "verification-",
+        "biosimulations_run_ids": runs_verify_workflow_input.biosimulations_run_ids,
+        "include_outputs": runs_verify_workflow_input.include_outputs,
+        "user_description": runs_verify_workflow_input.user_description,
+        "observables": runs_verify_workflow_input.observables,
+        "rTol": runs_verify_workflow_input.rTol,
+        "aTol": runs_verify_workflow_input.aTol
+    }
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
+        with open(file_path, "rb") as file:
+            response = await test_client.post("/verify_runs", params=query_params)
+            assert response.status_code == 200
+
+        output = RunsVerifyWorkflowOutput.model_validate(response.json())
+
+        # poll api until job is completed
+        while output.workflow_status != RunsVerifyWorkflowStatus.COMPLETED:
+            await asyncio.sleep(5)
+            response = await test_client.get(f"/verify_runs/{output.workflow_id}")
+            if response.status_code == 200:
+                output = RunsVerifyWorkflowOutput.model_validate(response.json())
+                logging.info(f"polling, job status is: {output.workflow_status}")
+
+        assert_runs_verify_results(observed_results=output, expected_results_template=runs_verify_workflow_output)

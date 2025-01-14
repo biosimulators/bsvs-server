@@ -14,7 +14,7 @@
       "concentration"
     ]
   },
-  "workflow_status": "IN_PROGRESS",
+  "workflow_status": "COMPLETED",
   "timestamp": "2025-01-14 04:57:26.711638+00:00",
   "actual_simulators": null,
   "workflow_run_id": "46b56093-a4ac-4129-b69e-1e96a4054c66",

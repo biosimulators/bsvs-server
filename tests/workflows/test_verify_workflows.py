@@ -105,7 +105,6 @@ def assert_omex_verify_results(observed_results: OmexVerifyWorkflowOutput,
     expected_results.workflow_input.source_omex.omex_s3_file = observed_results.workflow_input.source_omex.omex_s3_file
     expected_results.workflow_run_id = observed_results.workflow_run_id
     expected_results.timestamp = observed_results.timestamp
-    expected_results.workflow_status = observed_results.workflow_status
     if expected_results.workflow_results and observed_results.workflow_results:
         for i in range(len(expected_results.workflow_results.sims_run_info)):
             expected_biosim_sim_run = expected_results.workflow_results.sims_run_info[i].biosim_sim_run
@@ -151,7 +150,6 @@ def assert_runs_verify_results(observed_results: RunsVerifyWorkflowOutput,
     expected_results.workflow_id = observed_results.workflow_id
     expected_results.workflow_run_id = observed_results.workflow_run_id
     expected_results.timestamp = observed_results.timestamp
-    expected_results.workflow_status = observed_results.workflow_status
     if expected_results.workflow_results and observed_results.workflow_results:
         for i in range(len(expected_results.workflow_results.sims_run_info)):
             expected_biosim_sim_run = expected_results.workflow_results.sims_run_info[i].biosim_sim_run
