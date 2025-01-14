@@ -70,9 +70,15 @@ async def test_verify_workflow(temporal_client: Client, temporal_verify_worker: 
     # with open(Path(__file__).parent.parent.parent / "local_data" / "OmexVerifyWorkflowOutput_expected.json", "w") as f:
     #     f.write(observed_results.model_dump_json())
 
+    assert_omex_verify_results(observed_results=observed_results, expected_results_template=omex_verify_workflow_output)
+
+
+def assert_omex_verify_results(observed_results: OmexVerifyWorkflowOutput,
+                               expected_results_template: OmexVerifyWorkflowOutput) -> None:
+
     # customize expected results to match those things which vary between runs
-    expected_results = omex_verify_workflow_output
-    expected_results.workflow_id = workflow_id
+    expected_results = expected_results_template.model_copy(deep=True)
+    expected_results.workflow_id = observed_results.workflow_id
     expected_results.workflow_input.source_omex.omex_s3_file = observed_results.workflow_input.source_omex.omex_s3_file
     expected_results.workflow_run_id = observed_results.workflow_run_id
     expected_results.timestamp = observed_results.timestamp
@@ -94,13 +100,15 @@ async def test_verify_workflow(temporal_client: Client, temporal_verify_worker: 
     assert expected_results.workflow_results is not None
     assert observed_results.workflow_results is not None
     ds_names = list(expected_results.workflow_results.comparison_statistics.keys())
-    num_simulators = len(omex_verify_workflow_input.requested_simulators)
+    num_simulators = len(expected_results_template.workflow_input.requested_simulators)
     for ds_name in ds_names:
         for i in range(num_simulators):
             for j in range(num_simulators):
                 assert observed_results.workflow_results is not None
-                observed_compare_i_j: ComparisonStatistics = observed_results.workflow_results.comparison_statistics[ds_name][i][j]
-                expected_compare_i_j: ComparisonStatistics = expected_results.workflow_results.comparison_statistics[ds_name][i][j]
+                observed_compare_i_j: ComparisonStatistics = \
+                observed_results.workflow_results.comparison_statistics[ds_name][i][j]
+                expected_compare_i_j: ComparisonStatistics = \
+                expected_results.workflow_results.comparison_statistics[ds_name][i][j]
                 # assert observed_compare_i_j.mse == expected_compare_i_j.mse
                 assert observed_compare_i_j.is_close == expected_compare_i_j.is_close
                 assert observed_compare_i_j.error_message == expected_compare_i_j.error_message
@@ -108,4 +116,5 @@ async def test_verify_workflow(temporal_client: Client, temporal_verify_worker: 
                 assert observed_compare_i_j.simulator_version_j == expected_compare_i_j.simulator_version_j
     expected_results.workflow_results.comparison_statistics = observed_results.workflow_results.comparison_statistics
 
+    # compare everything else which has not been hardwired to match
     assert observed_results == expected_results

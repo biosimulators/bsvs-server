@@ -1,21 +1,19 @@
 import asyncio
 import logging
 import os
-from copy import copy
 from pathlib import Path
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 from temporalio.client import Client
 from temporalio.worker import Worker
-from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
 from biosim_server.api.main import app
 from biosim_server.io.file_service_local import FileServiceLocal
 from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
-from biosim_server.omex_sim.biosim1.models import SourceOmex
 from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, \
     OmexVerifyWorkflowStatus
+from tests.workflows.test_verify_workflows import assert_omex_verify_results
 
 
 @pytest.mark.asyncio
@@ -59,66 +57,19 @@ async def test_verify_and_get_output(omex_verify_workflow_input: OmexVerifyWorkf
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         with open(file_path, "rb") as file:
-            files = {"uploaded_file": (
-                "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex", file, "application/zip")}
+            upload_filename = "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
+            files = {"uploaded_file": (upload_filename, file, "application/zip")}
             response = await test_client.post("/verify_omex", files=files, params=query_params)
             assert response.status_code == 200
 
-            workflow_output = OmexVerifyWorkflowOutput.model_validate(response.json())
-            output = OmexVerifyWorkflowOutput(
-                workflow_input=OmexVerifyWorkflowInput(
-                    source_omex=SourceOmex(omex_s3_file=workflow_output.workflow_input.source_omex.omex_s3_file,
-                                           name=workflow_output.workflow_input.source_omex.name),
-                    user_description=workflow_output.workflow_input.user_description,
-                    requested_simulators=workflow_output.workflow_input.requested_simulators,
-                    include_outputs=workflow_output.workflow_input.include_outputs,
-                    rTol=workflow_output.workflow_input.rTol,
-                    aTol=workflow_output.workflow_input.aTol,
-                    observables=workflow_output.workflow_input.observables
-                ),
-                workflow_status=workflow_output.workflow_status,
-                timestamp=workflow_output.timestamp,
-                workflow_id=workflow_output.workflow_id,
-                workflow_run_id=workflow_output.workflow_run_id
-            )
+        output = OmexVerifyWorkflowOutput.model_validate(response.json())
 
-            while output.workflow_status != OmexVerifyWorkflowStatus.COMPLETED:
-                await asyncio.sleep(5)
-                response = await test_client.get(f"/verify_omex/{output.workflow_id}")
-                if response.status_code == 200:
-                    output = OmexVerifyWorkflowOutput.model_validate(response.json())
-                    logging.info(f"polling, job status is: {output.workflow_status}")
+        # poll api until job is completed
+        while output.workflow_status != OmexVerifyWorkflowStatus.COMPLETED:
+            await asyncio.sleep(5)
+            response = await test_client.get(f"/verify_omex/{output.workflow_id}")
+            if response.status_code == 200:
+                output = OmexVerifyWorkflowOutput.model_validate(response.json())
+                logging.info(f"polling, job status is: {output.workflow_status}")
 
-            # set timestamp, job_id, and omex_s3_path before comparison (these are set on server)
-            expected_verify_workflow_output = OmexVerifyWorkflowOutput(
-                workflow_input=copy(omex_verify_workflow_input),
-                workflow_status=OmexVerifyWorkflowStatus.PENDING,
-                timestamp=output.timestamp,
-                workflow_id=output.workflow_id,
-                workflow_run_id=output.workflow_run_id,
-                workflow_results=output.workflow_results
-            )
-            expected_verify_workflow_output.workflow_input.source_omex.omex_s3_file = output.workflow_input.source_omex.omex_s3_file
-            expected_verify_workflow_output.timestamp = output.timestamp
-            expected_verify_workflow_output.workflow_id = output.workflow_id
-            expected_verify_workflow_output.workflow_run_id = output.workflow_run_id
-            expected_verify_workflow_output.workflow_status = OmexVerifyWorkflowStatus.COMPLETED
-            assert expected_verify_workflow_output == output
-
-    # verify the omex_s3_path file to the original file_path
-    # this works because we are using the local file service instead of S3
-    omex_s3_path = Path(output.workflow_input.source_omex.omex_s3_file)
-    assert omex_s3_path.exists()
-    with open(omex_s3_path, "rb") as f:
-        assert f.read() == file_path.read_bytes()
-
-    # verify the workflow is started
-    # assert output.workflow_run_id is not None
-    workflow_handle = temporal_client.get_workflow_handle(workflow_id=output.workflow_id, result_type=OmexVerifyWorkflowOutput)
-    assert workflow_handle is not None
-    workflow_handle_result: OmexVerifyWorkflowOutput = await workflow_handle.result()
-    expected_verify_workflow_output.timestamp = workflow_handle_result.timestamp
-    expected_verify_workflow_output.workflow_run_id = workflow_handle_result.workflow_run_id
-    expected_verify_workflow_output.workflow_status = workflow_handle_result.workflow_status
-
-    assert workflow_handle_result == expected_verify_workflow_output
+        assert_omex_verify_results(observed_results=output, expected_results_template=omex_verify_workflow_output)
