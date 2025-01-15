@@ -26,8 +26,8 @@ class RunsVerifyWorkflowInput(BaseModel):
     user_description: str
     biosimulations_run_ids: list[str]
     include_outputs: bool
-    rTol: float
-    aTol: float
+    rel_tol: float
+    abs_tol: float
     observables: Optional[list[str]] = None
 
 
@@ -86,7 +86,7 @@ class RunsVerifyWorkflow:
 
         generate_statistics_input = GenerateStatisticsInput(sim_run_info_list=run_data,
                                                             include_outputs=self.verify_input.include_outputs,
-                                                            a_tol=self.verify_input.aTol, r_tol=self.verify_input.rTol)
+                                                            abs_tol=self.verify_input.abs_tol, rel_tol=self.verify_input.rel_tol)
         # Generate comparison report
         generate_statistics_output: GenerateStatisticsOutput = await workflow.execute_activity(
             generate_statistics,

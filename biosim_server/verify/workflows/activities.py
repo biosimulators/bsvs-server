@@ -18,8 +18,8 @@ class SimulationRunInfo(BaseModel):
 class GenerateStatisticsInput(BaseModel):
     sim_run_info_list: list[SimulationRunInfo]
     include_outputs: bool
-    a_tol: float
-    r_tol: float
+    abs_tol: float
+    rel_tol: float
 
 
 class DatasetVar(BaseModel):
@@ -137,7 +137,7 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
 
                 # compute statistics
                 is_close, mse = await calc_stats(a=array_i, b=array_j,
-                                                 r_tol=gen_stats_input.r_tol, a_tol=gen_stats_input.a_tol)
+                                                 rel_tol=gen_stats_input.rel_tol, abs_tol=gen_stats_input.abs_tol)
                 is_close_list: list[bool] = is_close.tolist()  # type: ignore
 
                 activity.logger.info(
@@ -160,9 +160,9 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
 
 
 async def calc_stats(a: NDArray[np.float64], b: NDArray[np.float64],
-                     r_tol: float, a_tol: float) -> tuple[NDArray[np.bool], NDArray[np.float64]]:
+                     rel_tol: float, abs_tol: float) -> tuple[NDArray[np.bool], NDArray[np.float64]]:
     mse = np.mean((a - b) ** 2, axis=1)
-    is_close_a_b: NDArray[np.bool] = np.isclose(a, b, rtol=r_tol, atol=a_tol, equal_nan=True).all(axis=1)  # type: ignore
-    is_close_b_a: NDArray[np.bool] = np.isclose(a, b, rtol=r_tol, atol=a_tol, equal_nan=True).all(axis=1)  # type: ignore
+    is_close_a_b: NDArray[np.bool] = np.isclose(a, b, rtol=rel_tol, atol=abs_tol, equal_nan=True).all(axis=1)  # type: ignore
+    is_close_b_a: NDArray[np.bool] = np.isclose(a, b, rtol=rel_tol, atol=abs_tol, equal_nan=True).all(axis=1)  # type: ignore
     is_close = np.logical_and(is_close_a_b, is_close_b_a)
     return is_close, mse

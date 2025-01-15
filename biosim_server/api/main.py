@@ -163,8 +163,8 @@ async def start_verify_omex(
         user_description=user_description,
         requested_simulators=simulator_specs,
         include_outputs=include_outputs,
-        rTol=rel_tol,
-        aTol=abs_tol,
+        rel_tol=rel_tol,
+        abs_tol=abs_tol,
         observables=observables)
 
     # ---- invoke workflow ---- #
@@ -245,8 +245,8 @@ async def start_verify_runs(
         biosimulations_run_ids=biosimulations_run_ids,
         user_description=user_description,
         include_outputs=include_outputs,
-        rTol=rel_tol,
-        aTol=abs_tol,
+        rel_tol=rel_tol,
+        abs_tol=abs_tol,
         observables=observables)
 
     # ---- invoke workflow ---- #

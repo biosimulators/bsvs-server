@@ -20,8 +20,8 @@ async def start_workflow() -> None:
             requested_simulators=[BiosimSimulatorSpec(simulator="vcell", version="latest"),
                                   BiosimSimulatorSpec(simulator="copasi", version="latest")],
             include_outputs=True,
-            rTol=1e-6,
-            aTol=1e-9,
+            rel_tol=1e-6,
+            abs_tol=1e-9,
             observables=["time", "concentration"]
         )],
         task_queue="verification_tasks",

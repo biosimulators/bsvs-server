@@ -52,8 +52,8 @@ async def test_omex_verify_and_get_output(omex_verify_workflow_input: OmexVerify
         "include_outputs": omex_verify_workflow_input.include_outputs,
         "user_description": omex_verify_workflow_input.user_description,
         "observables": omex_verify_workflow_input.observables,
-        "rTol": omex_verify_workflow_input.rTol,
-        "aTol": omex_verify_workflow_input.aTol
+        "rel_tol": omex_verify_workflow_input.rel_tol,
+        "abs_tol": omex_verify_workflow_input.abs_tol
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
@@ -92,8 +92,8 @@ async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerify
         "include_outputs": runs_verify_workflow_input.include_outputs,
         "user_description": runs_verify_workflow_input.user_description,
         "observables": runs_verify_workflow_input.observables,
-        "rTol": runs_verify_workflow_input.rTol,
-        "aTol": runs_verify_workflow_input.aTol
+        "rel_tol": runs_verify_workflow_input.rel_tol,
+        "abs_tol": runs_verify_workflow_input.abs_tol
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:

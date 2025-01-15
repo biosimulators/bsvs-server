@@ -17,8 +17,8 @@
       }
     ],
     "include_outputs": false,
-    "rTol": 1e-6,
-    "aTol": 1e-9,
+    "rel_tol": 1e-6,
+    "abs_tol": 1e-9,
     "observables": [
       "time",
       "concentration"
