@@ -131,9 +131,9 @@ async def start_verify_omex(
                                       description="List of simulators 'name' or 'name:version' to compare."),
         include_outputs: bool = Query(default=True,
                                       description="Whether to include the output data on which the comparison is based."),
-        user_description: str = Query(..., description="User description of the verification run."),
-        rel_tol: float = Query(default=1e-6, description="Relative tolerance to use for proximity comparison."),
-        abs_tol: float = Query(default=1e-9, description="Absolute tolerance to use for proximity comparison."),
+        user_description: str = Query(default="my-omex-compare", description="User description of the verification run."),
+        rel_tol: float = Query(default=0.000001, description="Relative tolerance to use for proximity comparison."),
+        abs_tol: float = Query(default=0.0000000001, description="Absolute tolerance to use for proximity comparison."),
         observables: Optional[list[str]] = Query(default=None,
                                                  description="List of observables to include in the return data.")
 ) -> OmexVerifyWorkflowOutput:
@@ -225,15 +225,16 @@ async def get_verify_omex(workflow_id: str) -> OmexVerifyWorkflowOutput:
     operation_id="start-verify-runs",
     tags=["Verification"],
     dependencies=[Depends(get_temporal_client)],
-    summary="Compare UTC outputs from a a list of biosimulation runs.")
+    summary="Compare UTC outputs from a list of biosimulation runs")
 async def start_verify_runs(
         workflow_id_prefix: str = Query(default="runs-verification-", description="Prefix for the workflow id."),
-        biosimulations_run_ids: list[str] = Query(description="List of biosimulations run IDs to compare."),
+        biosimulations_run_ids: list[str] = Query(default=["67817a2e1f52f47f628af971","67817a2eba5a3f02b9f2938d"],
+                                                  description="List of biosimulations run IDs to compare."),
         include_outputs: bool = Query(default=True,
                                       description="Whether to include the output data on which the comparison is based."),
-        user_description: str = Query(..., description="User description of the verification run."),
-        rel_tol: float = Query(default=1e-6, description="Relative tolerance to use for proximity comparison."),
-        abs_tol: float = Query(default=1e-9, description="Absolute tolerance to use for proximity comparison."),
+        user_description: str = Query(default="my-verify-job", description="User description of the verification run."),
+        rel_tol: float = Query(default=0.000001, description="Relative tolerance to use for proximity comparison."),
+        abs_tol: float = Query(default=0.000000001, description="Absolute tolerance to use for proximity comparison."),
         observables: Optional[list[str]] = Query(default=None,
                                                  description="List of observables to include in the return data.")
 ) -> RunsVerifyWorkflowOutput:
