@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     storage_tensorstore_driver: TS_DRIVER = "zarr3"
     storage_tensorstore_kvstore_driver: KV_DRIVER = "gcs"
 
+    temporal_service_url: str = "localhost:7233"
+
     storage_local_cache_dir: str = ""
 
     storage_access_key_id: str = ""

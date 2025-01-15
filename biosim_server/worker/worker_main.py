@@ -2,15 +2,14 @@ import asyncio
 import logging
 import random
 
-from temporalio.client import Client
 from temporalio.worker import Worker, UnsandboxedWorkflowRunner
 
+from biosim_server.dependencies import get_temporal_client, init_standalone
 from biosim_server.omex_sim.workflows.biosim_activities import get_hdf5_metadata, get_hdf5_data
 from biosim_server.omex_sim.workflows.biosim_activities import get_sim_run, submit_biosim_sim
 from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow
 from biosim_server.verify.workflows.activities import generate_statistics
 from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflow
-from biosim_server.temporal_utils.converter import pydantic_data_converter
 from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflow
 
 interrupt_event = asyncio.Event()
@@ -21,7 +20,11 @@ async def main() -> None:
 
     random.seed(667)
 
-    client = await Client.connect("localhost:7233", data_converter=pydantic_data_converter)
+    await init_standalone()
+
+    client = get_temporal_client()
+    if client is None:
+        raise Exception("Could not connect to Temporal service")
 
     run_futures = []
     handle = Worker(

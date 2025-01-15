@@ -4,6 +4,7 @@ from biosim_server.io.file_service import FileService
 from biosim_server.io.file_service_S3 import FileServiceS3
 from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
 from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
+from biosim_server.config import get_settings
 
 #------ file service (standalone or pytest) ------
 
@@ -44,9 +45,10 @@ def get_temporal_client() -> TemporalClient | None:
 #------ initialized standalone application (standalone) ------
 
 async def init_standalone() -> None:
+    settings = get_settings()
     set_file_service(FileServiceS3())
     set_biosim_service(BiosimServiceRest())
-    set_temporal_client(await TemporalClient.connect("localhost:7233"))
+    set_temporal_client(await TemporalClient.connect(settings.temporal_service_url))
 
 async def shutdown_standalone() -> None:
     file_service = get_file_service()
