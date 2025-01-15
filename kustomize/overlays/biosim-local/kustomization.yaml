@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: biosim-local
+
+images:
+- name: ghcr.io/biosimulators/bsvs-server-api
+  newTag: 7.7.0.11
+- name: ghcr.io/biosimulators/bsvs-server-worker
+  newTag: 7.7.0.11
+
+replicas:
+- count: 1
+  name: api
+- count: 1
+  name: worker
+
+resources:
+- ingress.yaml
+- secret-ghcr.yaml
+- ../../config/biosim-local
+- ../../base

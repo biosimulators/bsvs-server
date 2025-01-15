@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  labels:
+    app: worker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+      - name: worker
+        image: ghcr.io/biosimulations/biosim-worker:latest
+        envFrom:
+          - configMapRef:
+              name: worker-config
+      imagePullSecrets:
+        - name: ghcr-secret
+
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    app: api
+#  name: api
+#spec:
+#  ports:
+#    - name: "8080"
+#      port: 8080
+#      targetPort: 8080
+#  selector:
+#    app: api
