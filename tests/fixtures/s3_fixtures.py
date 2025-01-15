@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import AsyncGenerator
 
 import pytest_asyncio
@@ -8,7 +9,7 @@ from biosim_server.io.file_service_S3 import FileServiceS3
 from biosim_server.io.file_service_local import FileServiceLocal
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def file_service_local() -> AsyncGenerator[FileServiceLocal, None]:
     file_service_local = FileServiceLocal()
     file_service_local.init()
@@ -21,7 +22,7 @@ async def file_service_local() -> AsyncGenerator[FileServiceLocal, None]:
     set_file_service(saved_file_service)
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def file_service_s3() -> AsyncGenerator[FileServiceS3, None]:
     file_service_s3: FileServiceS3 = FileServiceS3()
     saved_file_service = get_file_service()
@@ -31,3 +32,8 @@ async def file_service_s3() -> AsyncGenerator[FileServiceS3, None]:
 
     await file_service_s3.close()
     set_file_service(saved_file_service)
+
+
+@pytest_asyncio.fixture(scope="function")
+async def file_service_s3_test_base_path() -> Path:
+    return Path("verify_test")

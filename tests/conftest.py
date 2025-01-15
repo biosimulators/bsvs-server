@@ -14,7 +14,8 @@ from tests.fixtures.database_fixtures import (  # noqa: F401
 )
 from tests.fixtures.s3_fixtures import (  # noqa: F401
     file_service_s3,
-    file_service_local
+    file_service_local,
+    file_service_s3_test_base_path
 )
 from tests.fixtures.temporal_fixtures import (  # noqa: F401
     temporal_env,

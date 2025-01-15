@@ -1,3 +1,4 @@
+import logging
 import uuid
 from pathlib import Path
 
@@ -5,6 +6,8 @@ import pytest
 from temporalio.client import Client, WorkflowHandle
 from temporalio.worker import Worker
 
+from biosim_server.config import get_settings
+from biosim_server.io.file_service_S3 import FileServiceS3
 from biosim_server.io.file_service_local import FileServiceLocal
 from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
 from biosim_server.omex_sim.biosim1.models import SourceOmex, BiosimSimulatorSpec, BiosimSimulationRunStatus, \
@@ -17,6 +20,7 @@ from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkfl
 from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput
 from tests.fixtures.biosim_service_mock import BiosimServiceMock
+from tests.fixtures.s3_fixtures import file_service_s3_test_base_path
 
 
 @pytest.mark.asyncio
@@ -50,8 +54,39 @@ async def test_sim_workflow(temporal_client: Client, temporal_verify_worker: Wor
     assert workflow_handle_result == expected_results
 
 
+@pytest.mark.skipif(len(get_settings().storage_secret) == 0,
+                    reason="S3 config STORAGE_SECRET not supplied")
 @pytest.mark.asyncio
-async def test_omex_verify_workflow(temporal_client: Client, temporal_verify_worker: Worker,
+async def test_omex_verify_workflow_S3(temporal_client: Client, temporal_verify_worker: Worker,
+                               omex_verify_workflow_input: OmexVerifyWorkflowInput,
+                               omex_verify_workflow_output: OmexVerifyWorkflowOutput,
+                               biosim_service_rest: BiosimServiceRest, file_service_s3: FileServiceS3,
+                               file_service_s3_test_base_path: Path) -> None:
+    assert biosim_service_rest is not None
+
+    # set up the omex file to mock S3 (uploads on the fly)
+    path_from_root = Path("local_data/BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex")
+    test_omex_file = Path(__file__).parent.parent.parent / path_from_root
+    s3_path = str(file_service_s3_test_base_path / "test_verify_workflow" / f"omex {uuid.uuid4().hex}" / test_omex_file.name)
+
+    await file_service_s3.upload_file(file_path=test_omex_file, s3_path=s3_path)
+    workflow_id = uuid.uuid4().hex
+    logging.info(f"Stored test omex file at {s3_path}")
+    omex_verify_workflow_input.source_omex = SourceOmex(omex_s3_file=s3_path, name="name")
+
+    observed_results: OmexVerifyWorkflowOutput = await temporal_client.execute_workflow(
+        OmexVerifyWorkflow.run, args=[omex_verify_workflow_input],
+        # result_type=OmexVerifyWorkflowOutput,
+        id=workflow_id, task_queue="verification_tasks")
+
+    # with open(Path(__file__).parent.parent.parent / "local_data" / "OmexVerifyWorkflowOutput_expected.json", "w") as f:
+    #     f.write(observed_results.model_dump_json())
+
+    assert_omex_verify_results(observed_results=observed_results, expected_results_template=omex_verify_workflow_output)
+
+
+@pytest.mark.asyncio
+async def test_omex_verify_workflow_mockS3(temporal_client: Client, temporal_verify_worker: Worker,
                                omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                omex_verify_workflow_output: OmexVerifyWorkflowOutput,
                                biosim_service_rest: BiosimServiceRest, file_service_local: FileServiceLocal) -> None:
@@ -80,7 +115,7 @@ async def test_omex_verify_workflow(temporal_client: Client, temporal_verify_wor
 async def test_run_verify_workflow(temporal_client: Client, temporal_verify_worker: Worker,
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                runs_verify_workflow_output: RunsVerifyWorkflowOutput,
-                               biosim_service_rest: BiosimServiceRest, file_service_local: FileServiceLocal) -> None:
+                               biosim_service_rest: BiosimServiceRest, file_service_s3: FileServiceS3) -> None:
     assert biosim_service_rest is not None
 
     workflow_id = uuid.uuid4().hex
