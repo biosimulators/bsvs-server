@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: temporal-ui
+  name: temporal-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: temporal-ui
+  template:
+    metadata:
+      labels:
+        app: temporal-ui
+    spec:
+      containers:
+        - env:
+            - name: TEMPORAL_ADDRESS
+              value: temporal:7233
+            - name: TEMPORAL_CORS_ORIGINS
+              value: http://localhost:3000
+            - name: TEMPORAL_UI_PORT
+              value: "8080"
+          image: temporalio/ui:2.34.0
+          name: temporal-ui
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+      restartPolicy: Always

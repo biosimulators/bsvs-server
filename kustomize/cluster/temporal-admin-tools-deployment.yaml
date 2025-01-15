@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f ../../../docker-compose/docker-compose.yml
+    kompose.version: 1.35.0 (HEAD)
+  labels:
+    io.kompose.service: temporal-admin-tools
+  name: temporal-admin-tools
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: temporal-admin-tools
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f ../../../docker-compose/docker-compose.yml
+        kompose.version: 1.35.0 (HEAD)
+      labels:
+        io.kompose.service: temporal-admin-tools
+    spec:
+      containers:
+        - env:
+            - name: TEMPORAL_ADDRESS
+              value: temporal:7233
+            - name: TEMPORAL_CLI_ADDRESS
+              value: temporal:7233
+          image: temporalio/admin-tools
+          name: temporal-admin-tools
+          stdin: true
+          tty: true
+      restartPolicy: Always

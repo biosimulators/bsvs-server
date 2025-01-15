@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f ../../../docker-compose/docker-compose.yml
+    kompose.version: 1.35.0 (HEAD)
+  labels:
+    io.kompose.service: temporal
+  name: temporal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: temporal
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f ../../../docker-compose/docker-compose.yml
+        kompose.version: 1.35.0 (HEAD)
+      labels:
+        io.kompose.service: temporal
+    spec:
+      containers:
+        - env:
+            - name: DB
+              value: postgres12
+            - name: DB_PORT
+              value: "5432"
+            - name: DYNAMIC_CONFIG_FILE_PATH
+              value: config/dynamicconfig/development-sql.yaml
+            - name: ENABLE_ES
+              value: "true"
+            - name: ES_SEEDS
+              value: elasticsearch
+            - name: ES_VERSION
+              value: v7
+            - name: POSTGRES_PWD
+              value: temporal
+            - name: POSTGRES_SEEDS
+              value: postgresql
+            - name: POSTGRES_USER
+              value: temporal
+          image: temporalio/auto-setup
+          name: temporal
+          ports:
+            - containerPort: 7233
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/temporal/config/dynamicconfig
+              name: temporal-cm0
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            name: temporal-cm0
+          name: temporal-cm0
