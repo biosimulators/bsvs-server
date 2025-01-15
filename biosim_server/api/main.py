@@ -119,11 +119,10 @@ def root() -> dict[str, str]:
 @app.post(
     "/verify_omex",
     response_model=OmexVerifyWorkflowOutput,
-    name="Uniform Time Course Comparison from OMEX/COMBINE archive",
     operation_id="start-verify-omex",
     tags=["Verification"],
     dependencies=[Depends(get_temporal_client), Depends(get_file_service)],
-    summary="Compare UTC outputs from a deterministic SBML model within an OMEX/COMBINE archive.")
+    summary="Request verification report for OMEX/COMBINE archive")
 async def start_verify_omex(
         uploaded_file: UploadFile = File(..., description="OMEX/COMBINE archive containing a deterministic SBML model"),
         workflow_id_prefix: str = Query(default="omex-verification-", description="Prefix for the workflow id."),
@@ -141,12 +140,13 @@ async def start_verify_omex(
     save_dest = Path(os.path.join(os.getcwd(), "temp"))
     save_dest.mkdir(parents=True, exist_ok=True)
     local_temp_path: Path = await save_uploaded_file(uploaded_file, save_dest)
+    s3_path = str(Path("verify") / "omex" / uuid.uuid4().hex / local_temp_path.name)
 
     file_service = get_file_service()
     assert file_service is not None
-    s3_path: str = await file_service.upload_file(local_temp_path, local_temp_path.name)
+    full_s3_path: str = await file_service.upload_file(file_path=local_temp_path, s3_path=s3_path)
     local_temp_path.unlink()
-    logger.info(f"Uploaded file to S3 at {s3_path}")
+    logger.info(f"Uploaded file to S3 at {full_s3_path}")
 
     # ---- create workflow input ---- #
     simulator_specs: list[BiosimSimulatorSpec] = []
@@ -195,9 +195,9 @@ async def start_verify_omex(
     "/verify_omex/{workflow_id}",
     response_model=OmexVerifyWorkflowOutput,
     operation_id='get-verify-omex',
-    tags=["Results"],
+    tags=["Verification"],
     dependencies=[Depends(get_temporal_client)],
-    summary='Get the results of an existing verification run.')
+    summary='Retrieve verification report for OMEX/COMBINE archive')
 async def get_verify_omex(workflow_id: str) -> OmexVerifyWorkflowOutput:
     logger.info(f"in get /verify_omex/{workflow_id}")
 
@@ -221,11 +221,10 @@ async def get_verify_omex(workflow_id: str) -> OmexVerifyWorkflowOutput:
 @app.post(
     "/verify_runs",
     response_model=RunsVerifyWorkflowOutput,
-    name="Uniform Time Course Comparison from biosimulations runs",
     operation_id="start-verify-runs",
     tags=["Verification"],
     dependencies=[Depends(get_temporal_client)],
-    summary="Compare UTC outputs from a list of biosimulation runs")
+    summary="Request verification report for biosimulation runs")
 async def start_verify_runs(
         workflow_id_prefix: str = Query(default="runs-verification-", description="Prefix for the workflow id."),
         biosimulations_run_ids: list[str] = Query(default=["67817a2e1f52f47f628af971","67817a2eba5a3f02b9f2938d"],
@@ -277,9 +276,10 @@ async def start_verify_runs(
     "/verify_runs/{workflow_id}",
     response_model=RunsVerifyWorkflowOutput,
     operation_id='get-verify-runs',
-    tags=["Results"],
+    name="Retrieve biosimulation run verification",
+    tags=["Verification"],
     dependencies=[Depends(get_temporal_client)],
-    summary='Get the results of an existing verification run for biosimulation runs.')
+    summary='Get verification report for biosimulation runs')
 async def get_verify_runs(workflow_id: str) -> RunsVerifyWorkflowOutput:
     logger.info(f"in get /verify_runs/{workflow_id}")
 
