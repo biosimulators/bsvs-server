@@ -209,7 +209,7 @@ async def get_verify_omex(workflow_id: str) -> OmexVerifyWorkflowOutput:
                                                               result_type=OmexVerifyWorkflowOutput)
         workflow_output: OmexVerifyWorkflowOutput = await workflow_handle.query("get_output",
                                                                                 result_type=OmexVerifyWorkflowOutput,
-                                                                                rpc_timeout=timedelta(seconds=5))
+                                                                                rpc_timeout=timedelta(seconds=60))
         return workflow_output
     except Exception as e2:
         exc_message = str(e2)
@@ -291,7 +291,7 @@ async def get_verify_runs(workflow_id: str) -> RunsVerifyWorkflowOutput:
                                                               result_type=RunsVerifyWorkflowOutput)
         workflow_output: RunsVerifyWorkflowOutput = await workflow_handle.query("get_output",
                                                                                 result_type=RunsVerifyWorkflowOutput,
-                                                                                rpc_timeout=timedelta(seconds=5))
+                                                                                rpc_timeout=timedelta(seconds=60))
         return workflow_output
     except Exception as e2:
         exc_message = str(e2)
