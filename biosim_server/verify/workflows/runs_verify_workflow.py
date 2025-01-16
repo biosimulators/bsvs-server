@@ -91,7 +91,7 @@ class RunsVerifyWorkflow:
         generate_statistics_output: GenerateStatisticsOutput = await workflow.execute_activity(
             generate_statistics,
             arg=generate_statistics_input,
-            start_to_close_timeout=timedelta(seconds=10),
+            start_to_close_timeout=timedelta(minutes=10),
             retry_policy=RetryPolicy(maximum_attempts=100, backoff_coefficient=2.0,
                                      maximum_interval=timedelta(seconds=10)))
         self.verify_output.workflow_results = generate_statistics_output
