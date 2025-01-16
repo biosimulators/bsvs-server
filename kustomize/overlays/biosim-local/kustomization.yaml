@@ -18,5 +18,6 @@ replicas:
 resources:
 - ingress.yaml
 - secret-ghcr.yaml
+- secret-shared.yaml
 - ../../config/biosim-local
 - ../../base

@@ -15,13 +15,24 @@ spec:
         app: api
     spec:
       containers:
-      - name: api
-        image: ghcr.io/biosimulations/biosim-api:latest
-        ports:
-        - containerPort: 8000
-        envFrom:
-          - configMapRef:
-              name: api-config
+        - name: api
+          image: ghcr.io/biosimulations/biosim-api:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: api-config
+          env:
+            - name: STORAGE_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secrets
+                  key: STORAGE_ACCESS_KEY_ID
+            - name: STORAGE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secrets
+                  key: STORAGE_SECRET
       imagePullSecrets:
         - name: ghcr-secret
 

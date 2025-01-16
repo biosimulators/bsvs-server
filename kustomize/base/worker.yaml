@@ -15,25 +15,21 @@ spec:
         app: worker
     spec:
       containers:
-      - name: worker
-        image: ghcr.io/biosimulations/biosim-worker:latest
-        envFrom:
-          - configMapRef:
-              name: worker-config
+        - name: worker
+          image: ghcr.io/biosimulations/biosim-worker:latest
+          envFrom:
+            - configMapRef:
+                name: worker-config
+          env:
+            - name: STORAGE_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secrets
+                  key: STORAGE_ACCESS_KEY_ID
+            - name: STORAGE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secrets
+                  key: STORAGE_SECRET
       imagePullSecrets:
         - name: ghcr-secret
-
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  labels:
-#    app: api
-#  name: api
-#spec:
-#  ports:
-#    - name: "8080"
-#      port: 8080
-#      targetPort: 8080
-#  selector:
-#    app: api
