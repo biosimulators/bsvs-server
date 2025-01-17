@@ -13,10 +13,10 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 @pytest.mark.skipif(len(get_settings().storage_secret) == 0,
                     reason="S3 config STORAGE_SECRET not supplied")
 @pytest.mark.asyncio
-async def test_download_s3_file() -> None:
+async def test_download_s3_file(temp_test_data_dir: Path) -> None:
     RUN_ID = "61fd573874bc0ce059643515"
     S3_PATH = f"simulations/{RUN_ID}/contents/reports.h5"
-    LOCAL_PATH = Path(ROOT_DIR) / "local_data" / f"{RUN_ID}.h5"
+    LOCAL_PATH = temp_test_data_dir / f"{RUN_ID}.h5"
 
     await download_s3_file(s3_path=S3_PATH, file_path=LOCAL_PATH)
 

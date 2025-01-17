@@ -38,12 +38,11 @@ async def test_get_output_not_found(omex_verify_workflow_input: OmexVerifyWorkfl
 @pytest.mark.asyncio
 async def test_omex_verify_and_get_output_mockS3(omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                          omex_verify_workflow_output: OmexVerifyWorkflowOutput,
+                                         omex_test_file: Path,
                                          file_service_local: FileServiceLocal,
                                          temporal_client: Client,
                                          temporal_verify_worker: Worker,
                                          biosim_service_rest: BiosimServiceRest) -> None:
-    root_dir = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    file_path = root_dir / "local_data" / "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
     assert omex_verify_workflow_input.observables is not None
     query_params: dict[str, float | str | list[str]] = {
         "workflow_id_prefix": "verification-",
@@ -56,8 +55,8 @@ async def test_omex_verify_and_get_output_mockS3(omex_verify_workflow_input: Ome
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
-        with open(file_path, "rb") as file:
-            upload_filename = "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
+        with open(omex_test_file, "rb") as file:
+            upload_filename = omex_test_file.name
             files = {"uploaded_file": (upload_filename, file, "application/zip")}
             response = await test_client.post("/verify_omex", files=files, params=query_params)
             assert response.status_code == 200
@@ -80,12 +79,11 @@ async def test_omex_verify_and_get_output_mockS3(omex_verify_workflow_input: Ome
 @pytest.mark.asyncio
 async def test_omex_verify_and_get_output_S3(omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                          omex_verify_workflow_output: OmexVerifyWorkflowOutput,
+                                         omex_test_file: Path,
                                          file_service_s3: FileServiceS3,
                                          temporal_client: Client,
                                          temporal_verify_worker: Worker,
                                          biosim_service_rest: BiosimServiceRest) -> None:
-    root_dir = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    file_path = root_dir / "local_data" / "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
     assert omex_verify_workflow_input.observables is not None
     query_params: dict[str, float | str | list[str]] = {
         "workflow_id_prefix": "verification-",
@@ -98,8 +96,8 @@ async def test_omex_verify_and_get_output_S3(omex_verify_workflow_input: OmexVer
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
-        with open(file_path, "rb") as file:
-            upload_filename = "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
+        with open(omex_test_file, "rb") as file:
+            upload_filename = omex_test_file.name
             files = {"uploaded_file": (upload_filename, file, "application/zip")}
             response = await test_client.post("/verify_omex", files=files, params=query_params)
             assert response.status_code == 200
@@ -120,12 +118,11 @@ async def test_omex_verify_and_get_output_S3(omex_verify_workflow_input: OmexVer
 @pytest.mark.asyncio
 async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                          runs_verify_workflow_output: RunsVerifyWorkflowOutput,
+                                         omex_test_file: Path,
                                          file_service_local: FileServiceLocal,
                                          temporal_client: Client,
                                          temporal_verify_worker: Worker,
                                          biosim_service_rest: BiosimServiceRest) -> None:
-    root_dir = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    file_path = root_dir / "local_data" / "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
     assert runs_verify_workflow_input.observables is not None
     query_params: dict[str, float | str | list[str]] = {
         "workflow_id_prefix": "verification-",
@@ -138,7 +135,7 @@ async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerify
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
-        with open(file_path, "rb") as file:
+        with open(omex_test_file, "rb") as file:
             response = await test_client.post("/verify_runs", params=query_params)
             assert response.status_code == 200
 
