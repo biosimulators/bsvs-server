@@ -4,10 +4,10 @@ kind: Kustomization
 namespace: biosim-local
 
 images:
-- name: ghcr.io/biosimulators/bsvs-server-api
-  newTag: 7.7.0.11
-- name: ghcr.io/biosimulators/bsvs-server-worker
-  newTag: 7.7.0.11
+- name: ghcr.io/biosimulations/biosim-api
+  newTag: arm64_latest
+- name: ghcr.io/biosimulations/biosim-worker
+  newTag: arm64_latest
 
 replicas:
 - count: 1
