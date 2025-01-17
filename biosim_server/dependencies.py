@@ -1,9 +1,7 @@
 from temporalio.client import Client as TemporalClient
 
-from biosim_server.io.file_service import FileService
-from biosim_server.io.file_service_S3 import FileServiceS3
-from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
-from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
+from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest
+from biosim_server.common.storage import FileService, FileServiceS3
 from biosim_server.config import get_settings
 
 #------ file service (standalone or pytest) ------

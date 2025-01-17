@@ -6,19 +6,14 @@ import pytest
 from temporalio.client import Client, WorkflowHandle
 from temporalio.worker import Worker
 
+from biosim_server.common.biosim1_client import BiosimServiceRest, SourceOmex, BiosimSimulatorSpec, \
+    BiosimSimulationRunStatus, BiosimSimulationRun
+from biosim_server.common.storage import FileServiceLocal, FileServiceS3
 from biosim_server.config import get_settings
-from biosim_server.io.file_service_S3 import FileServiceS3
-from biosim_server.io.file_service_local import FileServiceLocal
-from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
-from biosim_server.omex_sim.biosim1.models import SourceOmex, BiosimSimulatorSpec, BiosimSimulationRunStatus, \
-    BiosimSimulationRun
-from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput, \
+from biosim_server.workflows.simulate import OmexSimWorkflow, OmexSimWorkflowInput, \
     OmexSimWorkflowOutput, OmexSimWorkflowStatus
-from biosim_server.verify.workflows.activities import ComparisonStatistics
-from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
-    OmexVerifyWorkflowOutput
-from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
-    RunsVerifyWorkflowOutput
+from biosim_server.workflows.verify import ComparisonStatistics, OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
+    OmexVerifyWorkflowOutput, RunsVerifyWorkflow, RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput
 from tests.fixtures.biosim_service_mock import BiosimServiceMock
 from tests.fixtures.s3_fixtures import file_service_s3_test_base_path
 

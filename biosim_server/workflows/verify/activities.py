@@ -5,9 +5,8 @@ from numpy.typing import NDArray
 from pydantic import BaseModel
 from temporalio import activity
 
-from biosim_server.omex_sim.biosim1.models import BiosimSimulationRun
-from biosim_server.omex_sim.biosim1.models import Hdf5DataValues, HDF5File
-from biosim_server.omex_sim.workflows.biosim_activities import get_hdf5_data, GetHdf5DataInput
+from biosim_server.common.biosim1_client import BiosimSimulationRun, Hdf5DataValues, HDF5File
+from biosim_server.workflows.simulate import get_hdf5_data, GetHdf5DataInput
 
 
 class SimulationRunInfo(BaseModel):

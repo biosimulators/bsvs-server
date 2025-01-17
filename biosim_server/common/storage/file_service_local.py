@@ -10,7 +10,7 @@ from typing import List, Optional
 import aiofiles
 from typing_extensions import override
 
-from biosim_server.io.file_service import FileService, ListingItem
+from biosim_server.common.storage.file_service import FileService, ListingItem
 
 
 def generate_fake_etag(file_path: Path) -> str:

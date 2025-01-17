@@ -9,14 +9,11 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from biosim_server.api.main import app
+from biosim_server.common.biosim1_client import BiosimServiceRest
+from biosim_server.common.storage import FileServiceS3, FileServiceLocal
 from biosim_server.config import get_settings
-from biosim_server.io.file_service_S3 import FileServiceS3
-from biosim_server.io.file_service_local import FileServiceLocal
-from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
-from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, \
-    OmexVerifyWorkflowStatus
-from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, \
-    RunsVerifyWorkflowStatus
+from biosim_server.workflows.verify import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus, \
+    RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
 from tests.workflows.test_verify_workflows import assert_omex_verify_results, assert_runs_verify_results
 
 
@@ -25,7 +22,7 @@ async def test_root() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         response = await test_client.get("/")
         assert response.status_code == 200
-        assert response.json() == {'docs': 'https://biochecknet.biosimulations.org/docs'}
+        assert response.json() == {'docs': 'https://biosim.biosimulations.org/docs'}
 
 
 @pytest.mark.asyncio

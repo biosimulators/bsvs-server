@@ -4,12 +4,10 @@ import os
 from pydantic import BaseModel
 from temporalio import activity
 
+from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest, SourceOmex, BiosimSimulatorSpec, \
+    BiosimSimulationRun, HDF5File, Hdf5DataValues
+from biosim_server.common.storage import FileService
 from biosim_server.dependencies import get_file_service, get_biosim_service
-from biosim_server.io.file_service import FileService
-from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
-from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
-from biosim_server.omex_sim.biosim1.models import SourceOmex, BiosimSimulatorSpec, BiosimSimulationRun, \
-    HDF5File, Hdf5DataValues
 
 
 class GetSimRunInput(BaseModel):

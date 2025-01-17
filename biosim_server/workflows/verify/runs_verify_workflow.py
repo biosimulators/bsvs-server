@@ -7,12 +7,10 @@ from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from biosim_server.omex_sim.biosim1.models import BiosimSimulationRun
-from biosim_server.omex_sim.biosim1.models import BiosimSimulatorSpec, HDF5File
-from biosim_server.omex_sim.workflows.biosim_activities import GetSimRunInput, get_hdf5_metadata, GetHdf5MetadataInput
-from biosim_server.omex_sim.workflows.biosim_activities import get_sim_run
-from biosim_server.verify.workflows.activities import generate_statistics, GenerateStatisticsOutput, \
-    GenerateStatisticsInput, SimulationRunInfo
+from biosim_server.common.biosim1_client import BiosimSimulationRun, BiosimSimulatorSpec, HDF5File
+from biosim_server.workflows.simulate import GetSimRunInput, get_hdf5_metadata, GetHdf5MetadataInput, get_sim_run
+from biosim_server.workflows.verify import generate_statistics, GenerateStatisticsOutput, GenerateStatisticsInput, \
+    SimulationRunInfo
 
 
 class RunsVerifyWorkflowStatus(StrEnum):

@@ -4,9 +4,9 @@ from typing import AsyncGenerator
 import pytest_asyncio
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
+from biosim_server.common.storage import FileServiceLocal
+from biosim_server.common.storage import FileServiceS3
 from biosim_server.dependencies import get_file_service, set_file_service
-from biosim_server.io.file_service_S3 import FileServiceS3
-from biosim_server.io.file_service_local import FileServiceLocal
 
 
 @pytest_asyncio.fixture(scope="function")

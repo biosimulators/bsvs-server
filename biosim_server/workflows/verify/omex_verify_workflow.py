@@ -9,11 +9,10 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 from temporalio.workflow import ChildWorkflowHandle
 
-from biosim_server.omex_sim.biosim1.models import BiosimSimulatorSpec, SourceOmex
-from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow, OmexSimWorkflowInput, \
-    OmexSimWorkflowOutput
-from biosim_server.verify.workflows.activities import generate_statistics, GenerateStatisticsInput, \
-    GenerateStatisticsOutput, SimulationRunInfo
+from biosim_server.common.biosim1_client import BiosimSimulatorSpec, SourceOmex
+from biosim_server.workflows.simulate import OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput
+from biosim_server.workflows.verify import generate_statistics, GenerateStatisticsInput, GenerateStatisticsOutput, \
+    SimulationRunInfo
 
 
 class OmexVerifyWorkflowStatus(StrEnum):

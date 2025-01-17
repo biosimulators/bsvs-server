@@ -5,9 +5,9 @@ from pathlib import Path
 import pytest
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from biosim_server.omex_sim.biosim1.models import SourceOmex, BiosimSimulatorSpec
-from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflowOutput, OmexVerifyWorkflowInput
-from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput
+from biosim_server.common.biosim1_client import SourceOmex, BiosimSimulatorSpec
+from biosim_server.workflows.verify import OmexVerifyWorkflowOutput, OmexVerifyWorkflowInput, RunsVerifyWorkflowInput, \
+    RunsVerifyWorkflowOutput
 
 
 @pytest.fixture(scope="function")

@@ -6,8 +6,8 @@ from typing import AsyncGenerator, Optional
 
 from temporalio import workflow
 
-from biosim_server.omex_sim.biosim1.models import BiosimSimulatorSpec, SourceOmex
-from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
+from biosim_server.common.biosim1_client import BiosimSimulatorSpec, SourceOmex
+from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflow, RunsVerifyWorkflowStatus
 
 with workflow.unsafe.imports_passed_through():
@@ -22,7 +22,7 @@ from starlette.middleware.cors import CORSMiddleware
 from biosim_server.dependencies import get_file_service, get_temporal_client, \
     init_standalone, shutdown_standalone
 from biosim_server.log_config import setup_logging
-from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
+from biosim_server.workflows.verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus
 
 logger = logging.getLogger(__name__)

@@ -8,8 +8,8 @@ from typing import Optional
 
 from typing_extensions import override
 
-from biosim_server.io.file_service import FileService, ListingItem
-from biosim_server.io.s3_aiobotocore import (
+from biosim_server.common.storage.file_service import FileService, ListingItem
+from biosim_server.common.storage.s3_aiobotocore import (
     download_s3_file,
     get_s3_modified_date,
     get_listing_of_s3_path,

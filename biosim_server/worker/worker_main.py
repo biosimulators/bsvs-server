@@ -5,12 +5,12 @@ import random
 from temporalio.worker import Worker, UnsandboxedWorkflowRunner
 
 from biosim_server.dependencies import get_temporal_client, init_standalone
-from biosim_server.omex_sim.workflows.biosim_activities import get_hdf5_metadata, get_hdf5_data
-from biosim_server.omex_sim.workflows.biosim_activities import get_sim_run, submit_biosim_sim
-from biosim_server.omex_sim.workflows.omex_sim_workflow import OmexSimWorkflow
-from biosim_server.verify.workflows.activities import generate_statistics
-from biosim_server.verify.workflows.omex_verify_workflow import OmexVerifyWorkflow
-from biosim_server.verify.workflows.runs_verify_workflow import RunsVerifyWorkflow
+from biosim_server.workflows.simulate.biosim_activities import get_hdf5_metadata, get_hdf5_data
+from biosim_server.workflows.simulate.biosim_activities import get_sim_run, submit_biosim_sim
+from biosim_server.workflows.simulate.omex_sim_workflow import OmexSimWorkflow
+from biosim_server.workflows.verify.activities import generate_statistics
+from biosim_server.workflows.verify.omex_verify_workflow import OmexVerifyWorkflow
+from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflow
 
 interrupt_event = asyncio.Event()
 

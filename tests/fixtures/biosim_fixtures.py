@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 import pytest_asyncio
 
 from biosim_server.dependencies import get_biosim_service, set_biosim_service
-from biosim_server.omex_sim.biosim1.biosim_service_rest import BiosimServiceRest
+from biosim_server.common.biosim1_client import BiosimServiceRest
 from tests.fixtures.biosim_service_mock import BiosimServiceMock
 
 

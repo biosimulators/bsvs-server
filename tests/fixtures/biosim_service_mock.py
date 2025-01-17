@@ -2,8 +2,7 @@ import uuid
 
 from typing_extensions import override
 
-from biosim_server.omex_sim.biosim1.biosim_service import BiosimService
-from biosim_server.omex_sim.biosim1.models import Hdf5DataValues, BiosimSimulationRun, HDF5File, \
+from biosim_server.common.biosim1_client import BiosimService, Hdf5DataValues, BiosimSimulationRun, HDF5File, \
     BiosimSimulationRunStatus, BiosimSimulatorSpec
 
 

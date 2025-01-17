@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 
-from biosim_server.omex_sim.biosim1.models import BiosimSimulationRun, HDF5File, Hdf5DataValues, BiosimSimulationRunStatus, BiosimSimulatorSpec
+from biosim_server.common.biosim1_client.models import BiosimSimulationRun, HDF5File, Hdf5DataValues, BiosimSimulatorSpec
 
 logger = logging.getLogger(__name__)
 

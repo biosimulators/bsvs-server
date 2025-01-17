@@ -4,9 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from biosim_server.common.storage import FileServiceS3, FileServiceLocal
 from biosim_server.config import get_settings
-from biosim_server.io.file_service_S3 import FileServiceS3
-from biosim_server.io.file_service_local import FileServiceLocal
 from tests.fixtures.s3_fixtures import file_service_s3_test_base_path
 
 
