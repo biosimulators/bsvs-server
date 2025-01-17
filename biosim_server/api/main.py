@@ -112,7 +112,7 @@ app.add_middleware(
 @app.get("/")
 def root() -> dict[str, str]:
     return {
-        'docs': 'https://biochecknet.biosimulations.org/docs'
+        'docs': 'https://biosim.biosimulations.org/docs'
     }
 
 
