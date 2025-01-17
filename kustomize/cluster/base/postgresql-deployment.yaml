@@ -28,6 +28,8 @@ spec:
               value: temporal
             - name: POSTGRES_USER
               value: temporal
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           image: postgres
           name: temporal-postgresql
           ports:
