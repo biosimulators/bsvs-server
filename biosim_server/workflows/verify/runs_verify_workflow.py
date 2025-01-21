@@ -5,9 +5,12 @@ from typing import Optional
 
 from pydantic import BaseModel
 from temporalio import workflow
+from temporalio.client import WorkflowFailureError
 from temporalio.common import RetryPolicy
+from temporalio.exceptions import ActivityError
 
-from biosim_server.common.biosim1_client import BiosimSimulationRun, BiosimSimulatorSpec, HDF5File
+from biosim_server.common.biosim1_client import BiosimSimulationRun, BiosimSimulatorSpec, HDF5File, \
+    BiosimSimulationRunStatus
 from biosim_server.workflows.simulate import GetSimRunInput, get_hdf5_metadata, GetHdf5MetadataInput, get_sim_run
 from biosim_server.workflows.verify import generate_statistics, GenerateStatisticsOutput, GenerateStatisticsInput, \
     SimulationRunInfo
@@ -18,6 +21,12 @@ class RunsVerifyWorkflowStatus(StrEnum):
     IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
+    RUN_ID_NOT_FOUND = "RUN_ID_NOT_FOUND"
+
+    @property
+    def is_done(self) -> bool:
+        return self in [RunsVerifyWorkflowStatus.COMPLETED, RunsVerifyWorkflowStatus.FAILED,
+                        RunsVerifyWorkflowStatus.RUN_ID_NOT_FOUND]
 
 
 class RunsVerifyWorkflowInput(BaseModel):
@@ -34,6 +43,7 @@ class RunsVerifyWorkflowOutput(BaseModel):
     workflow_input: RunsVerifyWorkflowInput
     workflow_status: RunsVerifyWorkflowStatus
     timestamp: str
+    workflow_error: Optional[str] = None
     actual_simulators: Optional[list[BiosimSimulatorSpec]] = None
     workflow_run_id: Optional[str] = None
     workflow_results: Optional[GenerateStatisticsOutput] = None
@@ -61,13 +71,23 @@ class RunsVerifyWorkflow:
         workflow.logger.setLevel(level=logging.INFO)
         workflow.logger.info("Main workflow started.")
 
-        # verify biosimulation runs are valid and complete and retreive Simulation results metadata
+        # verify biosimulation runs are valid and complete and retrieve Simulation results metadata
         biosimulation_runs: list[BiosimSimulationRun] = []
         for biosimulation_run_id in verify_input.biosimulations_run_ids:
             biosimulation_run = await workflow.execute_activity(get_sim_run,
-                args=[GetSimRunInput(biosim_run_id=biosimulation_run_id)], start_to_close_timeout=timedelta(seconds=60),
-                retry_policy=RetryPolicy(maximum_attempts=3))
+                args=[GetSimRunInput(biosim_run_id=biosimulation_run_id,
+                                     abort_on_not_found=True)],
+                start_to_close_timeout=timedelta(seconds=60),
+                retry_policy=RetryPolicy(maximum_attempts=30))
             biosimulation_runs.append(biosimulation_run)
+            if biosimulation_run.status == BiosimSimulationRunStatus.RUN_ID_NOT_FOUND:
+                # important to update the state of the workflow before returning, 
+                # so that subsequent workflow queries get the correct state
+                self.verify_output = RunsVerifyWorkflowOutput(workflow_id=workflow.info().workflow_id,
+                    workflow_input=verify_input, workflow_run_id=workflow.info().run_id,
+                    workflow_status=RunsVerifyWorkflowStatus.RUN_ID_NOT_FOUND, timestamp=str(workflow.now()),
+                    workflow_error=f"Simulation run with id {biosimulation_run_id} not found.")
+                return self.verify_output
 
         workflow.logger.info(f"verified access to completed run ids {verify_input.biosimulations_run_ids}.")
 

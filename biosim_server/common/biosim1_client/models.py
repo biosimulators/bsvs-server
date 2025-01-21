@@ -61,6 +61,7 @@ class BiosimSimulationRunStatus(StrEnum):
     PROCESSING = 'PROCESSING',
     SUCCEEDED = 'SUCCEEDED',
     FAILED = 'FAILED',
+    RUN_ID_NOT_FOUND = 'RUN_ID_NOT_FOUND',
     UNKNOWN = 'UNKNOWN'
 
 

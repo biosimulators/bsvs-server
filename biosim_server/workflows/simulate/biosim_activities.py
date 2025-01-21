@@ -1,25 +1,42 @@
 import logging
 import os
+from typing import Optional
 
+from aiohttp import ClientResponseError
 from pydantic import BaseModel
 from temporalio import activity
 
 from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest, SourceOmex, BiosimSimulatorSpec, \
-    BiosimSimulationRun, HDF5File, Hdf5DataValues
+    BiosimSimulationRun, BiosimSimulationRunStatus, HDF5File, Hdf5DataValues
 from biosim_server.common.storage import FileService
 from biosim_server.dependencies import get_file_service, get_biosim_service
 
 
 class GetSimRunInput(BaseModel):
     biosim_run_id: str
+    abort_on_not_found: Optional[bool] = False
 
 
 @activity.defn
 async def get_sim_run(get_sim_run_input: GetSimRunInput) -> BiosimSimulationRun:
     activity.logger.setLevel(logging.INFO)
     biosim_service = BiosimServiceRest()
-    biosim_sim_run: BiosimSimulationRun = await biosim_service.get_sim_run(get_sim_run_input.biosim_run_id)
-    return biosim_sim_run
+    try:
+        biosim_sim_run: BiosimSimulationRun = await biosim_service.get_sim_run(get_sim_run_input.biosim_run_id)
+        return biosim_sim_run
+    except ClientResponseError as e:
+        if e.status == 404:
+            activity.logger.warn(f"Simulation run with id {get_sim_run_input.biosim_run_id} not found", exc_info=e)
+            if get_sim_run_input.abort_on_not_found:
+                # return a failed simulation run rather than raising an exception to avoid retrying the activity
+                return BiosimSimulationRun(
+                    id=get_sim_run_input.biosim_run_id,
+                    name="",
+                    simulator="",
+                    simulatorVersion="",
+                    status=BiosimSimulationRunStatus.RUN_ID_NOT_FOUND
+                )
+        raise e
 
 
 class SubmitBiosimSimInput(BaseModel):

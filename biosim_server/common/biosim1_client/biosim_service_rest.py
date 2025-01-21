@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 class BiosimServiceRest(BiosimService):
     @override
     async def get_sim_run(self, simulation_run_id: str) -> BiosimSimulationRun:
+        """ raises ClientResponseError if the response status is not 2xx """
         api_base_url = os.environ.get('API_BASE_URL') or "https://api.biosimulations.org"
         assert (api_base_url is not None)
 

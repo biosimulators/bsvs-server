@@ -14,7 +14,8 @@ from biosim_server.common.storage import FileServiceS3, FileServiceLocal
 from biosim_server.config import get_settings
 from biosim_server.workflows.verify import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus, \
     RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
-from tests.workflows.test_verify_workflows import assert_omex_verify_results, assert_runs_verify_results
+from tests.workflows.test_omex_verify_workflows import assert_omex_verify_results
+from tests.workflows.test_runs_verify_workflow import assert_runs_verify_results
 
 
 @pytest.mark.asyncio
@@ -150,3 +151,42 @@ async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerify
                 logging.info(f"polling, job status is: {output.workflow_status}")
 
         assert_runs_verify_results(observed_results=output, expected_results_template=runs_verify_workflow_output)
+
+
+@pytest.mark.asyncio
+async def test_runs_verify_not_found(runs_verify_workflow_input: RunsVerifyWorkflowInput,
+                                         runs_verify_workflow_output: RunsVerifyWorkflowOutput,
+                                         omex_test_file: Path,
+                                         file_service_local: FileServiceLocal,
+                                         temporal_client: Client,
+                                         temporal_verify_worker: Worker,
+                                         biosim_service_rest: BiosimServiceRest) -> None:
+    assert runs_verify_workflow_input.observables is not None
+    query_params: dict[str, float | str | list[str]] = {
+        "workflow_id_prefix": "verification-",
+        "biosimulations_run_ids": ["bad_run_id_1", "bad_run_id_2"],
+        "include_outputs": runs_verify_workflow_input.include_outputs,
+        "user_description": runs_verify_workflow_input.user_description,
+        "observables": runs_verify_workflow_input.observables,
+        "rel_tol": runs_verify_workflow_input.rel_tol,
+        "abs_tol": runs_verify_workflow_input.abs_tol
+    }
+
+    async with (AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client):
+        with open(omex_test_file, "rb") as file:
+            response = await test_client.post("/verify_runs", params=query_params)
+            assert response.status_code == 200
+
+        output = RunsVerifyWorkflowOutput.model_validate(response.json())
+
+        # poll api until job is completed
+        while not output.workflow_status.is_done:
+            await asyncio.sleep(5)
+            response = await test_client.get(f"/verify_runs/{output.workflow_id}")
+            if response.status_code == 200:
+                output = RunsVerifyWorkflowOutput.model_validate(response.json())
+                logging.info(f"polling, job status is: {output.workflow_status}")
+
+        assert output.workflow_status == RunsVerifyWorkflowStatus.RUN_ID_NOT_FOUND
+        assert output.workflow_error in [ "Simulation run with id bad_run_id_1 not found",
+                                          "Simulation run with id bad_run_id_2 not found"]
