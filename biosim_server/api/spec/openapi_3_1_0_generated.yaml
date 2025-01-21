@@ -360,6 +360,7 @@ components:
       - PROCESSING
       - SUCCEEDED
       - FAILED
+      - RUN_ID_NOT_FOUND
       - UNKNOWN
       title: BiosimSimulationRunStatus
     BiosimSimulatorSpec:
@@ -744,6 +745,11 @@ components:
         timestamp:
           type: string
           title: Timestamp
+        workflow_error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Workflow Error
         actual_simulators:
           anyOf:
           - items:
@@ -774,6 +780,7 @@ components:
       - IN_PROGRESS
       - COMPLETED
       - FAILED
+      - RUN_ID_NOT_FOUND
       title: RunsVerifyWorkflowStatus
     SimulationRunInfo:
       properties:
