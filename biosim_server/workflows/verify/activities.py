@@ -21,11 +21,6 @@ class GenerateStatisticsInput(BaseModel):
     rel_tol: float
 
 
-class DatasetVar(BaseModel):
-    dataset_name: str
-    var_name: str
-
-
 class RunData(BaseModel):
     run_id: str
     dataset_name: str
@@ -45,7 +40,6 @@ class ComparisonStatistics(BaseModel):
 
 class GenerateStatisticsOutput(BaseModel):
     sims_run_info: list[SimulationRunInfo]
-    all_dataset_vars: list[DatasetVar]
     comparison_statistics: dict[str, list[list[ComparisonStatistics]]]  # matrix of comparison statistics per dataset
     sim_run_data: Optional[list[RunData]] = None
 
@@ -72,18 +66,14 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
 
     # collect the list of unique dataset names
     dataset_names: set[str] = set()
-    dataset_vars: dict[str, DatasetVar] = {}
     for run_index_i in range(num_runs):
         sim_run_info_j = gen_stats_input.sim_run_info_list[run_index_i]
         for group in sim_run_info_j.hdf5_file.groups:
             for dataset in group.datasets:
-                for var_name in dataset.sedml_labels:
-                    dataset_var_key = f"{dataset.name}.{var_name}"
-                    dataset_vars[dataset_var_key] = DatasetVar(dataset_name=dataset.name, var_name=var_name)
-                dataset_names.add(dataset.name)
+                 dataset_names.add(dataset.name)
     # get list of unique dataset_vars by reading the metadata within each dataset
 
-    activity.logger.info(f"Found {len(dataset_names)} unique datasets and {len(dataset_vars)} unique dataset variables")
+    activity.logger.info(f"Found {len(dataset_names)} unique datasets")
 
     # for each unique dataset name, compare the results from run_i with run_j (where i < j)
     comparison_statistics: dict[
@@ -150,7 +140,6 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
         comparison_statistics[dataset_name] = ds_comparison
 
     gen_stats_output = GenerateStatisticsOutput(sims_run_info=gen_stats_input.sim_run_info_list,
-                                                all_dataset_vars=list(dataset_vars.values()),
                                                 comparison_statistics=comparison_statistics)
     if gen_stats_input.include_outputs:
         gen_stats_output.sim_run_data = sims_run_data

@@ -430,19 +430,6 @@ components:
       - simulator_version_j
       - var_names
       title: ComparisonStatistics
-    DatasetVar:
-      properties:
-        dataset_name:
-          type: string
-          title: Dataset Name
-        var_name:
-          type: string
-          title: Var Name
-      type: object
-      required:
-      - dataset_name
-      - var_name
-      title: DatasetVar
     GenerateStatisticsOutput:
       properties:
         sims_run_info:
@@ -450,11 +437,6 @@ components:
             $ref: '#/components/schemas/SimulationRunInfo'
           type: array
           title: Sims Run Info
-        all_dataset_vars:
-          items:
-            $ref: '#/components/schemas/DatasetVar'
-          type: array
-          title: All Dataset Vars
         comparison_statistics:
           additionalProperties:
             items:
@@ -474,7 +456,6 @@ components:
       type: object
       required:
       - sims_run_info
-      - all_dataset_vars
       - comparison_statistics
       title: GenerateStatisticsOutput
     HDF5Attribute:
