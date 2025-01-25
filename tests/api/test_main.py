@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import os
 from pathlib import Path
 
 import pytest
