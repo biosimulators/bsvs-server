@@ -10,7 +10,7 @@ from temporalio.worker import Worker
 
 from biosim_server.api.main import app
 from biosim_server.common.biosim1_client import BiosimServiceRest
-from biosim_server.common.storage import FileServiceS3, FileServiceLocal
+from biosim_server.common.storage import FileServiceGCS, FileServiceLocal
 from biosim_server.config import get_settings
 from biosim_server.workflows.verify import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus, \
     RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
@@ -37,7 +37,7 @@ async def test_get_output_not_found(omex_verify_workflow_input: OmexVerifyWorkfl
 
 
 @pytest.mark.asyncio
-async def test_omex_verify_and_get_output_mockS3(omex_verify_workflow_input: OmexVerifyWorkflowInput,
+async def test_omex_verify_and_get_output_mockGCS(omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                          omex_verify_workflow_output: OmexVerifyWorkflowOutput,
                                          omex_test_file: Path,
                                          file_service_local: FileServiceLocal,
@@ -75,13 +75,13 @@ async def test_omex_verify_and_get_output_mockS3(omex_verify_workflow_input: Ome
         assert_omex_verify_results(observed_results=output, expected_results_template=omex_verify_workflow_output)
 
 
-@pytest.mark.skipif(len(get_settings().storage_secret) == 0,
-                    reason="S3 config STORAGE_SECRET not supplied")
+@pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
+                    reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
-async def test_omex_verify_and_get_output_S3(omex_verify_workflow_input: OmexVerifyWorkflowInput,
+async def test_omex_verify_and_get_output_GCS(omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                          omex_verify_workflow_output: OmexVerifyWorkflowOutput,
                                          omex_test_file: Path,
-                                         file_service_s3: FileServiceS3,
+                                         file_service_gcs: FileServiceGCS,
                                          temporal_client: Client,
                                          temporal_verify_worker: Worker,
                                          biosim_service_rest: BiosimServiceRest) -> None:
@@ -188,5 +188,5 @@ async def test_runs_verify_not_found(runs_verify_workflow_input: RunsVerifyWorkf
                 logging.info(f"polling, job status is: {output.workflow_status}")
 
         assert output.workflow_status == RunsVerifyWorkflowStatus.RUN_ID_NOT_FOUND
-        assert output.workflow_error in [ "Simulation run with id bad_run_id_1 not found",
-                                          "Simulation run with id bad_run_id_2 not found"]
+        assert output.workflow_error in [ "Simulation run with id bad_run_id_1 not found.",
+                                          "Simulation run with id bad_run_id_2 not found."]

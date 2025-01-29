@@ -1,7 +1,7 @@
 from temporalio.client import Client as TemporalClient
 
 from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest
-from biosim_server.common.storage import FileService, FileServiceS3
+from biosim_server.common.storage import FileService, FileServiceGCS
 from biosim_server.config import get_settings
 
 #------ file service (standalone or pytest) ------
@@ -44,7 +44,7 @@ def get_temporal_client() -> TemporalClient | None:
 
 async def init_standalone() -> None:
     settings = get_settings()
-    set_file_service(FileServiceS3())
+    set_file_service(FileServiceGCS())
     set_biosim_service(BiosimServiceRest())
     set_temporal_client(await TemporalClient.connect(settings.temporal_service_url))
 

@@ -7,31 +7,31 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from biosim_server.common.biosim1_client import BiosimServiceRest, SourceOmex
-from biosim_server.common.storage import FileServiceLocal, FileServiceS3
+from biosim_server.common.storage import FileServiceLocal, FileServiceGCS
 from biosim_server.config import get_settings
 from biosim_server.workflows.verify import ComparisonStatistics, OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput
-from tests.fixtures.s3_fixtures import file_service_s3_test_base_path
+from tests.fixtures.gcs_fixtures import file_service_gcs_test_base_path
 
 
-@pytest.mark.skipif(len(get_settings().storage_secret) == 0,
-                    reason="S3 config STORAGE_SECRET not supplied")
+@pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
+                    reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
-async def test_omex_verify_workflow_S3(temporal_client: Client, temporal_verify_worker: Worker,
+async def test_omex_verify_workflow_GCS(temporal_client: Client, temporal_verify_worker: Worker,
                                        omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                        omex_verify_workflow_output: OmexVerifyWorkflowOutput,
-                                       biosim_service_rest: BiosimServiceRest, file_service_s3: FileServiceS3,
-                                       file_service_s3_test_base_path: Path, omex_test_file: Path,
+                                       biosim_service_rest: BiosimServiceRest, file_service_gcs: FileServiceGCS,
+                                       file_service_gcs_test_base_path: Path, omex_test_file: Path,
                                        omex_verify_workflow_output_file: Path) -> None:
     assert biosim_service_rest is not None
 
-    # set up the omex file to mock S3 (uploads on the fly)
-    s3_path = str(file_service_s3_test_base_path / "test_verify_workflow" / f"omex {uuid.uuid4().hex}" / omex_test_file.name)
+    # set up the omex file to mock gcs (uploads on the fly)
+    gcs_path = str(file_service_gcs_test_base_path / "test_verify_workflow" / f"omex {uuid.uuid4().hex}" / omex_test_file.name)
 
-    await file_service_s3.upload_file(file_path=omex_test_file, s3_path=s3_path)
+    await file_service_gcs.upload_file(file_path=omex_test_file, gcs_path=gcs_path)
     workflow_id = uuid.uuid4().hex
-    logging.info(f"Stored test omex file at {s3_path}")
-    omex_verify_workflow_input.source_omex = SourceOmex(omex_s3_file=s3_path, name="name")
+    logging.info(f"Stored test omex file at {gcs_path}")
+    omex_verify_workflow_input.source_omex = SourceOmex(omex_s3_file=gcs_path, name="name")
 
     observed_results: OmexVerifyWorkflowOutput = await temporal_client.execute_workflow(
         OmexVerifyWorkflow.run, args=[omex_verify_workflow_input],
@@ -46,18 +46,18 @@ async def test_omex_verify_workflow_S3(temporal_client: Client, temporal_verify_
 
 
 @pytest.mark.asyncio
-async def test_omex_verify_workflow_mockS3(temporal_client: Client, temporal_verify_worker: Worker,
+async def test_omex_verify_workflow_mockGCS(temporal_client: Client, temporal_verify_worker: Worker,
                                omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                omex_verify_workflow_output: OmexVerifyWorkflowOutput,
                                biosim_service_rest: BiosimServiceRest, file_service_local: FileServiceLocal,
                                omex_test_file: Path, omex_verify_workflow_output_file: Path) -> None:
     assert biosim_service_rest is not None
 
-    # set up the omex file to mock S3 (uploads on the fly)
-    s3_path = "path/to/model.omex"
-    await file_service_local.upload_file(file_path=omex_test_file, s3_path=s3_path)
+    # set up the omex file to mock gcs (uploads on the fly)
+    gcs_path = "path/to/model.omex"
+    await file_service_local.upload_file(file_path=omex_test_file, gcs_path=gcs_path)
     workflow_id = uuid.uuid4().hex
-    omex_verify_workflow_input.source_omex = SourceOmex(omex_s3_file=s3_path, name="name")
+    omex_verify_workflow_input.source_omex = SourceOmex(omex_s3_file=gcs_path, name="name")
 
     observed_results: OmexVerifyWorkflowOutput = await temporal_client.execute_workflow(
         OmexVerifyWorkflow.run, args=[omex_verify_workflow_input],

@@ -12,10 +12,11 @@ from tests.fixtures.database_fixtures import (  # noqa: F401
     mongo_test_database,
     mongo_test_collection,
 )
-from tests.fixtures.s3_fixtures import (  # noqa: F401
-    file_service_s3,
+from tests.fixtures.gcs_fixtures import (  # noqa: F401
+    file_service_gcs,
     file_service_local,
-    file_service_s3_test_base_path
+    file_service_gcs_test_base_path,
+    gcs_token
 )
 from tests.fixtures.temporal_fixtures import (  # noqa: F401
     temporal_env,

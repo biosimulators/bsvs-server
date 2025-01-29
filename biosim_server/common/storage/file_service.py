@@ -31,27 +31,27 @@ async def calculate_file_md5(local_filepath: Path) -> str:
 class FileService(ABC):
 
     @abstractmethod
-    async def download_file(self, s3_path: str, file_path: Optional[Path] = None) -> tuple[str, str]:
+    async def download_file(self, gcs_path: str, file_path: Optional[Path] = None) -> tuple[str, str]:
         pass
 
     @abstractmethod
-    async def upload_file(self, file_path: Path, s3_path: str) -> str:
+    async def upload_file(self, file_path: Path, gcs_path: str) -> str:
         pass
 
     @abstractmethod
-    async def upload_bytes(self, file_contents: bytes, s3_path: str) -> str:
+    async def upload_bytes(self, file_contents: bytes, gcs_path: str) -> str:
         pass
 
     @abstractmethod
-    async def get_modified_date(self, s3_path: str) -> datetime:
+    async def get_modified_date(self, gcs_path: str) -> datetime:
         pass
 
     @abstractmethod
-    async def get_listing(self, s3_path: str) -> list[ListingItem]:
+    async def get_listing(self, gcs_path: str) -> list[ListingItem]:
         pass
 
     @abstractmethod
-    async def get_file_contents(self, s3_path: str) -> bytes:
+    async def get_file_contents(self, gcs_path: str) -> bytes:
         pass
 
     @abstractmethod

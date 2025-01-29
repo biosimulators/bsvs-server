@@ -140,13 +140,13 @@ async def start_verify_omex(
     save_dest = Path(os.path.join(os.getcwd(), "temp"))
     save_dest.mkdir(parents=True, exist_ok=True)
     local_temp_path: Path = await save_uploaded_file(uploaded_file, save_dest)
-    s3_path = str(Path("verify") / "omex" / uuid.uuid4().hex / local_temp_path.name)
+    gcs_path = str(Path("verify") / "omex" / uuid.uuid4().hex / local_temp_path.name)
 
     file_service = get_file_service()
     assert file_service is not None
-    full_s3_path: str = await file_service.upload_file(file_path=local_temp_path, s3_path=s3_path)
+    full_gcs_path: str = await file_service.upload_file(file_path=local_temp_path, gcs_path=gcs_path)
     local_temp_path.unlink()
-    logger.info(f"Uploaded file to S3 at {full_s3_path}")
+    logger.info(f"Uploaded file to S3 at {full_gcs_path}")
 
     # ---- create workflow input ---- #
     simulator_specs: list[BiosimSimulatorSpec] = []
@@ -156,10 +156,10 @@ async def start_verify_omex(
             simulator_specs.append(BiosimSimulatorSpec(simulator=name, version=version))
         else:
             simulator_specs.append(BiosimSimulatorSpec(simulator=simulator, version=None))
-    source_omex = SourceOmex(omex_s3_file=s3_path, name="name")
+    source_omex = SourceOmex(omex_s3_file=gcs_path, name="name")
     workflow_id = f"{workflow_id_prefix}{uuid.uuid4()}"
     omex_verify_workflow_input = OmexVerifyWorkflowInput(
-        source_omex=SourceOmex(omex_s3_file=s3_path, name="name"),
+        source_omex=SourceOmex(omex_s3_file=gcs_path, name="name"),
         user_description=user_description,
         requested_simulators=simulator_specs,
         include_outputs=include_outputs,

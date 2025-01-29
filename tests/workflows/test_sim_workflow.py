@@ -18,12 +18,12 @@ async def test_sim_workflow(temporal_client: Client, temporal_verify_worker: Wor
                             biosim_service_rest: BiosimServiceMock, file_service_local: FileServiceLocal) -> None:
     assert biosim_service_rest is not None
 
-    # set up the omex file to mock S3
-    s3_path = "path/to/model.omex"
-    await file_service_local.upload_file(file_path=omex_test_file, s3_path=s3_path)
+    # set up the omex file to mock GCS
+    gcs_path = "path/to/model.omex"
+    await file_service_local.upload_file(file_path=omex_test_file, gcs_path=gcs_path)
 
     sim_spec = BiosimSimulatorSpec(simulator="vcell", version="latest")
-    source_omex = SourceOmex(omex_s3_file=s3_path, name="name")
+    source_omex = SourceOmex(omex_s3_file=gcs_path, name="name")
     sim_workflow_input = OmexSimWorkflowInput(source_omex=source_omex, simulator_spec=sim_spec)
     workflow_handle = await temporal_client.start_workflow(OmexSimWorkflow.run, args=[sim_workflow_input],
         id=uuid.uuid4().hex, task_queue="verification_tasks", )

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script is used to create a sealed secret for the s3 storage
+# This script is used to create a sealed secret for the gcs storage
 # this script should take 3 arguments as input:
 #   namespace
 #   storage_access_key_id
