@@ -4,7 +4,15 @@ FROM python:3.11-slim AS base
 # Set environment variables
 ENV POETRY_VERSION=1.4.2 \
     POETRY_VIRTUALENVS_CREATE=false \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    STORAGE_LOCAL_CACHE_DIR="/app/scratch" \
+    STORAGE_BUCKET="simdata-bucket" \
+    STORAGE_ENDPOINT_URL="http://minio:9000" \
+    STORAGE_REGION="us-east-1" \
+    STORAGE_ACCESS_KEY_ID="minio" \
+    STORAGE_SECRET_ACCESS_KEY="minio123" \
+    STORAGE_GCS_CREDENTIALS_FILE="/app/secret/gcs_credentials.json"
+
 
 # Install Poetry
 RUN pip install "poetry==$POETRY_VERSION"
