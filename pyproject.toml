@@ -27,6 +27,7 @@ motor = {extras = ["srv"], version = "^3.6.0"}
 pydantic-settings = "^2.7.1"
 python-multipart = "^0.0.20"
 gcloud-aio-storage = "^9.3.0"
+h5py = "^3.12.1"
 
 
 [tool.poetry.group.worker.dependencies]
