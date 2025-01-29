@@ -131,8 +131,9 @@ async def start_verify_omex(
         include_outputs: bool = Query(default=False,
                                       description="Whether to include the output data on which the comparison is based."),
         user_description: str = Query(default="my-omex-compare", description="User description of the verification run."),
-        rel_tol: float = Query(default=0.000001, description="Relative tolerance to use for proximity comparison."),
-        abs_tol: float = Query(default=0.0000000001, description="Absolute tolerance to use for proximity comparison."),
+        rel_tol: float = Query(default=0.0001, description="Relative tolerance for proximity comparison."),
+        abs_tol_min: float = Query(default=0.001, description="Min absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale."),
+        abs_tol_scale: float = Query(default=0.00001, description="Scale for absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale."),
         observables: Optional[list[str]] = Query(default=None,
                                                  description="List of observables to include in the return data.")
 ) -> OmexVerifyWorkflowOutput:
@@ -164,7 +165,8 @@ async def start_verify_omex(
         requested_simulators=simulator_specs,
         include_outputs=include_outputs,
         rel_tol=rel_tol,
-        abs_tol=abs_tol,
+        abs_tol_min=abs_tol_min,
+        abs_tol_scale=abs_tol_scale,
         observables=observables)
 
     # ---- invoke workflow ---- #
@@ -232,8 +234,9 @@ async def start_verify_runs(
         include_outputs: bool = Query(default=False,
                                       description="Whether to include the output data on which the comparison is based."),
         user_description: str = Query(default="my-verify-job", description="User description of the verification run."),
-        rel_tol: float = Query(default=0.000001, description="Relative tolerance to use for proximity comparison."),
-        abs_tol: float = Query(default=0.000000001, description="Absolute tolerance to use for proximity comparison."),
+        rel_tol: float = Query(default=0.0001, description="Relative tolerance for proximity comparison."),
+        abs_tol_min: float = Query(default=0.001, description="Min absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale."),
+        abs_tol_scale: float = Query(default=0.00001, description="Scale for absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale."),
         observables: Optional[list[str]] = Query(default=None,
                                                  description="List of observables to include in the return data.")
 ) -> RunsVerifyWorkflowOutput:
@@ -245,7 +248,8 @@ async def start_verify_runs(
         user_description=user_description,
         include_outputs=include_outputs,
         rel_tol=rel_tol,
-        abs_tol=abs_tol,
+        abs_tol_min=abs_tol_min,
+        abs_tol_scale=abs_tol_scale,
         observables=observables)
 
     # ---- invoke workflow ---- #

@@ -31,7 +31,8 @@ class OmexVerifyWorkflowInput(BaseModel):
     requested_simulators: list[BiosimSimulatorSpec]
     include_outputs: bool
     rel_tol: float
-    abs_tol: float
+    abs_tol_min: float
+    abs_tol_scale: float
     observables: Optional[list[str]] = None
 
 
@@ -100,7 +101,8 @@ class OmexVerifyWorkflow:
         generate_statistics_output: GenerateStatisticsOutput = await workflow.execute_activity(
             generate_statistics,
             arg=GenerateStatisticsInput(sim_run_info_list=run_data, include_outputs=verify_input.include_outputs,
-                                        abs_tol=verify_input.abs_tol, rel_tol=verify_input.rel_tol),
+                                        abs_tol_min=verify_input.abs_tol_min, abs_tol_scale=verify_input.abs_tol_scale,
+                                        rel_tol=verify_input.rel_tol),
             start_to_close_timeout=timedelta(minutes=10),
             retry_policy=RetryPolicy(maximum_attempts=100, backoff_coefficient=2.0,
                                      maximum_interval=timedelta(seconds=10)), )

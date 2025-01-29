@@ -38,10 +38,6 @@ async def test_omex_verify_workflow_GCS(temporal_client: Client, temporal_verify
         # result_type=OmexVerifyWorkflowOutput,
         id=workflow_id, task_queue="verification_tasks")
 
-    # # uncomment to refresh the expected results
-    # with open(omex_verify_workflow_output_file, "w") as f:
-    #     f.write(observed_results.model_dump_json())
-
     assert_omex_verify_results(observed_results=observed_results, expected_results_template=omex_verify_workflow_output)
 
 
@@ -66,7 +62,7 @@ async def test_omex_verify_workflow_mockGCS(temporal_client: Client, temporal_ve
 
     # # uncomment to refresh the expected results
     # with open(omex_verify_workflow_output_file, "w") as f:
-    #     f.write(observed_results.model_dump_json())
+    #     f.write(observed_results.model_dump_json(indent=2))
 
     assert_omex_verify_results(observed_results=observed_results, expected_results_template=omex_verify_workflow_output)
 

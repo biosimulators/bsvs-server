@@ -35,15 +35,15 @@ def get_results(results_zip_file: Path) -> dict[str, dict[str, NDArray[np.float6
     return results
 
 
-def compare_arrays(arr1: NDArray[np.float64], arr2: NDArray[np.float64]) -> tuple[bool, float]:
+def compare_arrays(arr1: NDArray[np.float64], arr2: NDArray[np.float64],
+                   rtol: float = 1e-4, atol_min: float = 1e-3, atol_scale: float = 1e-5) -> tuple[bool, float]:
     # np.seterr(divide='raise')
     if type(arr1[0]) == np.float64:
         if np.isnan(arr1).any() or np.isnan(arr2).any():
             return False, 1e10
         max1 = np.nanmax(arr1)
         max2 = np.nanmax(arr2)
-        atol = np.nanmax([1e-3, max1*1e-5, max2*1e-5])
-        rtol = 1e-4
+        atol = np.nanmax([atol_min, max1*atol_scale, max2*atol_scale])
         try:
             score = np.nanmax(abs(arr1 - arr2) / (atol + rtol * abs(arr2)))
         except FloatingPointError as e:

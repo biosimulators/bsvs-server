@@ -51,7 +51,8 @@ async def test_omex_verify_and_get_output_mockGCS(omex_verify_workflow_input: Om
         "user_description": omex_verify_workflow_input.user_description,
         "observables": omex_verify_workflow_input.observables,
         "rel_tol": omex_verify_workflow_input.rel_tol,
-        "abs_tol": omex_verify_workflow_input.abs_tol
+        "abs_tol_min": omex_verify_workflow_input.abs_tol_min,
+        "abs_tol_scale": omex_verify_workflow_input.abs_tol_scale
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
@@ -92,7 +93,8 @@ async def test_omex_verify_and_get_output_GCS(omex_verify_workflow_input: OmexVe
         "user_description": omex_verify_workflow_input.user_description,
         "observables": omex_verify_workflow_input.observables,
         "rel_tol": omex_verify_workflow_input.rel_tol,
-        "abs_tol": omex_verify_workflow_input.abs_tol
+        "abs_tol_min": omex_verify_workflow_input.abs_tol_min,
+        "abs_tol_scale": omex_verify_workflow_input.abs_tol_scale
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
@@ -131,7 +133,8 @@ async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerify
         "user_description": runs_verify_workflow_input.user_description,
         "observables": runs_verify_workflow_input.observables,
         "rel_tol": runs_verify_workflow_input.rel_tol,
-        "abs_tol": runs_verify_workflow_input.abs_tol
+        "abs_tol_min": runs_verify_workflow_input.abs_tol_min,
+        "abs_tol_scale": runs_verify_workflow_input.abs_tol_scale
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
@@ -168,7 +171,8 @@ async def test_runs_verify_not_found(runs_verify_workflow_input: RunsVerifyWorkf
         "user_description": runs_verify_workflow_input.user_description,
         "observables": runs_verify_workflow_input.observables,
         "rel_tol": runs_verify_workflow_input.rel_tol,
-        "abs_tol": runs_verify_workflow_input.abs_tol
+        "abs_tol_min": runs_verify_workflow_input.abs_tol_min,
+        "abs_tol_scale": runs_verify_workflow_input.abs_tol_scale
     }
 
     async with (AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client):
