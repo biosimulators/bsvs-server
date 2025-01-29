@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import AsyncGenerator
-
+from gcloud.aio.auth import Token
 import pytest_asyncio
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from biosim_server.common.storage import FileServiceLocal
-from biosim_server.common.storage import FileServiceS3
+from biosim_server.common.storage import FileServiceLocal, create_token
+from biosim_server.common.storage import FileServiceGCS
 from biosim_server.dependencies import get_file_service, set_file_service
 
 
@@ -23,17 +23,26 @@ async def file_service_local() -> AsyncGenerator[FileServiceLocal, None]:
 
 
 @pytest_asyncio.fixture(scope="function")
-async def file_service_s3() -> AsyncGenerator[FileServiceS3, None]:
-    file_service_s3: FileServiceS3 = FileServiceS3()
+async def file_service_gcs() -> AsyncGenerator[FileServiceGCS, None]:
+    file_service_gcs: FileServiceGCS = FileServiceGCS()
     saved_file_service = get_file_service()
-    set_file_service(file_service_s3)
+    set_file_service(file_service_gcs)
 
-    yield file_service_s3
+    yield file_service_gcs
 
-    await file_service_s3.close()
+    await file_service_gcs.close()
     set_file_service(saved_file_service)
 
 
 @pytest_asyncio.fixture(scope="function")
-async def file_service_s3_test_base_path() -> Path:
+async def file_service_gcs_test_base_path() -> Path:
     return Path("verify_test")
+
+
+@pytest_asyncio.fixture(scope="module")
+async def gcs_token() -> AsyncGenerator[Token, None]:
+    token: Token = create_token()
+
+    yield token
+
+    await token.close()

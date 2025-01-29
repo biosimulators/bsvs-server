@@ -6,12 +6,14 @@ from typing import Generator
 import pytest
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
+from biosim_server.config import get_local_cache_dir
 from biosim_server.common.biosim1_client import SourceOmex, BiosimSimulatorSpec
 from biosim_server.workflows.verify import OmexVerifyWorkflowOutput, OmexVerifyWorkflowInput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput
 
 fixture_data_dir = Path(os.path.dirname(__file__)) / "local_data"
-root_dir = (Path(os.path.dirname(__file__))).parent.parent
+temp_data_dir = get_local_cache_dir() / "test_temp_dir"
+temp_data_dir.mkdir(exist_ok=True)
 
 
 @pytest.fixture(scope="function")
@@ -29,13 +31,14 @@ def omex_verify_workflow_input() -> OmexVerifyWorkflowInput:
     path = "path/to/omex"
     simulators = [BiosimSimulatorSpec(simulator="copasi"), BiosimSimulatorSpec(simulator="vcell")]
     include_outputs = False
-    rel_tol = 1e-6
-    abs_tol = 1e-9
+    rel_tol = 1e-4
+    abs_tol_min = 1e-3
+    abs_tol_scale = 1e-5
     observables = ["time", "concentration"]
     omex_input = OmexVerifyWorkflowInput(source_omex=SourceOmex(omex_s3_file=path, name="name"),
                                          user_description="description", requested_simulators=simulators,
-                                         include_outputs=include_outputs, rel_tol=rel_tol, abs_tol=abs_tol,
-                                         observables=observables)
+                                         include_outputs=include_outputs, rel_tol=rel_tol, abs_tol_min=abs_tol_min,
+                                         abs_tol_scale=abs_tol_scale, observables=observables)
     return omex_input
 
 
@@ -57,13 +60,14 @@ def omex_verify_workflow_output(omex_verify_workflow_input: OmexVerifyWorkflowIn
 @pytest.fixture(scope="function")
 def runs_verify_workflow_input() -> RunsVerifyWorkflowInput:
     include_outputs = False
-    rel_tol = 1e-6
-    abs_tol = 1e-9
+    rel_tol = 1e-4
+    abs_tol_min = 1e-3
+    abs_tol_scale = 1e-5
     observables = ["time", "concentration"]
     run_ids = ["67817a2e1f52f47f628af971", "67817a2eba5a3f02b9f2938d"]
     omex_input = RunsVerifyWorkflowInput(user_description="description", biosimulations_run_ids=run_ids,
-                                         include_outputs=include_outputs, rel_tol=rel_tol, abs_tol=abs_tol,
-                                         observables=observables)
+                                         include_outputs=include_outputs, rel_tol=rel_tol, abs_tol_min=abs_tol_min,
+                                         abs_tol_scale=abs_tol_scale, observables=observables)
     return omex_input
 
 
@@ -94,7 +98,6 @@ def hdf5_json_test_file() -> Path:
 
 @pytest.fixture(scope="function")
 def temp_test_data_dir() -> Generator[Path, None, None]:
-    temp_data_dir = root_dir / "temp_test_data"
     temp_data_dir.mkdir(exist_ok=True)
 
     yield temp_data_dir

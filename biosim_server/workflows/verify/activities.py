@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -7,6 +7,11 @@ from temporalio import activity
 
 from biosim_server.common.biosim1_client import BiosimSimulationRun, Hdf5DataValues, HDF5File
 from biosim_server.workflows.simulate import get_hdf5_data, GetHdf5DataInput
+
+NDArray1b: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool]]
+NDArray1f: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
+NDArray2f: TypeAlias = np.ndarray[tuple[int, int], np.dtype[np.float64]]
+NDArray3f: TypeAlias = np.ndarray[tuple[int, int, int], np.dtype[np.float64]]
 
 
 class SimulationRunInfo(BaseModel):
@@ -17,13 +22,9 @@ class SimulationRunInfo(BaseModel):
 class GenerateStatisticsInput(BaseModel):
     sim_run_info_list: list[SimulationRunInfo]
     include_outputs: bool
-    abs_tol: float
+    abs_tol_min: float
+    abs_tol_scale: float
     rel_tol: float
-
-
-class DatasetVar(BaseModel):
-    dataset_name: str
-    var_name: str
 
 
 class RunData(BaseModel):
@@ -38,14 +39,13 @@ class ComparisonStatistics(BaseModel):
     simulator_version_i: str  # version of simulator used for run i <simulator_name>:<version>
     simulator_version_j: str  # version of simulator used for run j <simulator_name>:<version>
     var_names: list[str]
-    mse: Optional[list[float]] = None
+    score: Optional[list[float]] = None
     is_close: Optional[list[bool]] = None
     error_message: Optional[str] = None
 
 
 class GenerateStatisticsOutput(BaseModel):
     sims_run_info: list[SimulationRunInfo]
-    all_dataset_vars: list[DatasetVar]
     comparison_statistics: dict[str, list[list[ComparisonStatistics]]]  # matrix of comparison statistics per dataset
     sim_run_data: Optional[list[RunData]] = None
 
@@ -72,18 +72,14 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
 
     # collect the list of unique dataset names
     dataset_names: set[str] = set()
-    dataset_vars: dict[str, DatasetVar] = {}
     for run_index_i in range(num_runs):
         sim_run_info_j = gen_stats_input.sim_run_info_list[run_index_i]
         for group in sim_run_info_j.hdf5_file.groups:
             for dataset in group.datasets:
-                for var_name in dataset.sedml_labels:
-                    dataset_var_key = f"{dataset.name}.{var_name}"
-                    dataset_vars[dataset_var_key] = DatasetVar(dataset_name=dataset.name, var_name=var_name)
-                dataset_names.add(dataset.name)
+                 dataset_names.add(dataset.name)
     # get list of unique dataset_vars by reading the metadata within each dataset
 
-    activity.logger.info(f"Found {len(dataset_names)} unique datasets and {len(dataset_vars)} unique dataset variables")
+    activity.logger.info(f"Found {len(dataset_names)} unique datasets")
 
     # for each unique dataset name, compare the results from run_i with run_j (where i < j)
     comparison_statistics: dict[
@@ -135,14 +131,16 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
                     continue
 
                 # compute statistics
-                is_close, mse = await calc_stats(a=array_i, b=array_j,
-                                                 rel_tol=gen_stats_input.rel_tol, abs_tol=gen_stats_input.abs_tol)
-                is_close_list: list[bool] = is_close.tolist()  # type: ignore
+                is_close, score = calc_stats(arr1=array_i, arr2=array_j, rel_tol=gen_stats_input.rel_tol,
+                                             abs_tol_min=gen_stats_input.abs_tol_min,
+                                             atol_scale=gen_stats_input.abs_tol_scale)
+                is_close_list: list[bool] = is_close.tolist()
+                score_list: list[float] = score.tolist()
 
                 activity.logger.info(
-                    f"Comparing {simulation_version_j}:run={run_id_i} and {simulation_version_j}:run={run_id_j} for dataset {dataset_name} MSE: {mse} is_close: {is_close}")
+                    f"Comparing {simulation_version_j}:run={run_id_i} and {simulation_version_j}:run={run_id_j} for dataset {dataset_name} score: {score} is_close: {is_close}")
 
-                stats_i_j.mse = mse.tolist()  # type: ignore # convert to list for serialization
+                stats_i_j.score = score_list
                 stats_i_j.is_close = is_close_list
                 stats_i_j.error_message = None
                 ds_comparison_i.append(stats_i_j)
@@ -150,7 +148,6 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
         comparison_statistics[dataset_name] = ds_comparison
 
     gen_stats_output = GenerateStatisticsOutput(sims_run_info=gen_stats_input.sim_run_info_list,
-                                                all_dataset_vars=list(dataset_vars.values()),
                                                 comparison_statistics=comparison_statistics)
     if gen_stats_input.include_outputs:
         gen_stats_output.sim_run_data = sims_run_data
@@ -158,10 +155,42 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
     return gen_stats_output
 
 
-async def calc_stats(a: NDArray[np.float64], b: NDArray[np.float64],
-                     rel_tol: float, abs_tol: float) -> tuple[NDArray[np.bool], NDArray[np.float64]]:
-    mse = np.mean((a - b) ** 2, axis=1)
-    is_close_a_b: NDArray[np.bool] = np.isclose(a, b, rtol=rel_tol, atol=abs_tol, equal_nan=True).all(axis=1)  # type: ignore
-    is_close_b_a: NDArray[np.bool] = np.isclose(a, b, rtol=rel_tol, atol=abs_tol, equal_nan=True).all(axis=1)  # type: ignore
-    is_close = np.logical_and(is_close_a_b, is_close_b_a)
-    return is_close, mse
+def calc_stats(arr1: NDArray[np.float64], arr2: NDArray[np.float64],
+                     rel_tol: float, abs_tol_min: float, atol_scale: float) -> tuple[NDArray1b, NDArray1f]:
+    """
+    Calculate the statistics for comparing two arrays.
+
+    computes the same function as hdf5_compare.compare_arrays:
+
+       atol = np.nanmax([atol_min, max1*atol_scale, max2*atol_scale])
+       score = np.nanmax(abs(arr1 - arr2) / (atol + rtol * abs(arr2)))
+       close = np.allclose(arr1, arr2, rtol=rtol, atol=atol, equal_nan=False)
+
+    but as vectors to retain the score and is_close for each variable
+    """
+    assert arr1.shape == arr2.shape
+    assert len(arr1.shape) == 2
+
+    # atol = np.nanmax([atol_min, max1*atol_scale, max2*atol_scale])
+    #
+    #   using temporary 3D array to hold the absolute tolerance arrays to get an element-wise max)
+    # ... there is probably a simpler way to do this with numpy while still avoiding loops
+    max1 = np.nanmax(a=arr1, axis=1)  # shape=(arr1.shape[0],) - max value for each variable in arr1
+    max2 = np.nanmax(a=arr2, axis=1)  # shape=(arr2.shape[0],) - max value for each variable in arr2
+    abs_tol_arrays = np.zeros((3, arr1.shape[0]))
+    abs_tol_arrays[0, :] = np.multiply(np.ones(shape=arr1.shape[0]), abs_tol_min)
+    abs_tol_arrays[1, :] = np.multiply(max1, atol_scale)
+    abs_tol_arrays[2, :] = np.multiply(max2, atol_scale)
+    atol_array = np.max(abs_tol_arrays, axis=0)
+
+    # score = np.nanmax(abs(arr1 - arr2) / (atol + rtol * abs(arr2)))
+    rel_tol_array = np.multiply(np.ones(shape=arr1.shape[0]), rel_tol)  # shape=(arr1.shape[0],)
+    numerator = np.abs(arr1 - arr2)
+    scaled_arr2 = np.multiply(rel_tol_array[:, np.newaxis], np.abs(arr2))
+    denominator = np.add(atol_array[:,np.newaxis], scaled_arr2)
+    score: NDArray1f = np.nanmax(a=np.divide(numerator, denominator), axis=1)
+
+    # close = np.allclose(arr1, arr2, rtol=rel_tol, atol=atol, equal_nan=False)
+    is_close: NDArray1b = np.less(score, 1.0)  # type: ignore
+    assert len(is_close.shape) == 1 and len(score.shape) == 1 and is_close.shape == score.shape
+    return is_close, score

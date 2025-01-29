@@ -1,13 +1,14 @@
 import asyncio
 import logging
 import uuid
+from pathlib import Path
 
 import pytest
-from temporalio.client import Client, WorkflowHandle
+from temporalio.client import Client
 from temporalio.worker import Worker
 
 from biosim_server.common.biosim1_client import BiosimServiceRest
-from biosim_server.common.storage import FileServiceS3
+from biosim_server.common.storage import FileServiceGCS
 from biosim_server.workflows.verify import ComparisonStatistics, RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
 
@@ -16,7 +17,8 @@ from biosim_server.workflows.verify import ComparisonStatistics, RunsVerifyWorkf
 async def test_run_verify_workflow(temporal_client: Client, temporal_verify_worker: Worker,
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                runs_verify_workflow_output: RunsVerifyWorkflowOutput,
-                               biosim_service_rest: BiosimServiceRest, file_service_s3: FileServiceS3) -> None:
+                               runs_verify_workflow_output_file: Path,
+                               biosim_service_rest: BiosimServiceRest, file_service_gcs: FileServiceGCS) -> None:
     assert biosim_service_rest is not None
 
     workflow_id = uuid.uuid4().hex
@@ -26,8 +28,9 @@ async def test_run_verify_workflow(temporal_client: Client, temporal_verify_work
         # result_type=RunsVerifyWorkflowOutput,
         id=workflow_id, task_queue="verification_tasks")
 
-    # with open(Path(__file__).parent / "fixtures" / "local_data" / "RunsVerifyWorkflowOutput_expected.json", "w") as f:
-    #     f.write(observed_results.model_dump_json())
+    # uncomment to update fixture for future tests
+    # with open(runs_verify_workflow_output_file, "w") as f:
+    #     f.write(observed_results.model_dump_json(indent=2))
 
     assert_runs_verify_results(observed_results=observed_results, expected_results_template=runs_verify_workflow_output)
 
@@ -36,7 +39,7 @@ async def test_run_verify_workflow(temporal_client: Client, temporal_verify_work
 async def test_run_verify_workflow_not_found_execute(temporal_client: Client, temporal_verify_worker: Worker,
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                runs_verify_workflow_output: RunsVerifyWorkflowOutput,
-                               biosim_service_rest: BiosimServiceRest, file_service_s3: FileServiceS3) -> None:
+                               biosim_service_rest: BiosimServiceRest, file_service_gcs: FileServiceGCS) -> None:
     assert biosim_service_rest is not None
 
     workflow_id = uuid.uuid4().hex
@@ -54,7 +57,7 @@ async def test_run_verify_workflow_not_found_execute(temporal_client: Client, te
 async def test_run_verify_workflow_not_found_poll(temporal_client: Client, temporal_verify_worker: Worker,
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                runs_verify_workflow_output: RunsVerifyWorkflowOutput,
-                               biosim_service_rest: BiosimServiceRest, file_service_s3: FileServiceS3) -> None:
+                               biosim_service_rest: BiosimServiceRest, file_service_gcs: FileServiceGCS) -> None:
     assert biosim_service_rest is not None
 
     workflow_id = uuid.uuid4().hex

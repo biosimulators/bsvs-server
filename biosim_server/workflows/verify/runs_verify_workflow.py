@@ -5,9 +5,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 from temporalio import workflow
-from temporalio.client import WorkflowFailureError
 from temporalio.common import RetryPolicy
-from temporalio.exceptions import ActivityError
 
 from biosim_server.common.biosim1_client import BiosimSimulationRun, BiosimSimulatorSpec, HDF5File, \
     BiosimSimulationRunStatus
@@ -34,7 +32,8 @@ class RunsVerifyWorkflowInput(BaseModel):
     biosimulations_run_ids: list[str]
     include_outputs: bool
     rel_tol: float
-    abs_tol: float
+    abs_tol_min: float
+    abs_tol_scale: float
     observables: Optional[list[str]] = None
 
 
@@ -104,7 +103,9 @@ class RunsVerifyWorkflow:
 
         generate_statistics_input = GenerateStatisticsInput(sim_run_info_list=run_data,
                                                             include_outputs=self.verify_input.include_outputs,
-                                                            abs_tol=self.verify_input.abs_tol, rel_tol=self.verify_input.rel_tol)
+                                                            abs_tol_min=self.verify_input.abs_tol_min,
+                                                            abs_tol_scale=self.verify_input.abs_tol_scale,
+                                                            rel_tol=self.verify_input.rel_tol)
         # Generate comparison report
         generate_statistics_output: GenerateStatisticsOutput = await workflow.execute_activity(
             generate_statistics,

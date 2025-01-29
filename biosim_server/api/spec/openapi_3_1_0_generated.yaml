@@ -74,19 +74,28 @@ paths:
         required: false
         schema:
           type: number
-          description: Relative tolerance to use for proximity comparison.
-          default: 1.0e-06
+          description: Relative tolerance for proximity comparison.
+          default: 0.0001
           title: Rel Tol
-        description: Relative tolerance to use for proximity comparison.
-      - name: abs_tol
+        description: Relative tolerance for proximity comparison.
+      - name: abs_tol_min
         in: query
         required: false
         schema:
           type: number
-          description: Absolute tolerance to use for proximity comparison.
-          default: 1.0e-10
-          title: Abs Tol
-        description: Absolute tolerance to use for proximity comparison.
+          description: Min absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale.
+          default: 0.001
+          title: Abs Tol Min
+        description: Min absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale.
+      - name: abs_tol_scale
+        in: query
+        required: false
+        schema:
+          type: number
+          description: Scale for absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale.
+          default: 1.0e-05
+          title: Abs Tol Scale
+        description: Scale for absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale.
       - name: observables
         in: query
         required: false
@@ -198,19 +207,28 @@ paths:
         required: false
         schema:
           type: number
-          description: Relative tolerance to use for proximity comparison.
-          default: 1.0e-06
+          description: Relative tolerance for proximity comparison.
+          default: 0.0001
           title: Rel Tol
-        description: Relative tolerance to use for proximity comparison.
-      - name: abs_tol
+        description: Relative tolerance for proximity comparison.
+      - name: abs_tol_min
         in: query
         required: false
         schema:
           type: number
-          description: Absolute tolerance to use for proximity comparison.
-          default: 1.0e-09
-          title: Abs Tol
-        description: Absolute tolerance to use for proximity comparison.
+          description: Min absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale.
+          default: 0.001
+          title: Abs Tol Min
+        description: Min absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale.
+      - name: abs_tol_scale
+        in: query
+        required: false
+        schema:
+          type: number
+          description: Scale for absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale.
+          default: 1.0e-05
+          title: Abs Tol Scale
+        description: Scale for absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale.
       - name: observables
         in: query
         required: false
@@ -404,13 +422,13 @@ components:
             type: string
           type: array
           title: Var Names
-        mse:
+        score:
           anyOf:
           - items:
               type: number
             type: array
           - type: 'null'
-          title: Mse
+          title: Score
         is_close:
           anyOf:
           - items:
@@ -430,19 +448,6 @@ components:
       - simulator_version_j
       - var_names
       title: ComparisonStatistics
-    DatasetVar:
-      properties:
-        dataset_name:
-          type: string
-          title: Dataset Name
-        var_name:
-          type: string
-          title: Var Name
-      type: object
-      required:
-      - dataset_name
-      - var_name
-      title: DatasetVar
     GenerateStatisticsOutput:
       properties:
         sims_run_info:
@@ -450,11 +455,6 @@ components:
             $ref: '#/components/schemas/SimulationRunInfo'
           type: array
           title: Sims Run Info
-        all_dataset_vars:
-          items:
-            $ref: '#/components/schemas/DatasetVar'
-          type: array
-          title: All Dataset Vars
         comparison_statistics:
           additionalProperties:
             items:
@@ -474,7 +474,6 @@ components:
       type: object
       required:
       - sims_run_info
-      - all_dataset_vars
       - comparison_statistics
       title: GenerateStatisticsOutput
     HDF5Attribute:
@@ -615,9 +614,12 @@ components:
         rel_tol:
           type: number
           title: Rel Tol
-        abs_tol:
+        abs_tol_min:
           type: number
-          title: Abs Tol
+          title: Abs Tol Min
+        abs_tol_scale:
+          type: number
+          title: Abs Tol Scale
         observables:
           anyOf:
           - items:
@@ -632,7 +634,8 @@ components:
       - requested_simulators
       - include_outputs
       - rel_tol
-      - abs_tol
+      - abs_tol_min
+      - abs_tol_scale
       title: OmexVerifyWorkflowInput
     OmexVerifyWorkflowOutput:
       properties:
@@ -715,9 +718,12 @@ components:
         rel_tol:
           type: number
           title: Rel Tol
-        abs_tol:
+        abs_tol_min:
           type: number
-          title: Abs Tol
+          title: Abs Tol Min
+        abs_tol_scale:
+          type: number
+          title: Abs Tol Scale
         observables:
           anyOf:
           - items:
@@ -731,7 +737,8 @@ components:
       - biosimulations_run_ids
       - include_outputs
       - rel_tol
-      - abs_tol
+      - abs_tol_min
+      - abs_tol_scale
       title: RunsVerifyWorkflowInput
     RunsVerifyWorkflowOutput:
       properties:

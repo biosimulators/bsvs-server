@@ -1,5 +1,5 @@
 {
-  "workflow_id": "a335208bd8a54693b7fb42343f014dba",
+  "workflow_id": "828669f86cb24c2f991694c0539c8105",
   "workflow_input": {
     "source_omex": {
       "name": "name",
@@ -17,22 +17,23 @@
       }
     ],
     "include_outputs": false,
-    "rel_tol": 1e-6,
-    "abs_tol": 1e-9,
+    "rel_tol": 0.0001,
+    "abs_tol_min": 0.001,
+    "abs_tol_scale": 0.00001,
     "observables": [
       "time",
       "concentration"
     ]
   },
   "workflow_status": "COMPLETED",
-  "timestamp": "2025-01-13 06:17:00.252135+00:00",
+  "timestamp": "2025-01-27 17:13:32.308744+00:00",
   "actual_simulators": null,
-  "workflow_run_id": "cf5de858-dab7-492f-940b-3fcdbcf95afe",
+  "workflow_run_id": "4855aa15-c551-4b90-83fd-64ad613d4b4b",
   "workflow_results": {
     "sims_run_info": [
       {
         "biosim_sim_run": {
-          "id": "6784afdcba5a3f02b9f2bfba",
+          "id": "6797bebc23ddc7fe45081fe6",
           "name": "name",
           "simulator": "copasi",
           "simulatorVersion": "4.45.296",
@@ -52,8 +53,8 @@
         },
         "hdf5_file": {
           "filename": "reports.h5",
-          "id": "6784afdcba5a3f02b9f2bfba",
-          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/6784afdcba5a3f02b9f2bfba/outputs/reports.h5",
+          "id": "6797bebc23ddc7fe45081fe6",
+          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/6797bebc23ddc7fe45081fe6/outputs/reports.h5",
           "groups": [
             {
               "name": "BIOMD0000000010_url.sedml",
@@ -485,7 +486,7 @@
       },
       {
         "biosim_sim_run": {
-          "id": "6784afdc167dc18b5b24432d",
+          "id": "6797bebc23ddc7fe45081fe7",
           "name": "name",
           "simulator": "vcell",
           "simulatorVersion": "7.7.0.13",
@@ -505,8 +506,8 @@
         },
         "hdf5_file": {
           "filename": "reports.h5",
-          "id": "6784afdc167dc18b5b24432d",
-          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/6784afdc167dc18b5b24432d/outputs/reports.h5",
+          "id": "6797bebc23ddc7fe45081fe7",
+          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/6797bebc23ddc7fe45081fe7/outputs/reports.h5",
           "groups": [
             {
               "name": "BIOMD0000000010_url.sedml",
@@ -935,160 +936,6 @@
             }
           ]
         }
-      }
-    ],
-    "all_dataset_vars": [
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "Time"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "MAPK_PP"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "MAPK"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "MKKK"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "MKKK_P"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "MKK"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "MKK_P"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "MKK_PP"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "MAPK_P"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "uVol"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "J0"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "J1"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "J2"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "J3"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "J4"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "J5"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "J6"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "J7"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "J8"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-        "var_name": "J9"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
-        "var_name": "task_fig2a.time/60"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
-        "var_name": "MAPK_PP"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
-        "var_name": "MAPK"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
-        "var_name": "task_fig2b.time/60"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
-        "var_name": "MAPK_PP"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
-        "var_name": "MAPK"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/report_2",
-        "var_name": "task_fig2a.time/60"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/report_2",
-        "var_name": "task_fig2a.MAPK_PP"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/report_2",
-        "var_name": "task_fig2a.MAPK"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/report_3",
-        "var_name": "task_fig2b.time/60"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/report_3",
-        "var_name": "task_fig2b.MAPK_PP"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/report_3",
-        "var_name": "task_fig2b.MAPK"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
-        "var_name": "plot_0_0_0"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
-        "var_name": "plot_0_0_1"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
-        "var_name": "plot_0_1_1"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
-        "var_name": "plot_1_0_0"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
-        "var_name": "plot_1_0_1"
-      },
-      {
-        "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
-        "var_name": "plot_1_1_1"
       }
     ],
     "comparison_statistics": {
@@ -1120,7 +967,7 @@
               "J8",
               "J9"
             ],
-            "mse": [
+            "score": [
               0.0,
               0.0,
               0.0,
@@ -1192,49 +1039,49 @@
               "J8",
               "J9"
             ],
-            "mse": [
+            "score": [
               0.0,
-              7.068847624010096e-7,
-              5.090201530125706e-7,
-              2.214784143227218e-8,
-              2.214784142222782e-8,
-              3.375753167548297e-7,
-              7.752019181836099e-8,
-              1.5619082986842242e-7,
-              1.365152346064181e-7,
+              0.2109208541519768,
+              0.6160117641611397,
+              0.08073399713312734,
+              0.13396543530030625,
+              0.0844545843285283,
+              0.3207037300083684,
+              0.21449570723816266,
+              0.96109237672241,
               0.0,
-              1.5815733394531717e-12,
-              1.3839311774039995e-13,
-              1.1731742379707888e-11,
-              1.033804683989358e-11,
-              5.234055690372182e-12,
-              2.9304973864093064e-12,
-              1.0548192500419493e-10,
-              1.0936474242899449e-10,
-              1.7460280263826061e-13,
-              3.462611657323798e-12
+              0.006402084786197194,
+              0.0012556976092903502,
+              0.012589597583596512,
+              0.01308331126907003,
+              0.011326124992810022,
+              0.009667698853151248,
+              0.09630682413689742,
+              0.09893510061030918,
+              0.0020428828371769213,
+              0.01972444866994348
             ],
             "is_close": [
               true,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
               true,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
             ],
             "error_message": null
           }
@@ -1266,49 +1113,49 @@
               "J8",
               "J9"
             ],
-            "mse": [
+            "score": [
               0.0,
-              7.068847624010096e-7,
-              5.090201530125706e-7,
-              2.214784143227218e-8,
-              2.214784142222782e-8,
-              3.375753167548297e-7,
-              7.752019181836099e-8,
-              1.5619082986842242e-7,
-              1.365152346064181e-7,
+              0.21092530300648407,
+              0.6159738194492199,
+              0.08073334534056023,
+              0.1339672299981345,
+              0.08445387107687062,
+              0.3206934452499603,
+              0.21449110649600422,
+              0.9610000157434938,
               0.0,
-              1.5815733394531717e-12,
-              1.3839311774039995e-13,
-              1.1731742379707888e-11,
-              1.033804683989358e-11,
-              5.234055690372182e-12,
-              2.9304973864093064e-12,
-              1.0548192500419493e-10,
-              1.0936474242899449e-10,
-              1.7460280263826061e-13,
-              3.462611657323798e-12
+              0.006402080687530857,
+              0.0012556974516127215,
+              0.012589613433413199,
+              0.0130833283863958,
+              0.011326112164713817,
+              0.009667689506720173,
+              0.09630589664539227,
+              0.09893412180457972,
+              0.0020428832545140354,
+              0.01972440976463269
             ],
             "is_close": [
               true,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
               true,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
             ],
             "error_message": null
           },
@@ -1338,7 +1185,7 @@
               "J8",
               "J9"
             ],
-            "mse": [
+            "score": [
               0.0,
               0.0,
               0.0,
@@ -1397,7 +1244,7 @@
               "MAPK_PP",
               "MAPK"
             ],
-            "mse": [
+            "score": [
               0.0,
               0.0,
               0.0
@@ -1418,7 +1265,7 @@
               "MAPK_PP",
               "MAPK"
             ],
-            "mse": null,
+            "score": null,
             "is_close": null,
             "error_message": "Variables of copasi:4.45.296 and vcell:7.7.0.13 do not match, ['task_fig2a.time/60', 'MAPK_PP', 'MAPK'] != ['plot_0_0_0', 'plot_0_0_1', 'plot_0_1_1']"
           }
@@ -1433,7 +1280,7 @@
               "plot_0_0_1",
               "plot_0_1_1"
             ],
-            "mse": null,
+            "score": null,
             "is_close": null,
             "error_message": "Variables of vcell:7.7.0.13 and copasi:4.45.296 do not match, ['plot_0_0_0', 'plot_0_0_1', 'plot_0_1_1'] != ['task_fig2a.time/60', 'MAPK_PP', 'MAPK']"
           },
@@ -1446,7 +1293,7 @@
               "plot_0_0_1",
               "plot_0_1_1"
             ],
-            "mse": [
+            "score": [
               0.0,
               0.0,
               0.0
@@ -1471,7 +1318,7 @@
               "MAPK_PP",
               "MAPK"
             ],
-            "mse": [
+            "score": [
               0.0,
               0.0,
               0.0
@@ -1492,7 +1339,7 @@
               "MAPK_PP",
               "MAPK"
             ],
-            "mse": null,
+            "score": null,
             "is_close": null,
             "error_message": "Variables of copasi:4.45.296 and vcell:7.7.0.13 do not match, ['task_fig2b.time/60', 'MAPK_PP', 'MAPK'] != ['plot_1_0_0', 'plot_1_0_1', 'plot_1_1_1']"
           }
@@ -1507,7 +1354,7 @@
               "plot_1_0_1",
               "plot_1_1_1"
             ],
-            "mse": null,
+            "score": null,
             "is_close": null,
             "error_message": "Variables of vcell:7.7.0.13 and copasi:4.45.296 do not match, ['plot_1_0_0', 'plot_1_0_1', 'plot_1_1_1'] != ['task_fig2b.time/60', 'MAPK_PP', 'MAPK']"
           },
@@ -1520,7 +1367,7 @@
               "plot_1_0_1",
               "plot_1_1_1"
             ],
-            "mse": [
+            "score": [
               0.0,
               0.0,
               0.0
@@ -1545,7 +1392,7 @@
               "task_fig2a.MAPK_PP",
               "task_fig2a.MAPK"
             ],
-            "mse": [
+            "score": [
               0.0,
               0.0,
               0.0
@@ -1566,15 +1413,15 @@
               "task_fig2a.MAPK_PP",
               "task_fig2a.MAPK"
             ],
-            "mse": [
-              7.832064826486234e-30,
-              7.068847624010096e-7,
-              5.090201530125706e-7
+            "score": [
+              1.2053311887363872e-12,
+              0.2109208541519768,
+              0.6160117641611397
             ],
             "is_close": [
               true,
-              false,
-              false
+              true,
+              true
             ],
             "error_message": null
           }
@@ -1589,15 +1436,15 @@
               "task_fig2a.MAPK_PP",
               "task_fig2a.MAPK"
             ],
-            "mse": [
-              7.832064826486234e-30,
-              7.068847624010096e-7,
-              5.090201530125706e-7
+            "score": [
+              1.205331188736387e-12,
+              0.21092530300648407,
+              0.6159738194492199
             ],
             "is_close": [
               true,
-              false,
-              false
+              true,
+              true
             ],
             "error_message": null
           },
@@ -1610,7 +1457,7 @@
               "task_fig2a.MAPK_PP",
               "task_fig2a.MAPK"
             ],
-            "mse": [
+            "score": [
               0.0,
               0.0,
               0.0
@@ -1635,7 +1482,7 @@
               "task_fig2b.MAPK_PP",
               "task_fig2b.MAPK"
             ],
-            "mse": [
+            "score": [
               0.0,
               0.0,
               0.0
@@ -1656,15 +1503,15 @@
               "task_fig2b.MAPK_PP",
               "task_fig2b.MAPK"
             ],
-            "mse": [
-              5.734806001292011e-30,
-              4.4899338910569416e-7,
-              4.250409686092151e-7
+            "score": [
+              1.1516089720585092e-12,
+              0.1449101929048558,
+              0.1579643595189614
             ],
             "is_close": [
               true,
-              false,
-              false
+              true,
+              true
             ],
             "error_message": null
           }
@@ -1679,15 +1526,15 @@
               "task_fig2b.MAPK_PP",
               "task_fig2b.MAPK"
             ],
-            "mse": [
-              5.734806001292011e-30,
-              4.4899338910569416e-7,
-              4.250409686092151e-7
+            "score": [
+              1.1516089720585092e-12,
+              0.14491229283168663,
+              0.15796186428448936
             ],
             "is_close": [
               true,
-              false,
-              false
+              true,
+              true
             ],
             "error_message": null
           },
@@ -1700,7 +1547,7 @@
               "task_fig2b.MAPK_PP",
               "task_fig2b.MAPK"
             ],
-            "mse": [
+            "score": [
               0.0,
               0.0,
               0.0

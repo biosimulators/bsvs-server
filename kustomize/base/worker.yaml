@@ -22,15 +22,23 @@ spec:
             - configMapRef:
                 name: worker-config
           env:
-            - name: STORAGE_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: shared-secrets
-                  key: STORAGE_ACCESS_KEY_ID
-            - name: STORAGE_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: shared-secrets
-                  key: STORAGE_SECRET
+            - name: STORAGE_GCS_CREDENTIALS_FILE
+              value: /app/secret/gcs-credentials.json
+          volumeMounts:
+            - name: gcs-credentials
+              mountPath: /app/secret
+              readOnly: true
+            - name: worker-cache-pvc
+              mountPath: /app/scratch
+      volumes:
+        - name: worker-cache-pvc
+          persistentVolumeClaim:
+            claimName: worker-cache-pvc
+        - name: gcs-credentials
+          secret:
+              secretName: shared-secrets
+              items:
+                - key: gcs_credentials.json
+                  path: gcs-credentials.json
       imagePullSecrets:
         - name: ghcr-secret

@@ -1,5 +1,6 @@
 import os
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from dotenv import load_dotenv
@@ -29,13 +30,19 @@ class Settings(BaseSettings):
 
     temporal_service_url: str = "localhost:7233"
 
-    storage_local_cache_dir: str = ""
+    storage_local_cache_dir: str = "./local_cache"
 
-    storage_access_key_id: str = ""
-    storage_secret: str = ""
     storage_gcs_credentials_file: str = ""
 
 
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def get_local_cache_dir() -> Path:
+    settings = get_settings()
+    local_cache_dir = Path(settings.storage_local_cache_dir)
+    local_cache_dir.mkdir(parents=True, exist_ok=True)
+    return local_cache_dir
+

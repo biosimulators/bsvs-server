@@ -26,7 +26,7 @@ async def get_sim_run(get_sim_run_input: GetSimRunInput) -> BiosimSimulationRun:
         return biosim_sim_run
     except ClientResponseError as e:
         if e.status == 404:
-            activity.logger.warn(f"Simulation run with id {get_sim_run_input.biosim_run_id} not found", exc_info=e)
+            activity.logger.warn(f"Simulation run with id {get_sim_run_input.biosim_run_id} not found.", exc_info=e)
             if get_sim_run_input.abort_on_not_found:
                 # return a failed simulation run rather than raising an exception to avoid retrying the activity
                 return BiosimSimulationRun(
