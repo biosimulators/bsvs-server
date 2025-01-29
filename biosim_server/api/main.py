@@ -19,8 +19,8 @@ import uvicorn
 from fastapi import FastAPI, File, UploadFile, Query, APIRouter, Depends, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from biosim_server.dependencies import get_file_service, get_temporal_client, \
-    init_standalone, shutdown_standalone
+from biosim_server.config import get_local_cache_dir
+from biosim_server.dependencies import get_file_service, get_temporal_client, init_standalone, shutdown_standalone
 from biosim_server.log_config import setup_logging
 from biosim_server.workflows.verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus
@@ -138,9 +138,9 @@ async def start_verify_omex(
                                                  description="List of observables to include in the return data.")
 ) -> OmexVerifyWorkflowOutput:
     # ---- save omex file to a temporary file and then upload to cloud storage ---- #
-    save_dest = Path(os.path.join(os.getcwd(), "temp"))
-    save_dest.mkdir(parents=True, exist_ok=True)
-    local_temp_path: Path = await save_uploaded_file(uploaded_file, save_dest)
+    save_dest_dir = get_local_cache_dir() / "uploaded_files"
+    save_dest_dir.mkdir(exist_ok=True)
+    local_temp_path: Path = await save_uploaded_file(uploaded_file=uploaded_file, save_dest_dir=save_dest_dir)
     gcs_path = str(Path("verify") / "omex" / uuid.uuid4().hex / local_temp_path.name)
 
     file_service = get_file_service()
@@ -304,12 +304,12 @@ async def get_verify_runs(workflow_id: str) -> RunsVerifyWorkflowOutput:
         raise HTTPException(status_code=404, detail=msg)
 
 
-async def save_uploaded_file(uploaded_file2: UploadFile, save_dest: Path) -> Path:
+async def save_uploaded_file(uploaded_file: UploadFile, save_dest_dir: Path) -> Path:
     """Write `fastapi.UploadFile` instance passed by api gateway user to `save_dest`."""
-    filename = uploaded_file2.filename or (uuid.uuid4().hex + ".omex")
-    file_path = save_dest / filename
+    filename = uploaded_file.filename or (uuid.uuid4().hex + ".omex")
+    file_path = save_dest_dir / filename
     with open(file_path, 'wb') as file:
-        contents = await uploaded_file2.read()
+        contents = await uploaded_file.read()
         file.write(contents)
     return file_path
 

@@ -37,12 +37,17 @@ spec:
             - name: STORAGE_GCS_CREDENTIALS_FILE
               value: /app/secret/gcs-credentials.json
           volumeMounts:
+            - name: cache-volume
+              mountPath: /app/scratch
             - name: gcs-credentials
               mountPath: /app/secret
               readOnly: true
             - name: cache-volume
               mountPath: /app/scratch
       volumes:
+        - name: cache-volume
+          persistentVolumeClaim:
+            claimName: api-cache-pvc
         - name: gcs-credentials
           secret:
               secretName: shared-secrets

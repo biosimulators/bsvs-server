@@ -6,12 +6,14 @@ from typing import Generator
 import pytest
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
+from biosim_server.config import get_local_cache_dir
 from biosim_server.common.biosim1_client import SourceOmex, BiosimSimulatorSpec
 from biosim_server.workflows.verify import OmexVerifyWorkflowOutput, OmexVerifyWorkflowInput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput
 
 fixture_data_dir = Path(os.path.dirname(__file__)) / "local_data"
-root_dir = (Path(os.path.dirname(__file__))).parent.parent
+temp_data_dir = get_local_cache_dir() / "test_temp_dir"
+temp_data_dir.mkdir(exist_ok=True)
 
 
 @pytest.fixture(scope="function")
@@ -96,7 +98,6 @@ def hdf5_json_test_file() -> Path:
 
 @pytest.fixture(scope="function")
 def temp_test_data_dir() -> Generator[Path, None, None]:
-    temp_data_dir = root_dir / "temp_test_data"
     temp_data_dir.mkdir(exist_ok=True)
 
     yield temp_data_dir

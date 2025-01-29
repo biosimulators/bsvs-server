@@ -29,6 +29,9 @@ RUN poetry install --no-root --only main
 # Copy the rest of the application code
 COPY . /app
 
+# Declare the volume for local cache storage
+VOLUME ["/app/scratch"]
+
 # Expose the port FastAPI will run on
 EXPOSE 8000
 

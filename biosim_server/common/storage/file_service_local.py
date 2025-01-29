@@ -10,6 +10,7 @@ from typing import List, Optional
 import aiofiles
 from typing_extensions import override
 
+from biosim_server.config import get_local_cache_dir
 from biosim_server.common.storage.file_service import FileService, ListingItem
 
 
@@ -19,7 +20,8 @@ def generate_fake_etag(file_path: Path) -> str:
 
 class FileServiceLocal(FileService):
     # temporary base directory for the mock GCS file store
-    BASE_DIR_PARENT = Path(__file__).parent.parent.parent / "local_data"
+    BASE_DIR_PARENT = get_local_cache_dir() / "local_data"
+    BASE_DIR_PARENT.mkdir(exist_ok=True)
     BASE_DIR = BASE_DIR_PARENT / ("gcs_" + uuid.uuid4().hex)
 
     gcs_files_written: list[Path] = []
