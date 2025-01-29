@@ -32,8 +32,6 @@ class Settings(BaseSettings):
 
     storage_local_cache_dir: str = "./local_cache"
 
-    storage_access_key_id: str = ""
-    storage_secret: str = ""
     storage_gcs_credentials_file: str = ""
 
 

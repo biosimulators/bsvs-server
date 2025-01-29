@@ -9,8 +9,6 @@ ENV POETRY_VERSION=1.4.2 \
     STORAGE_BUCKET="simdata-bucket" \
     STORAGE_ENDPOINT_URL="http://minio:9000" \
     STORAGE_REGION="us-east-1" \
-    STORAGE_ACCESS_KEY_ID="minio" \
-    STORAGE_SECRET_ACCESS_KEY="minio123" \
     STORAGE_GCS_CREDENTIALS_FILE="/app/secret/gcs_credentials.json"
 
 
