@@ -25,15 +25,13 @@ spec:
             - name: STORAGE_GCS_CREDENTIALS_FILE
               value: /app/secret/gcs-credentials.json
           volumeMounts:
-            - name: cache-volume
-              mountPath: /app/scratch
             - name: gcs-credentials
               mountPath: /app/secret
               readOnly: true
-            - name: cache-volume
+            - name: worker-cache-pvc
               mountPath: /app/scratch
       volumes:
-        - name: cache-volume
+        - name: worker-cache-pvc
           persistentVolumeClaim:
             claimName: worker-cache-pvc
         - name: gcs-credentials
@@ -42,8 +40,5 @@ spec:
               items:
                 - key: gcs_credentials.json
                   path: gcs-credentials.json
-        - name: cache-volume
-          persistentVolumeClaim:
-            claimName: worker-cache-pvc
       imagePullSecrets:
         - name: ghcr-secret
