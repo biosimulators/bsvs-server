@@ -65,11 +65,6 @@ class BiosimSimulationRunStatus(StrEnum):
     UNKNOWN = 'UNKNOWN'
 
 
-class SourceOmex(BaseModel):
-    name: str
-    omex_s3_file: str
-
-
 class BiosimSimulatorSpec(BaseModel):
     simulator: str
     version: Optional[str] = None

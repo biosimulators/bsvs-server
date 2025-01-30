@@ -6,7 +6,7 @@ from typing import AsyncGenerator, Optional
 
 from temporalio import workflow
 
-from biosim_server.common.biosim1_client import BiosimSimulatorSpec, SourceOmex
+from biosim_server.common.biosim1_client import BiosimSimulatorSpec
 from biosim_server.common.database.data_models import OmexFile
 from biosim_server.common.storage.data_cache import get_cached_omex_file
 from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
@@ -150,10 +150,10 @@ async def start_verify_omex(
             simulator_specs.append(BiosimSimulatorSpec(simulator=name, version=version))
         else:
             simulator_specs.append(BiosimSimulatorSpec(simulator=simulator, version=None))
-    source_omex = SourceOmex(omex_s3_file=omex_file.omex_gcs_path, name="name")
+    omex_file = OmexFile(omex_gcs_path=omex_file.omex_gcs_path, uploaded_filename="BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex", file_hash_md5="hash", file_size=100, bucket_name="bucket")
     workflow_id = f"{workflow_id_prefix}{uuid.uuid4()}"
     omex_verify_workflow_input = OmexVerifyWorkflowInput(
-        source_omex=SourceOmex(omex_s3_file=omex_file.omex_gcs_path, name="name"),
+        omex_file=omex_file,
         user_description=user_description,
         requested_simulators=simulator_specs,
         include_outputs=include_outputs,
@@ -163,7 +163,7 @@ async def start_verify_omex(
         observables=observables)
 
     # ---- invoke workflow ---- #
-    logger.info(f"starting workflow for {source_omex}")
+    logger.info(f"starting workflow for {omex_file}")
     temporal_client = get_temporal_client()
     assert temporal_client is not None
     workflow_handle = await temporal_client.start_workflow(

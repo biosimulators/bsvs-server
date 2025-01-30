@@ -6,7 +6,8 @@ import pytest
 from temporalio.client import Client
 from temporalio.worker import Worker
 
-from biosim_server.common.biosim1_client import BiosimServiceRest, SourceOmex
+from biosim_server.common.biosim1_client import BiosimServiceRest
+from biosim_server.common.database.data_models import OmexFile
 from biosim_server.common.storage import FileServiceLocal, FileServiceGCS
 from biosim_server.config import get_settings
 from biosim_server.workflows.verify import ComparisonStatistics, OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
@@ -25,13 +26,14 @@ async def test_omex_verify_workflow_GCS(temporal_client: Client, temporal_verify
                                        omex_verify_workflow_output_file: Path) -> None:
     assert biosim_service_rest is not None
 
-    # set up the omex file to mock gcs (uploads on the fly)
-    gcs_path = str(file_service_gcs_test_base_path / "test_verify_workflow" / f"omex {uuid.uuid4().hex}" / omex_test_file.name)
+    gcs_path = str(file_service_gcs_test_base_path / "omex" / f"omex{uuid.uuid4().hex}" / omex_test_file.name)
+    omex_file = OmexFile(omex_gcs_path=gcs_path, uploaded_filename=omex_test_file.name, file_hash_md5="hash", file_size=100, bucket_name="bucket")
+
 
     await file_service_gcs.upload_file(file_path=omex_test_file, gcs_path=gcs_path)
     workflow_id = uuid.uuid4().hex
     logging.info(f"Stored test omex file at {gcs_path}")
-    omex_verify_workflow_input.source_omex = SourceOmex(omex_s3_file=gcs_path, name="name")
+    omex_verify_workflow_input.omex_file = omex_file
 
     observed_results: OmexVerifyWorkflowOutput = await temporal_client.execute_workflow(
         OmexVerifyWorkflow.run, args=[omex_verify_workflow_input],
@@ -46,21 +48,24 @@ async def test_omex_verify_workflow_mockGCS(temporal_client: Client, temporal_ve
                                omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                omex_verify_workflow_output: OmexVerifyWorkflowOutput,
                                biosim_service_rest: BiosimServiceRest, file_service_local: FileServiceLocal,
-                               omex_test_file: Path, omex_verify_workflow_output_file: Path) -> None:
+                               omex_verify_workflow_output_file: Path,
+                               omex_test_file: Path) -> None:
     assert biosim_service_rest is not None
 
     # set up the omex file to mock gcs (uploads on the fly)
     gcs_path = "path/to/model.omex"
+    omex_file = OmexFile(omex_gcs_path=gcs_path, uploaded_filename=omex_test_file.name, file_hash_md5="hash",
+                         file_size=100, bucket_name="bucket")
     await file_service_local.upload_file(file_path=omex_test_file, gcs_path=gcs_path)
     workflow_id = uuid.uuid4().hex
-    omex_verify_workflow_input.source_omex = SourceOmex(omex_s3_file=gcs_path, name="name")
+    omex_verify_workflow_input.omex_file = omex_file
 
     observed_results: OmexVerifyWorkflowOutput = await temporal_client.execute_workflow(
         OmexVerifyWorkflow.run, args=[omex_verify_workflow_input],
         # result_type=OmexVerifyWorkflowOutput,
         id=workflow_id, task_queue="verification_tasks")
 
-    # # uncomment to refresh the expected results
+    # uncomment to refresh the expected results
     # with open(omex_verify_workflow_output_file, "w") as f:
     #     f.write(observed_results.model_dump_json(indent=2))
 
@@ -74,7 +79,7 @@ def assert_omex_verify_results(observed_results: OmexVerifyWorkflowOutput,
     # customize expected results to match those things which vary between runs
     expected_results = expected_results_template.model_copy(deep=True)
     expected_results.workflow_id = observed_results.workflow_id
-    expected_results.workflow_input.source_omex.omex_s3_file = observed_results.workflow_input.source_omex.omex_s3_file
+    expected_results.workflow_input.omex_file = observed_results.workflow_input.omex_file
     expected_results.workflow_run_id = observed_results.workflow_run_id
     expected_results.timestamp = observed_results.timestamp
     if expected_results.workflow_results and observed_results.workflow_results:

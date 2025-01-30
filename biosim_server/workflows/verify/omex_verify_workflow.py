@@ -9,7 +9,8 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 from temporalio.workflow import ChildWorkflowHandle
 
-from biosim_server.common.biosim1_client import BiosimSimulatorSpec, SourceOmex
+from biosim_server.common.biosim1_client import BiosimSimulatorSpec
+from biosim_server.common.database.data_models import OmexFile
 from biosim_server.workflows.simulate import OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput
 from biosim_server.workflows.verify import generate_statistics, GenerateStatisticsInput, GenerateStatisticsOutput, \
     SimulationRunInfo
@@ -26,7 +27,7 @@ class OmexVerifyWorkflowStatus(StrEnum):
 
 
 class OmexVerifyWorkflowInput(BaseModel):
-    source_omex: SourceOmex
+    omex_file: OmexFile
     user_description: str
     requested_simulators: list[BiosimSimulatorSpec]
     include_outputs: bool
@@ -77,7 +78,7 @@ class OmexVerifyWorkflow:
         for simulator_spec in verify_input.requested_simulators:
             child_workflows.append(
                 workflow.start_child_workflow(OmexSimWorkflow.run,  # type: ignore
-                    args=[OmexSimWorkflowInput(source_omex=verify_input.source_omex, simulator_spec=simulator_spec)],
+                    args=[OmexSimWorkflowInput(omex_file=verify_input.omex_file, simulator_spec=simulator_spec)],
                     result_type=OmexSimWorkflowOutput,
                     task_queue="verification_tasks", execution_timeout=timedelta(minutes=10), ))
 

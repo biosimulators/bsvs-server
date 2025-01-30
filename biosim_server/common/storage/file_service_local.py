@@ -13,6 +13,7 @@ from typing_extensions import override
 from biosim_server.config import get_local_cache_dir
 from biosim_server.common.storage.file_service import FileService, ListingItem
 
+logger = logging.getLogger(__name__)
 
 def generate_fake_etag(file_path: Path) -> str:
     return file_path.absolute().as_uri()
@@ -36,6 +37,7 @@ class FileServiceLocal(FileService):
 
     @override
     async def download_file(self, gcs_path: str, file_path: Optional[Path]=None) -> tuple[str, str]:
+        logger.info(f"Downloading {gcs_path} to {file_path}")
         if file_path is None:
             file_path = Path(__file__).parent / ("temp_file_"+uuid.uuid4().hex)
         # copy file from mock gcs to local file system
@@ -46,10 +48,11 @@ class FileServiceLocal(FileService):
             contents = await f.read()
             async with aiofiles.open(local_file_path, mode='wb') as f2:
                 await f2.write(contents)
-        return str(gcs_file_path), str(local_file_path)
+        return str(gcs_path), str(local_file_path)
 
     @override
     async def upload_file(self, file_path: Path, gcs_path: str) -> str:
+        logger.info(f"Uploading {file_path} to {gcs_path}")
         # copy file from local file_path to mock gcs using aoifiles
         local_file_path = Path(file_path)
         gcs_file_path = self.BASE_DIR / gcs_path
@@ -60,7 +63,7 @@ class FileServiceLocal(FileService):
                 await f2.write(contents)
         self.gcs_files_written.append(gcs_file_path)
         logging.info(f"Uploaded file to gcs at {gcs_file_path}")
-        return str(gcs_file_path)
+        return str(gcs_path)
 
     @override
     async def upload_bytes(self, file_contents: bytes, gcs_path: str) -> str:
@@ -70,7 +73,7 @@ class FileServiceLocal(FileService):
         async with aiofiles.open(gcs_file_path, mode='wb') as f:
             await f.write(file_contents)
         self.gcs_files_written.append(gcs_file_path)
-        return str(gcs_file_path)
+        return str(gcs_path)
 
     @override
     async def get_modified_date(self, gcs_path: str) -> datetime:

@@ -3,19 +3,20 @@ import uuid
 
 from temporalio.client import Client
 
-from biosim_server.common.biosim1_client import SourceOmex, BiosimSimulatorSpec
+from biosim_server.common.biosim1_client import BiosimSimulatorSpec
+from biosim_server.common.database.data_models import OmexFile
 from biosim_server.common.temporal import pydantic_data_converter
 from biosim_server.workflows.verify import OmexVerifyWorkflow, OmexVerifyWorkflowInput
 
 
 async def start_workflow() -> None:
     client = await Client.connect("localhost:7233", data_converter=pydantic_data_converter)
-    source_omex = SourceOmex(omex_s3_file="path/to/model.omex", name="model_name")
+    omex_file = OmexFile(omex_gcs_path="path/to/model.omex", uploaded_filename="BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex", file_hash_md5="hash", file_size=100, bucket_name="bucket")
     workflow_id = uuid.uuid4().hex
     handle = await client.start_workflow(
         OmexVerifyWorkflow.run,
         args=[OmexVerifyWorkflowInput(
-            source_omex=source_omex,
+            omex_file=omex_file,
             user_description="description",
             requested_simulators=[BiosimSimulatorSpec(simulator="vcell", version="latest"),
                                   BiosimSimulatorSpec(simulator="copasi", version="latest")],

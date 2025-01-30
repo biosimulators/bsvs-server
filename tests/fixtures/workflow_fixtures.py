@@ -6,8 +6,9 @@ from typing import Generator
 import pytest
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
+from biosim_server.common.database.data_models import OmexFile
 from biosim_server.config import get_local_cache_dir
-from biosim_server.common.biosim1_client import SourceOmex, BiosimSimulatorSpec
+from biosim_server.common.biosim1_client import BiosimSimulatorSpec
 from biosim_server.workflows.verify import OmexVerifyWorkflowOutput, OmexVerifyWorkflowInput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput
 
@@ -29,13 +30,14 @@ def runs_verify_workflow_id() -> str:
 @pytest.fixture(scope="function")
 def omex_verify_workflow_input() -> OmexVerifyWorkflowInput:
     path = "path/to/omex"
+    omex_file = OmexFile(file_hash_md5="hash", uploaded_filename="BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex", file_size=100, omex_gcs_path=path, bucket_name="bucket")
     simulators = [BiosimSimulatorSpec(simulator="copasi"), BiosimSimulatorSpec(simulator="vcell")]
     include_outputs = False
     rel_tol = 1e-4
     abs_tol_min = 1e-3
     abs_tol_scale = 1e-5
     observables = ["time", "concentration"]
-    omex_input = OmexVerifyWorkflowInput(source_omex=SourceOmex(omex_s3_file=path, name="name"),
+    omex_input = OmexVerifyWorkflowInput(omex_file=omex_file,
                                          user_description="description", requested_simulators=simulators,
                                          include_outputs=include_outputs, rel_tol=rel_tol, abs_tol_min=abs_tol_min,
                                          abs_tol_scale=abs_tol_scale, observables=observables)

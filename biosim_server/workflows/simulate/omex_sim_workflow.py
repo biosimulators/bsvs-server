@@ -7,13 +7,14 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 
 from biosim_server.common.biosim1_client import BiosimSimulationRun, BiosimSimulationRunStatus, HDF5File, \
-    SourceOmex, BiosimSimulatorSpec
+    BiosimSimulatorSpec
+from biosim_server.common.database.data_models import OmexFile
 from biosim_server.workflows.simulate import get_hdf5_metadata, get_sim_run, submit_biosim_sim, SubmitBiosimSimInput, \
     GetSimRunInput, GetHdf5MetadataInput
 
 
 class OmexSimWorkflowInput(BaseModel):
-    source_omex: SourceOmex
+    omex_file: OmexFile
     simulator_spec: BiosimSimulatorSpec
 
 
@@ -56,7 +57,7 @@ class OmexSimWorkflow:
         workflow.logger.info(f"Child workflow started for {sim_input.simulator_spec.simulator}.")
 
         workflow.logger.info(f"submitting job for simulator {sim_input.simulator_spec.simulator}.")
-        submit_biosim_input = SubmitBiosimSimInput(source_omex=sim_input.source_omex,
+        submit_biosim_input = SubmitBiosimSimInput(omex_file=sim_input.omex_file,
                                                    simulator_spec=sim_input.simulator_spec)
         self.sim_output.biosim_run = await workflow.execute_activity(
             submit_biosim_sim,

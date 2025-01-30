@@ -6,8 +6,9 @@ from aiohttp import ClientResponseError
 from pydantic import BaseModel
 from temporalio import activity
 
-from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest, SourceOmex, BiosimSimulatorSpec, \
+from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest, BiosimSimulatorSpec, \
     BiosimSimulationRun, BiosimSimulationRunStatus, HDF5File, Hdf5DataValues
+from biosim_server.common.database.data_models import OmexFile
 from biosim_server.common.storage import FileService
 from biosim_server.dependencies import get_file_service, get_biosim_service
 
@@ -40,7 +41,7 @@ async def get_sim_run(get_sim_run_input: GetSimRunInput) -> BiosimSimulationRun:
 
 
 class SubmitBiosimSimInput(BaseModel):
-    source_omex: SourceOmex
+    omex_file: OmexFile
     simulator_spec: BiosimSimulatorSpec
 
 
@@ -53,9 +54,9 @@ async def submit_biosim_sim(input: SubmitBiosimSimInput) -> BiosimSimulationRun:
     file_service: FileService | None = get_file_service()
     if file_service is None:
         raise Exception("File service is not initialized")
-    (_, local_omex_path) = await file_service.download_file(input.source_omex.omex_s3_file)
-    simulation_run = await biosim_service.run_biosim_sim(local_omex_path, input.source_omex.name,
-                                                         input.simulator_spec)
+    (_, local_omex_path) = await file_service.download_file(gcs_path=input.omex_file.omex_gcs_path)
+    simulation_run = await biosim_service.run_biosim_sim(local_omex_path=local_omex_path, omex_name=input.omex_file.uploaded_filename,
+                                                         simulator_spec=input.simulator_spec)
     os.remove(local_omex_path)
     return simulation_run
 

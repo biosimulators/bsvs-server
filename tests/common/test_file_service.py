@@ -20,8 +20,8 @@ async def test_file_service_local(file_service_local: FileServiceLocal) -> None:
         f.write(expected_file_content)
 
     # upload the file
-    absolute_gcs_path = await file_service.upload_file(orig_file_path, gcs_path)
-    assert absolute_gcs_path == str(file_service.BASE_DIR / gcs_path)
+    returned_gcs_path = await file_service.upload_file(orig_file_path, gcs_path)
+    assert returned_gcs_path == gcs_path
 
     # download the file
     new_file_path = Path("temp2.txt")

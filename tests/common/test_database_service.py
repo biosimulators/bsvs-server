@@ -6,6 +6,6 @@ from biosim_server.common.database.database_service_mongo import DatabaseService
 
 @pytest.mark.asyncio
 async def test_database_service(database_service_mongo: DatabaseServiceMongo) -> None:
-    omex_file = OmexFile(file_hash_md5="1234", bucket_name="test_bucket", uploaded_filename="test.omex", omex_gcs_path="/path/to/omex", file_size=100000)
+    omex_file = OmexFile(file_hash_md5="1234", bucket_name="test_bucket", uploaded_filename="BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex", omex_gcs_path="path/to/omex", file_size=100000)
     await database_service_mongo.insert_omex_file(omex_file=omex_file)
     assert await database_service_mongo.get_omex_file(file_hash_md5=omex_file.file_hash_md5) == omex_file
