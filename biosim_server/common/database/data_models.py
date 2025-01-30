@@ -19,3 +19,17 @@ class OmexFile(BaseModel):
         if v.find("/") >= 0:
             raise ValueError("uploaded_filename must not contain any path separators")
         return v
+
+
+class DockerContainerInfo(BaseModel):
+    url: str
+    digest: str
+
+
+class BiosimulatorVersion(BaseModel):
+    id: str
+    name: str
+    version: str
+    image: DockerContainerInfo
+
+

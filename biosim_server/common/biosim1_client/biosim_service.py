@@ -2,6 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 
 from biosim_server.common.biosim1_client.models import BiosimSimulationRun, HDF5File, Hdf5DataValues, BiosimSimulatorSpec
+from biosim_server.common.database.data_models import BiosimulatorVersion
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,10 @@ class BiosimService(ABC):
 
     @abstractmethod
     async def get_hdf5_data(self, simulation_run_id: str, dataset_name: str) -> Hdf5DataValues:
+        pass
+
+    @abstractmethod
+    async def get_simulation_versions(self) -> list[BiosimulatorVersion]:
         pass
 
     @abstractmethod

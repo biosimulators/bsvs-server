@@ -38,6 +38,10 @@ class Settings(BaseSettings):
     mongo_db_name: str = "biosimulations"
     mongo_collection_omex_files: str = "omex_files"
 
+    simdata_api_base_url: str = "https://simdata.api.biosimulations.org"
+    biosimulators_api_base_url: str = "https://api.biosimulators.org"
+    biosimulations_api_base_url: str = "https://api.biosimulations.org"
+
 
 @lru_cache
 def get_settings() -> Settings:
