@@ -46,21 +46,22 @@ async def download_gcs_file(gcs_path: str, file_path: Path, token: Token) -> str
     logger.info(f"Downloading {file_path} to {gcs_path}")
     async with Storage(token=token) as client:
         await client.download_to_filename(bucket=get_settings().storage_bucket, object_name=gcs_path, filename=str(file_path))
-        return f"{get_settings().storage_endpoint_url}/{get_settings().storage_bucket}/{gcs_path}"
+        return gcs_path
 
 
 async def upload_file_to_gcs(file_path: Path, gcs_path: str, token: Token) -> str:
     logger.info(f"Uploading {file_path} to {gcs_path}")
     async with Storage(token=token) as client:
-        await client.upload_from_filename(bucket=get_settings().storage_bucket, object_name=gcs_path, filename=str(file_path))
-        return f"{get_settings().storage_endpoint_url}/{get_settings().storage_bucket}/{gcs_path}"
+        result: dict[str, Any] = await client.upload_from_filename(bucket=get_settings().storage_bucket, object_name=gcs_path, filename=str(file_path))
+        logger.info(f"Upload result: {result}")
+        return gcs_path
 
 
 async def upload_bytes_to_gcs(file_contents: bytes, gcs_path: str, token: Token) -> str:
     logger.info(f"Uploading {len(file_contents)} bytes to {gcs_path}")
     async with Storage(token=token) as client:
         await client.upload(bucket=get_settings().storage_bucket, file_data=file_contents, object_name=gcs_path)
-        return f"{get_settings().storage_endpoint_url}/{get_settings().storage_bucket}/{gcs_path}"
+        return gcs_path
 
 
 async def get_gcs_modified_date(gcs_path: str, token: Token) -> datetime:

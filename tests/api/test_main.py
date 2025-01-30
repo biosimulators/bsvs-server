@@ -9,6 +9,7 @@ from temporalio.worker import Worker
 
 from biosim_server.api.main import app
 from biosim_server.common.biosim1_client import BiosimServiceRest
+from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
 from biosim_server.common.storage import FileServiceGCS, FileServiceLocal
 from biosim_server.config import get_settings
 from biosim_server.workflows.verify import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus, \
@@ -39,6 +40,7 @@ async def test_get_output_not_found(omex_verify_workflow_input: OmexVerifyWorkfl
 async def test_omex_verify_and_get_output_mockGCS(omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                          omex_verify_workflow_output: OmexVerifyWorkflowOutput,
                                          omex_test_file: Path,
+                                         database_service_mongo: DatabaseServiceMongo,
                                          file_service_local: FileServiceLocal,
                                          temporal_client: Client,
                                          temporal_verify_worker: Worker,
@@ -81,6 +83,7 @@ async def test_omex_verify_and_get_output_mockGCS(omex_verify_workflow_input: Om
 async def test_omex_verify_and_get_output_GCS(omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                          omex_verify_workflow_output: OmexVerifyWorkflowOutput,
                                          omex_test_file: Path,
+                                         database_service_mongo: DatabaseServiceMongo,
                                          file_service_gcs: FileServiceGCS,
                                          temporal_client: Client,
                                          temporal_verify_worker: Worker,

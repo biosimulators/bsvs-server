@@ -34,6 +34,10 @@ class Settings(BaseSettings):
 
     storage_gcs_credentials_file: str = ""
 
+    mongo_url: str = "mongodb://localhost:27017"
+    mongo_db_name: str = "biosimulations"
+    mongo_collection_omex_files: str = "omex_files"
+
 
 @lru_cache
 def get_settings() -> Settings:

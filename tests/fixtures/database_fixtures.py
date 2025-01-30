@@ -5,6 +5,9 @@ import pytest_asyncio
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase, AsyncIOMotorCollection
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
+from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
+from biosim_server.dependencies import set_database_service, get_database_service
+
 MONGODB_DATABASE_NAME = "mydatabase"
 MONGODB_COLLECTION_NAME = "verification"
 
@@ -29,3 +32,14 @@ async def mongo_test_database(mongo_test_client: AsyncIOMotorClient) -> AsyncIOM
 async def mongo_test_collection(mongo_test_database: AsyncIOMotorDatabase) -> AsyncIOMotorCollection:
     test_collection: AsyncIOMotorCollection = mongo_test_database.get_collection(name=MONGODB_COLLECTION_NAME)
     return test_collection
+
+@pytest_asyncio.fixture(scope="function")
+async def database_service_mongo(mongo_test_client: AsyncIOMotorClient) -> AsyncGenerator[DatabaseServiceMongo,None]:
+    db_service = DatabaseServiceMongo(db_client=mongo_test_client)
+    old_db_service = get_database_service()
+    set_database_service(db_service)
+
+    yield db_service
+
+    set_database_service(old_db_service)
+    # await db_service.close()  the underlying client will already be closed

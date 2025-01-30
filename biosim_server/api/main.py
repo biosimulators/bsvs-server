@@ -7,12 +7,13 @@ from typing import AsyncGenerator, Optional
 from temporalio import workflow
 
 from biosim_server.common.biosim1_client import BiosimSimulatorSpec, SourceOmex
+from biosim_server.common.database.data_models import OmexFile
+from biosim_server.common.storage.data_cache import get_cached_omex_file
 from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflow, RunsVerifyWorkflowStatus
 
 with workflow.unsafe.imports_passed_through():
     from datetime import datetime, UTC, timedelta
-from pathlib import Path
 
 import dotenv
 import uvicorn
@@ -20,7 +21,8 @@ from fastapi import FastAPI, File, UploadFile, Query, APIRouter, Depends, HTTPEx
 from starlette.middleware.cors import CORSMiddleware
 
 from biosim_server.config import get_local_cache_dir
-from biosim_server.dependencies import get_file_service, get_temporal_client, init_standalone, shutdown_standalone
+from biosim_server.dependencies import get_file_service, get_temporal_client, init_standalone, shutdown_standalone, \
+    get_database_service
 from biosim_server.log_config import setup_logging
 from biosim_server.workflows.verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus
@@ -121,7 +123,7 @@ def root() -> dict[str, str]:
     response_model=OmexVerifyWorkflowOutput,
     operation_id="start-verify-omex",
     tags=["Verification"],
-    dependencies=[Depends(get_temporal_client), Depends(get_file_service)],
+    dependencies=[Depends(get_temporal_client), Depends(get_file_service), Depends(get_local_cache_dir), Depends(get_database_service)],
     summary="Request verification report for OMEX/COMBINE archive")
 async def start_verify_omex(
         uploaded_file: UploadFile = File(..., description="OMEX/COMBINE archive containing a deterministic SBML model"),
@@ -137,17 +139,8 @@ async def start_verify_omex(
         observables: Optional[list[str]] = Query(default=None,
                                                  description="List of observables to include in the return data.")
 ) -> OmexVerifyWorkflowOutput:
-    # ---- save omex file to a temporary file and then upload to cloud storage ---- #
-    save_dest_dir = get_local_cache_dir() / "uploaded_files"
-    save_dest_dir.mkdir(exist_ok=True)
-    local_temp_path: Path = await save_uploaded_file(uploaded_file=uploaded_file, save_dest_dir=save_dest_dir)
-    gcs_path = str(Path("verify") / "omex" / uuid.uuid4().hex / local_temp_path.name)
-
-    file_service = get_file_service()
-    assert file_service is not None
-    full_gcs_path: str = await file_service.upload_file(file_path=local_temp_path, gcs_path=gcs_path)
-    local_temp_path.unlink()
-    logger.info(f"Uploaded file to S3 at {full_gcs_path}")
+    # ---- using hash to avoid saving multiple copies, upload to cloud storage if needed ---- #
+    omex_file: OmexFile = await get_cached_omex_file(uploaded_file=uploaded_file)
 
     # ---- create workflow input ---- #
     simulator_specs: list[BiosimSimulatorSpec] = []
@@ -157,10 +150,10 @@ async def start_verify_omex(
             simulator_specs.append(BiosimSimulatorSpec(simulator=name, version=version))
         else:
             simulator_specs.append(BiosimSimulatorSpec(simulator=simulator, version=None))
-    source_omex = SourceOmex(omex_s3_file=gcs_path, name="name")
+    source_omex = SourceOmex(omex_s3_file=omex_file.omex_gcs_path, name="name")
     workflow_id = f"{workflow_id_prefix}{uuid.uuid4()}"
     omex_verify_workflow_input = OmexVerifyWorkflowInput(
-        source_omex=SourceOmex(omex_s3_file=gcs_path, name="name"),
+        source_omex=SourceOmex(omex_s3_file=omex_file.omex_gcs_path, name="name"),
         user_description=user_description,
         requested_simulators=simulator_specs,
         include_outputs=include_outputs,
@@ -302,16 +295,6 @@ async def get_verify_runs(workflow_id: str) -> RunsVerifyWorkflowOutput:
         msg = f"error retrieving verification job output with id: {workflow_id}: {exc_message}"
         logger.error(msg, exc_info=e2)
         raise HTTPException(status_code=404, detail=msg)
-
-
-async def save_uploaded_file(uploaded_file: UploadFile, save_dest_dir: Path) -> Path:
-    """Write `fastapi.UploadFile` instance passed by api gateway user to `save_dest`."""
-    filename = uploaded_file.filename or (uuid.uuid4().hex + ".omex")
-    file_path = save_dest_dir / filename
-    with open(file_path, 'wb') as file:
-        contents = await uploaded_file.read()
-        file.write(contents)
-    return file_path
 
 
 if __name__ == "__main__":

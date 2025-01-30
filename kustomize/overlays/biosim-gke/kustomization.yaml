@@ -21,5 +21,6 @@ resources:
 - secret-shared.yaml
 - api-pvc.yaml
 - worker-pvc.yaml
+- mongodb-pvc.yaml
 - ../../config/biosim-gke
 - ../../base
