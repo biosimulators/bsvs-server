@@ -33,16 +33,15 @@ async def get_sim_run(get_sim_run_input: GetSimRunInput) -> BiosimSimulationRun:
                 return BiosimSimulationRun(
                     id=get_sim_run_input.biosim_run_id,
                     name="",
-                    simulator="",
-                    simulatorVersion="",
-                    status=BiosimSimulationRunStatus.RUN_ID_NOT_FOUND
+                    simulator_version=BiosimulatorVersion(id="", name="", version="", image=DockerContainerInfo(url="", digest="")),
+                    status=BiosimSimulationRunStatus.RUN_ID_NOT_FOUND,
                 )
         raise e
 
 
 class SubmitBiosimSimInput(BaseModel):
     omex_file: OmexFile
-    simulator_spec: BiosimSimulatorSpec
+    simulator_version: BiosimulatorVersion
 
 
 @activity.defn
@@ -57,7 +56,7 @@ async def submit_biosim_sim(input: SubmitBiosimSimInput) -> BiosimSimulationRun:
     (_, local_omex_path) = await file_service.download_file(gcs_path=input.omex_file.omex_gcs_path)
     activity.logger.info(f"Downloaded OMEX file from gcs_path {input.omex_file.omex_gcs_path} to local path {local_omex_path}")
     simulation_run = await biosim_service.run_biosim_sim(local_omex_path=local_omex_path, omex_name=input.omex_file.uploaded_filename,
-                                                         simulator_spec=input.simulator_spec)
+                                                         simulator_version=input.simulator_version)
     os.remove(local_omex_path)
     activity.logger.info(f"Deleted local OMEX file at {local_omex_path}")
     return simulation_run

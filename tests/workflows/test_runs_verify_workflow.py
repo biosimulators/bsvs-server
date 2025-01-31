@@ -100,8 +100,7 @@ def assert_runs_verify_results(observed_results: RunsVerifyWorkflowOutput,
             expected_hdf5_file.uri = result_hdf5_file.uri
             expected_hdf5_file.id = result_hdf5_file.id
             expected_biosim_sim_run.id = result_biosim_sim_run.id
-            expected_biosim_sim_run.simulatorVersion = result_biosim_sim_run.simulatorVersion
-            expected_biosim_sim_run.simulatorDigest = result_biosim_sim_run.simulatorDigest
+            expected_biosim_sim_run.simulator_version = result_biosim_sim_run.simulator_version
 
     # compare the comparison statistics separately, seems not to be 100% deterministic
     assert expected_results.workflow_results is not None

@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from typing_extensions import override
@@ -43,12 +44,11 @@ class BiosimServiceMock(BiosimService):
     @override
     async def run_biosim_sim(self, local_omex_path: str, omex_name: str, simulator_version: BiosimulatorVersion) -> BiosimSimulationRun:
         logger.info(f"Submitting MOCK simulation for {omex_name} with local path {local_omex_path} with simulator {simulator_version.id}")
+        sim_id = "mock_"+str(uuid.uuid4().hex)
         sim_run = BiosimSimulationRun(
             id=sim_id,
             name=omex_name,
-            simulator=simulator_spec.simulator,
-            simulatorVersion=simulator_spec.version or "1.0",
-            simulatorDigest="sha256:5d1595553608436a2a343f8ab7e650798ef5ba5dab007b9fe31cd342bf18ec81",
+            simulator_version=simulator_version,
             status=BiosimSimulationRunStatus.RUNNING
         )
         self.sim_runs[sim_id] = sim_run

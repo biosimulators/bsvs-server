@@ -15,7 +15,7 @@ from biosim_server.workflows.simulate import get_hdf5_metadata, get_sim_run, sub
 
 class OmexSimWorkflowInput(BaseModel):
     omex_file: OmexFile
-    simulator_spec: BiosimSimulatorSpec
+    simulator_version: BiosimulatorVersion
 
 
 class OmexSimWorkflowStatus(StrEnum):
@@ -54,11 +54,11 @@ class OmexSimWorkflow:
     async def run(self, sim_input: OmexSimWorkflowInput) -> OmexSimWorkflowOutput:
         self.sim_output.workflow_id = workflow.info().workflow_id
         workflow.logger.setLevel(level=logging.DEBUG)
-        workflow.logger.info(f"Child workflow started for {sim_input.simulator_spec.simulator}.")
+        workflow.logger.info(f"Child workflow started for {sim_input.simulator_version.id}.")
 
-        workflow.logger.info(f"submitting job for simulator {sim_input.simulator_spec.simulator}.")
+        workflow.logger.info(f"submitting job for simulator {sim_input.simulator_version.id}.")
         submit_biosim_input = SubmitBiosimSimInput(omex_file=sim_input.omex_file,
-                                                   simulator_spec=sim_input.simulator_spec)
+                                                   simulator_version=sim_input.simulator_version)
         self.sim_output.biosim_run = await workflow.execute_activity(
             submit_biosim_sim,
             args=[submit_biosim_input],
@@ -67,7 +67,7 @@ class OmexSimWorkflow:
         )
 
         workflow.logger.info(
-            f"Job {self.sim_output.biosim_run.id} for {sim_input.simulator_spec.simulator}, "
+            f"Job {self.sim_output.biosim_run.id} for {sim_input.simulator_version.id}, "
             f"status is {self.sim_output.biosim_run.status}.")
 
         while self.sim_output.biosim_run is not None and self.sim_output.biosim_run.status not in [
@@ -82,7 +82,7 @@ class OmexSimWorkflow:
             )
 
             workflow.logger.info(
-                f"Job {self.sim_output.biosim_run.id} for {sim_input.simulator_spec.simulator}, "
+                f"Job {self.sim_output.biosim_run.id} for {sim_input.simulator_version.id}, "
                 f"status is {self.sim_output.biosim_run.status}.")
 
             if self.sim_output.biosim_run.status == BiosimSimulationRunStatus.FAILED:

@@ -28,7 +28,7 @@ class OmexVerifyWorkflowStatus(StrEnum):
 class OmexVerifyWorkflowInput(BaseModel):
     omex_file: OmexFile
     user_description: str
-    requested_simulators: list[BiosimSimulatorSpec]
+    requested_simulators: list[BiosimulatorVersion]
     include_outputs: bool
     rel_tol: float
     abs_tol_min: float
@@ -41,7 +41,7 @@ class OmexVerifyWorkflowOutput(BaseModel):
     workflow_input: OmexVerifyWorkflowInput
     workflow_status: OmexVerifyWorkflowStatus
     timestamp: str
-    actual_simulators: Optional[list[BiosimSimulatorSpec]] = None
+    actual_simulators: Optional[list[BiosimulatorVersion]] = None
     workflow_run_id: Optional[str] = None
     workflow_results: Optional[GenerateStatisticsOutput] = None
 
@@ -77,9 +77,9 @@ class OmexVerifyWorkflow:
         for simulator_spec in verify_input.requested_simulators:
             child_workflows.append(
                 workflow.start_child_workflow(OmexSimWorkflow.run,  # type: ignore
-                    args=[OmexSimWorkflowInput(omex_file=verify_input.omex_file, simulator_spec=simulator_spec)],
-                    result_type=OmexSimWorkflowOutput,
-                    task_queue="verification_tasks", execution_timeout=timedelta(minutes=10), ))
+                                              args=[OmexSimWorkflowInput(omex_file=verify_input.omex_file, simulator_version=simulator_spec)],
+                                              result_type=OmexSimWorkflowOutput,
+                                              task_queue="verification_tasks", execution_timeout=timedelta(minutes=10), ))
 
         workflow.logger.info(f"waiting for {len(child_workflows)} child simulation workflows.")
         # Wait for all child workflows to complete

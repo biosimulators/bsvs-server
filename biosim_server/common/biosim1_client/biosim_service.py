@@ -13,7 +13,7 @@ class BiosimService(ABC):
         pass
 
     @abstractmethod
-    async def run_biosim_sim(self, local_omex_path: str, omex_name: str, simulator_spec: BiosimSimulatorSpec) -> BiosimSimulationRun:
+    async def run_biosim_sim(self, local_omex_path: str, omex_name: str, simulator_version: BiosimulatorVersion) -> BiosimSimulationRun:
         pass
 
     @abstractmethod

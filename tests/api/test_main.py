@@ -48,7 +48,7 @@ async def test_omex_verify_and_get_output_mockGCS(omex_verify_workflow_input: Om
     assert omex_verify_workflow_input.observables is not None
     query_params: dict[str, float | str | list[str]] = {
         "workflow_id_prefix": "verification-",
-        "simulators": [sim.simulator for sim in omex_verify_workflow_input.requested_simulators],
+        "simulators": [f"{sim.id}:{sim.version}" for sim in omex_verify_workflow_input.requested_simulators],
         "include_outputs": omex_verify_workflow_input.include_outputs,
         "user_description": omex_verify_workflow_input.user_description,
         "observables": omex_verify_workflow_input.observables,
@@ -91,7 +91,7 @@ async def test_omex_verify_and_get_output_GCS(omex_verify_workflow_input: OmexVe
     assert omex_verify_workflow_input.observables is not None
     query_params: dict[str, float | str | list[str]] = {
         "workflow_id_prefix": "verification-",
-        "simulators": [sim.simulator for sim in omex_verify_workflow_input.requested_simulators],
+        "simulators": [f"{sim.id}:{sim.version}" for sim in omex_verify_workflow_input.requested_simulators],
         "include_outputs": omex_verify_workflow_input.include_outputs,
         "user_description": omex_verify_workflow_input.user_description,
         "observables": omex_verify_workflow_input.observables,

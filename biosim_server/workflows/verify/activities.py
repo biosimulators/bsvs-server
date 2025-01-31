@@ -84,7 +84,7 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
             labels_i = sim_run_info_i.hdf5_file.datasets[dataset_name].sedml_labels
             data_i: Hdf5DataValues = results_i[dataset_name]
             array_i: NDArray[np.float64] = np.array(data_i.values, dtype=np.float64).reshape(data_i.shape)
-            simulation_version_i = f"{sim_run_info_i.biosim_sim_run.simulator}:{sim_run_info_i.biosim_sim_run.simulatorVersion}"
+            simulation_version_i = f"{sim_run_info_i.biosim_sim_run.simulator_version.id}:{sim_run_info_i.biosim_sim_run.simulator_version.version}"
 
             ds_comparison_i: list[ComparisonStatistics] = []  # holds comparisons [i,:] for this dataset
 
@@ -93,7 +93,7 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
                 run_id_j = sim_run_info_j.biosim_sim_run.id
                 results_j: dict[str, Hdf5DataValues] = datasets[run_id_j]
                 labels_j = sim_run_info_j.hdf5_file.datasets[dataset_name].sedml_labels
-                simulation_version_j = f"{sim_run_info_j.biosim_sim_run.simulator}:{sim_run_info_j.biosim_sim_run.simulatorVersion}"
+                simulation_version_j = f"{sim_run_info_j.biosim_sim_run.simulator_version.id}:{sim_run_info_j.biosim_sim_run.simulator_version.version}"
 
                 # create a comparison statistics object with default values, add data or error message if needed
                 stats_i_j = ComparisonStatistics(simulator_version_i=simulation_version_i,

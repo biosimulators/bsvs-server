@@ -44,7 +44,7 @@ class RunsVerifyWorkflowOutput(BaseModel):
     workflow_status: RunsVerifyWorkflowStatus
     timestamp: str
     workflow_error: Optional[str] = None
-    actual_simulators: Optional[list[BiosimSimulatorSpec]] = None
+    actual_simulators: Optional[list[BiosimulatorVersion]] = None
     workflow_run_id: Optional[str] = None
     workflow_results: Optional[GenerateStatisticsOutput] = None
 

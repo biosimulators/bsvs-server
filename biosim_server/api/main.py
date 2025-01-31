@@ -142,19 +142,32 @@ async def start_verify_omex(
     omex_file: OmexFile = await get_cached_omex_file_from_upload(uploaded_file=uploaded_file)
 
     # ---- create workflow input ---- #
-    simulator_specs: list[BiosimSimulatorSpec] = []
+    simulator_versions: list[BiosimulatorVersion] = []
+    biosim_service = get_biosim_service()
+    assert biosim_service is not None
+    all_simulator_versions = await biosim_service.get_simulator_versions()
     for simulator in simulators:
+        simulator_version: Optional[BiosimulatorVersion] = None
         if ":" in simulator:
             name, version = simulator.split(":")
-            simulator_specs.append(BiosimSimulatorSpec(simulator=name, version=version))
+            for sv in all_simulator_versions:
+                if sv.id == name and sv.version == version:
+                    simulator_version = sv
+                    break
         else:
-            simulator_specs.append(BiosimSimulatorSpec(simulator=simulator, version=None))
-    omex_file = OmexFile(omex_gcs_path=omex_file.omex_gcs_path, uploaded_filename="BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex", file_hash_md5="hash", file_size=100, bucket_name="bucket")
+            for sv in all_simulator_versions:
+                if sv.id == simulator:
+                    simulator_version = sv  # don't break, we want the last one in the list
+        if simulator_version is not None:
+            simulator_versions.append(simulator_version)
+        else:
+            raise HTTPException(status_code=400, detail=f"Simulator {simulator} not found.")
+
     workflow_id = f"{workflow_id_prefix}{uuid.uuid4()}"
     omex_verify_workflow_input = OmexVerifyWorkflowInput(
         omex_file=omex_file,
         user_description=user_description,
-        requested_simulators=simulator_specs,
+        requested_simulators=simulator_versions,
         include_outputs=include_outputs,
         rel_tol=rel_tol,
         abs_tol_min=abs_tol_min,

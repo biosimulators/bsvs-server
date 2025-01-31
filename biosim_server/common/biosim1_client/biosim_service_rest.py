@@ -34,26 +34,25 @@ class BiosimServiceRest(BiosimService):
                 resp.raise_for_status()
                 res = await resp.json()
 
-        sim_run = BiosimSimulationRun(id=res["id"], name=res["name"], simulator=res['simulator'],
-                                      simulatorVersion=res['simulatorVersion'], simulatorDigest=res['simulatorDigest'],
-                                      status=BiosimSimulationRunStatus(res['status']))
+        assert res["id"] == simulation_run_id
 
+        sim_id: str = res['simulator']
+        sim_ver: str = res['simulatorVersion']
+        sim_digest: str = res['simulatorDigest']
+        sim_status = BiosimSimulationRunStatus(res['status'])
+        simulator_version = await self._get_simulator_version(sim_id=sim_id, sim_ver=sim_ver, sim_digest=sim_digest)
+        sim_run = BiosimSimulationRun(id=res["id"], name=res["name"], simulator_version=simulator_version, status=sim_status)
         return sim_run
 
 
     @override
     async def run_biosim_sim(self, local_omex_path: str, omex_name: str,
-                             simulator_spec: BiosimSimulatorSpec) -> BiosimSimulationRun:
+                             simulator_version: BiosimulatorVersion) -> BiosimSimulationRun:
         logger.info(f"Submitting simulation for {omex_name} with local path {local_omex_path} with simulator {simulator_version.id}")
-        This function runs the project on biosimulations.
-        """
-        api_base_url = get_settings().biosimulations_api_base_url
 
-        simulation_run_request = BiosimSimulationRunApiRequest(name=omex_name, simulator=simulator_spec.simulator,
-                                                               simulatorVersion=simulator_spec.version or "latest",
-                                                               maxTime=600, )
+        simulation_run_request = BiosimSimulationRunApiRequest(name=omex_name, simulator=simulator_version.id,
+                                                               simulatorVersion=simulator_version.version, maxTime=600)
 
-        print(local_omex_path)
         async with aiohttp.ClientSession() as session:
             with Path(local_omex_path).open('rb') as f:
                 data = FormData()
@@ -61,20 +60,34 @@ class BiosimServiceRest(BiosimService):
                 data.add_field(name='simulationRun', value=simulation_run_request.model_dump_json(),
                                content_type='multipart/form-data')
 
+                api_base_url = get_settings().biosimulations_api_base_url
                 async with session.post(url=api_base_url + '/runs', data=data) as resp:
                     resp.raise_for_status()
                     res = await resp.json()
 
-        if simulator_spec.version is None:
-            simulator_spec.version = res['simulatorVersion']
+        sim_id: str = res['simulator']
+        sim_ver: str = res['simulatorVersion']
+        sim_digest: str = res['simulatorDigest']
+        assert simulator_version.version == sim_ver
+        assert simulator_version.id == sim_id
+        assert simulator_version.image.digest == sim_digest
 
-        sim_run = BiosimSimulationRun(id=res["id"], name=res["name"], simulator=res['simulator'],
-                                      simulatorVersion=res['simulatorVersion'], simulatorDigest=res['simulatorDigest'],
-                                      status=BiosimSimulationRunStatus(res['status']))
+        sim_status = BiosimSimulationRunStatus(res['status'])
+        simulator_version = await self._get_simulator_version(sim_id=sim_id, sim_ver=sim_ver, sim_digest=sim_digest)
+        sim_run = BiosimSimulationRun(id=res["id"], name=res["name"], simulator_version=simulator_version, status=sim_status)
 
         # logger.info("Submitted " + omex_name + " on biosimulations with simulation id: " + sim_run.id)
         # logger.info("View:", api_base_url + "/runs/" + sim_run.id)
         return sim_run
+
+
+    async def _get_simulator_version(self, sim_id: str, sim_ver: str, sim_digest: str) -> BiosimulatorVersion:
+        simulator_version: BiosimulatorVersion
+        for simulator_version in await self.get_simulator_versions():
+            if simulator_version.id == sim_id and simulator_version.version == sim_ver and simulator_version.image.digest == sim_digest:
+                return simulator_version
+        raise Exception(f"Simulator version not found for simulator id: {sim_id}, version: {sim_ver}, digest: {sim_digest}")
+
 
     @override
     async def get_hdf5_metadata(self, simulation_run_id: str) -> HDF5File:

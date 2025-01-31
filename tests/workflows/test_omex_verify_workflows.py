@@ -32,7 +32,6 @@ async def test_omex_verify_workflow_GCS(temporal_client: Client, temporal_verify
     omex_file = await get_cached_omex_file_from_local(omex_file=omex_test_file, filename=omex_test_file.name)
 
     await file_service_gcs.upload_file(file_path=omex_test_file, gcs_path=omex_file.omex_gcs_path)
-    await file_service_gcs.upload_file(file_path=omex_test_file, gcs_path=gcs_path)
     workflow_id = uuid.uuid4().hex
     logging.info(f"Stored test omex file at {omex_file.omex_gcs_path}")
     omex_verify_workflow_input.omex_file = omex_file
@@ -91,8 +90,7 @@ def assert_omex_verify_results(observed_results: OmexVerifyWorkflowOutput,
             expected_hdf5_file.uri = result_hdf5_file.uri
             expected_hdf5_file.id = result_hdf5_file.id
             expected_biosim_sim_run.id = result_biosim_sim_run.id
-            expected_biosim_sim_run.simulatorVersion = result_biosim_sim_run.simulatorVersion
-            expected_biosim_sim_run.simulatorDigest = result_biosim_sim_run.simulatorDigest
+            expected_biosim_sim_run.simulator_version = result_biosim_sim_run.simulator_version
 
     # compare the comparison statistics separately, seems not to be 100% deterministic
     assert expected_results.workflow_results is not None
