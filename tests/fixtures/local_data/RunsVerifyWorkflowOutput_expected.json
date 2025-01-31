@@ -1,5 +1,5 @@
 {
-  "workflow_id": "e199a21d4bc343c98c83cf5fec6aab39",
+  "workflow_id": "dc621c26af984780b8fa0c15607af1c3",
   "workflow_input": {
     "user_description": "description",
     "biosimulations_run_ids": [
@@ -16,10 +16,10 @@
     ]
   },
   "workflow_status": "COMPLETED",
-  "timestamp": "2025-01-30 22:17:04.402157+00:00",
+  "timestamp": "2025-01-31 19:16:53.640816+00:00",
   "workflow_error": null,
   "actual_simulators": null,
-  "workflow_run_id": "b83deccc-1324-40d0-b875-066c716db6fc",
+  "workflow_run_id": "b00e4adc-32ba-4d79-92f8-b50c2daf08b5",
   "workflow_results": {
     "sims_run_info": [
       {

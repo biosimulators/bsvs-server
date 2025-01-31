@@ -5,7 +5,8 @@ import random
 from temporalio.worker import Worker, UnsandboxedWorkflowRunner
 
 from biosim_server.dependencies import get_temporal_client, init_standalone
-from biosim_server.workflows.simulate.biosim_activities import get_hdf5_metadata, get_hdf5_data
+from biosim_server.workflows.simulate.biosim_activities import get_hdf5_metadata, get_hdf5_data, \
+    save_biosimulator_workflow_run_activity, get_biosimulator_workflow_runs_activity
 from biosim_server.workflows.simulate.biosim_activities import get_sim_run, submit_biosim_sim
 from biosim_server.workflows.simulate.omex_sim_workflow import OmexSimWorkflow
 from biosim_server.workflows.verify.activities import generate_statistics
@@ -31,7 +32,8 @@ async def main() -> None:
         client,
         task_queue="verification_tasks",
         workflows=[OmexVerifyWorkflow, OmexSimWorkflow, RunsVerifyWorkflow],
-        activities=[generate_statistics, get_sim_run, submit_biosim_sim, get_hdf5_metadata, get_hdf5_data],
+        activities=[generate_statistics, get_sim_run, submit_biosim_sim, get_hdf5_metadata, get_hdf5_data,
+                    save_biosimulator_workflow_run_activity, get_biosimulator_workflow_runs_activity],
         workflow_runner=UnsandboxedWorkflowRunner(),
     )
     run_futures.append(handle.run())

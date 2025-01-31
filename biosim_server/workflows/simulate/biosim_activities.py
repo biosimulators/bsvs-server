@@ -8,9 +8,9 @@ from temporalio import activity
 
 from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest, HDF5File, Hdf5DataValues
 from biosim_server.common.database.data_models import OmexFile, BiosimSimulationRun, BiosimulatorVersion, \
-    DockerContainerInfo, BiosimSimulationRunStatus
+    DockerContainerInfo, BiosimSimulationRunStatus, BiosimulatorWorkflowRun
 from biosim_server.common.storage import FileService
-from biosim_server.dependencies import get_file_service, get_biosim_service
+from biosim_server.dependencies import get_file_service, get_biosim_service, get_database_service
 
 
 class GetSimRunInput(BaseModel):
@@ -72,6 +72,24 @@ async def get_hdf5_metadata(input: GetHdf5MetadataInput) -> HDF5File:
     biosim_service = BiosimServiceRest()
     hdf5_file: HDF5File = await biosim_service.get_hdf5_metadata(input.simulation_run_id)
     return hdf5_file
+
+
+@activity.defn
+async def get_biosimulator_workflow_runs_activity(file_hash_md5: str, sim_digest: str) -> list[BiosimulatorWorkflowRun]:
+    activity.logger.setLevel(logging.INFO)
+    activity.logger.info(f"Getting biosimulator workflow runs with file hash {file_hash_md5} and sim digest {sim_digest}")
+    database_service = get_database_service()
+    assert database_service is not None
+    return await database_service.get_biosimulator_workflow_runs(file_hash_md5=file_hash_md5, sim_digest=sim_digest)
+
+
+@activity.defn
+async def save_biosimulator_workflow_run_activity(input: BiosimulatorWorkflowRun) -> BiosimulatorWorkflowRun:
+    activity.logger.setLevel(logging.INFO)
+    activity.logger.info(f"Saving biosimulator workflow run with id {input.database_id}")
+    database_service = get_database_service()
+    assert database_service is not None
+    return await database_service.insert_biosimulator_workflow_run(input)
 
 
 class GetHdf5DataInput(BaseModel):

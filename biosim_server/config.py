@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     mongo_url: str = "mongodb://localhost:27017"
     mongo_db_name: str = "biosimulations"
     mongo_collection_omex_files: str = "omex_files"
+    mongo_collection_sim_outputs: str = "sim_outputs"
 
     simdata_api_base_url: str = "https://simdata.api.biosimulations.org"
     biosimulators_api_base_url: str = "https://api.biosimulators.org"

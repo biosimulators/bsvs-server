@@ -93,9 +93,13 @@ class OmexVerifyWorkflow:
                 raise Exception(
                     "Child workflow did not complete successfully, even after asyncio.gather on all workflows")
 
-            if omex_sim_workflow_output.biosim_run is None or omex_sim_workflow_output.hdf5_file is None:
+            if omex_sim_workflow_output.biosimulator_workflow_run is None:
                 continue
-            run_data.append(SimulationRunInfo(biosim_sim_run=omex_sim_workflow_output.biosim_run, hdf5_file=omex_sim_workflow_output.hdf5_file))
+            assert omex_sim_workflow_output.biosimulator_workflow_run is not None
+            assert omex_sim_workflow_output.biosimulator_workflow_run.biosim_run is not None
+            assert omex_sim_workflow_output.biosimulator_workflow_run.hdf5_file is not None
+            run_data.append(SimulationRunInfo(biosim_sim_run=omex_sim_workflow_output.biosimulator_workflow_run.biosim_run,
+                                              hdf5_file=omex_sim_workflow_output.biosimulator_workflow_run.hdf5_file))
 
         # Generate comparison report
         generate_statistics_output: GenerateStatisticsOutput = await workflow.execute_activity(
