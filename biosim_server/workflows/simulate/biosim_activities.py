@@ -8,7 +8,7 @@ from temporalio import activity
 
 from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest, HDF5File, Hdf5DataValues
 from biosim_server.common.database.data_models import OmexFile, BiosimSimulationRun, BiosimulatorVersion, \
-     BiosimSimulationRunStatus, BiosimulatorWorkflowRun
+    BiosimSimulationRunStatus, BiosimulatorWorkflowRun
 from biosim_server.common.storage import FileService
 from biosim_server.dependencies import get_file_service, get_biosim_service, get_database_service
 
@@ -75,12 +75,14 @@ async def get_hdf5_metadata(input: GetHdf5MetadataInput) -> HDF5File:
 
 
 @activity.defn
-async def get_biosimulator_workflow_runs_activity(file_hash_md5: str, sim_digest: str) -> list[BiosimulatorWorkflowRun]:
+async def get_biosimulator_workflow_runs_activity(file_hash_md5: str, sim_digest: str,
+                                                  cache_buster: str) -> list[BiosimulatorWorkflowRun]:
     activity.logger.setLevel(logging.INFO)
     activity.logger.info(f"Getting biosimulator workflow runs with file hash {file_hash_md5} and sim digest {sim_digest}")
     database_service = get_database_service()
     assert database_service is not None
-    return await database_service.get_biosimulator_workflow_runs(file_hash_md5=file_hash_md5, sim_digest=sim_digest)
+    return await database_service.get_biosimulator_workflow_runs(file_hash_md5=file_hash_md5, sim_digest=sim_digest,
+                                                                 cache_buster=cache_buster)
 
 
 @activity.defn

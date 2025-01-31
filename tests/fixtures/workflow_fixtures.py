@@ -59,7 +59,7 @@ def omex_verify_workflow_input(simulator_version_copasi: BiosimulatorVersion,
     omex_input = OmexVerifyWorkflowInput(omex_file=omex_file, user_description="description",
                                          requested_simulators=simulators, include_outputs=include_outputs,
                                          rel_tol=rel_tol, abs_tol_min=abs_tol_min, abs_tol_scale=abs_tol_scale,
-                                         observables=observables)
+                                         observables=observables, cache_buster="0")
     return omex_input
 
 

@@ -27,7 +27,8 @@ async def start_workflow() -> None:
             rel_tol=1e-4,
             abs_tol_min=1e-3,
             abs_tol_scale=1e-5,
-            observables=["time", "concentration"]
+            observables=["time", "concentration"],
+            cache_buster="0"
         )],
         task_queue="verification_tasks",
         id=workflow_id,

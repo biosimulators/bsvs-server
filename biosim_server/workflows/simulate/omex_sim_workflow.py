@@ -17,6 +17,7 @@ from biosim_server.workflows.simulate.biosim_activities import save_biosimulator
 class OmexSimWorkflowInput(BaseModel):
     omex_file: OmexFile
     simulator_version: BiosimulatorVersion
+    cache_buster: str
 
 
 class OmexSimWorkflowStatus(StrEnum):
@@ -100,7 +101,8 @@ class OmexSimWorkflow:
 
         biosimulator_workflow_run = BiosimulatorWorkflowRun(workflow_id=self.sim_output.workflow_id,
                                                             file_hash_md5=self.sim_input.omex_file.file_hash_md5,
-                                                            sim_digest=self.sim_input.simulator_version.image_digest,
+                                                            image_digest=self.sim_input.simulator_version.image_digest,
+                                                            cache_buster=self.sim_input.cache_buster,
                                                             omex_file=self.sim_input.omex_file,
                                                             simulator_version=self.sim_input.simulator_version,
                                                             biosim_run=biosim_simulation_run,

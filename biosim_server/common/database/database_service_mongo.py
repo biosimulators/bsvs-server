@@ -91,9 +91,10 @@ class DatabaseServiceMongo(DatabaseService):
             raise Exception("Insert failed")
 
     @override
-    async def get_biosimulator_workflow_runs(self, file_hash_md5: str, sim_digest: str) -> list[BiosimulatorWorkflowRun]:
-        logger.info(f"Getting OMEX sim workflow output with file hash {file_hash_md5} and sim digest {sim_digest}")
-        query = dict(file_hash_md5=file_hash_md5, sim_digest=sim_digest)
+    async def get_biosimulator_workflow_runs(self, file_hash_md5: str, image_digest: str, cache_buster: str) \
+            -> list[BiosimulatorWorkflowRun]:
+        logger.info(f"Getting OMEX sim workflow output with file hash {file_hash_md5} and sim digest {image_digest} and cache buster {cache_buster}")
+        query = dict(file_hash_md5=file_hash_md5, image_digest=image_digest, cache_buster=cache_buster)
         document = await self._sim_output_col.find(query).to_list(length=100)
         workflow_runs: list[BiosimulatorWorkflowRun] = []
         if document is not None and type(document) is list:

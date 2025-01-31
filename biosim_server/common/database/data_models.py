@@ -74,7 +74,8 @@ class BiosimSimulationRun(BaseModel):
 class BiosimulatorWorkflowRun(BaseModel):
     workflow_id: str
     file_hash_md5: str
-    sim_digest: str
+    image_digest: str
+    cache_buster: str
     omex_file: OmexFile
     simulator_version: BiosimulatorVersion
     biosim_run: BiosimSimulationRun | None = None

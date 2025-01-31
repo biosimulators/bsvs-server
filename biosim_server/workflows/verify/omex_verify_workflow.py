@@ -29,6 +29,7 @@ class OmexVerifyWorkflowInput(BaseModel):
     omex_file: OmexFile
     user_description: str
     requested_simulators: list[BiosimulatorVersion]
+    cache_buster: str
     include_outputs: bool
     rel_tol: float
     abs_tol_min: float
@@ -77,7 +78,9 @@ class OmexVerifyWorkflow:
         for simulator_spec in verify_input.requested_simulators:
             child_workflows.append(
                 workflow.start_child_workflow(OmexSimWorkflow.run,  # type: ignore
-                                              args=[OmexSimWorkflowInput(omex_file=verify_input.omex_file, simulator_version=simulator_spec)],
+                                              args=[OmexSimWorkflowInput(omex_file=verify_input.omex_file,
+                                                                         simulator_version=simulator_spec,
+                                                                         cache_buster=verify_input.cache_buster)],
                                               result_type=OmexSimWorkflowOutput,
                                               task_queue="verification_tasks", execution_timeout=timedelta(minutes=10), ))
 

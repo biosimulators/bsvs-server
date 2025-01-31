@@ -38,7 +38,8 @@ class DatabaseService(ABC):
         pass
 
     @abstractmethod
-    async def get_biosimulator_workflow_runs(self, file_hash_md5: str, sim_digest: str) -> list[BiosimulatorWorkflowRun]:
+    async def get_biosimulator_workflow_runs(self, file_hash_md5: str, sim_digest: str, cache_buster: str)\
+            -> list[BiosimulatorWorkflowRun]:
         pass
 
     @abstractmethod

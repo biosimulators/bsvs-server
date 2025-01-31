@@ -18,11 +18,10 @@ async def start_workflow() -> None:
     biosim_service: BiosimService | None = get_biosim_service()
     assert biosim_service is not None
     simulator_version = (await biosim_service.get_simulator_versions())[0]
-    omex_sim_workflow_input = OmexSimWorkflowInput(omex_file=omex_file, simulator_version=simulator_version)
+    omex_sim_workflow_input = OmexSimWorkflowInput(omex_file=omex_file, simulator_version=simulator_version,
+                                                   cache_buster="0")
     handle = await client.start_workflow(
-        OmexSimWorkflow.run,
-        args=[OmexSimWorkflowInput(omex_file=omex_sim_workflow_input.omex_file,
-                                   simulator_version=omex_sim_workflow_input.simulator_version)],
+        OmexSimWorkflow.run, args=[omex_sim_workflow_input],
         task_queue="verification_tasks",
         id=uuid.uuid4().hex,
     )

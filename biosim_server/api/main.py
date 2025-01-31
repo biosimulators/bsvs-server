@@ -135,6 +135,7 @@ async def start_verify_omex(
         rel_tol: float = Query(default=0.0001, description="Relative tolerance for proximity comparison."),
         abs_tol_min: float = Query(default=0.001, description="Min absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale."),
         abs_tol_scale: float = Query(default=0.00001, description="Scale for absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale."),
+        cache_buster: str = Query(default="0", description="Optional unique id for cache busting (unique string to force new simulation runs)."),
         observables: Optional[list[str]] = Query(default=None,
                                                  description="List of observables to include in the return data.")
 ) -> OmexVerifyWorkflowOutput:
@@ -172,7 +173,8 @@ async def start_verify_omex(
         rel_tol=rel_tol,
         abs_tol_min=abs_tol_min,
         abs_tol_scale=abs_tol_scale,
-        observables=observables)
+        observables=observables,
+        cache_buster=cache_buster)
 
     # ---- invoke workflow ---- #
     logger.info(f"starting workflow for {omex_file}")

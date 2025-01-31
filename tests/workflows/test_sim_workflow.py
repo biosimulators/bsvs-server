@@ -29,7 +29,7 @@ async def test_sim_workflow(temporal_client: Client, temporal_verify_worker: Wor
             simulator_version = sim
     assert simulator_version is not None
 
-    sim_workflow_input = OmexSimWorkflowInput(omex_file=omex_file, simulator_version=simulator_version)
+    sim_workflow_input = OmexSimWorkflowInput(omex_file=omex_file, simulator_version=simulator_version, cache_buster="0")
     workflow_handle = await temporal_client.start_workflow(OmexSimWorkflow.run, args=[sim_workflow_input],
         id=uuid.uuid4().hex, task_queue="verification_tasks", )
     assert isinstance(workflow_handle, WorkflowHandle)
