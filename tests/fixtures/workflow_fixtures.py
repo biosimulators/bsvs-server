@@ -6,9 +6,8 @@ from typing import Generator
 import pytest
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from biosim_server.common.database.data_models import OmexFile
+from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion
 from biosim_server.config import get_local_cache_dir
-from biosim_server.common.biosim1_client import BiosimSimulatorSpec
 from biosim_server.workflows.verify import OmexVerifyWorkflowOutput, OmexVerifyWorkflowInput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput
 

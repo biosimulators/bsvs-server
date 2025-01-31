@@ -33,3 +33,53 @@ class BiosimulatorVersion(BaseModel):
     image: DockerContainerInfo
 
 
+class ComparisonStatistics(BaseModel):
+    dataset_name: str
+    simulator_version_i: str  # version of simulator used for run i <simulator_name>:<version>
+    simulator_version_j: str  # version of simulator used for run j <simulator_name>:<version>
+    var_names: list[str]
+    score: Optional[list[float]] = None
+    is_close: Optional[list[bool]] = None
+    error_message: Optional[str] = None
+
+class BiosimSimulationRunStatus(StrEnum):
+    CREATED = 'CREATED'
+    QUEUED = 'QUEUED',
+    RUNNING = 'RUNNING',
+    SKIPPED = 'SKIPPED',
+    PROCESSING = 'PROCESSING',
+    SUCCEEDED = 'SUCCEEDED',
+    FAILED = 'FAILED',
+    RUN_ID_NOT_FOUND = 'RUN_ID_NOT_FOUND',
+    UNKNOWN = 'UNKNOWN'
+
+
+class BiosimSimulationRun(BaseModel):
+    id: str
+    name: str
+    simulator_version: BiosimulatorVersion
+    status: BiosimSimulationRunStatus
+    # cpus: Optional[int] = None
+    # memory: Optional[int] = None         # (in GB)
+    # maxTime: Optional[int] = None        # (in minutes)
+    # envVars: Optional[list[str]] = None  # list of environment variables (e.g., ["OMP_NUM_THREADS=4"])
+    # purpose: Optional[str] = None        # what does this correspond to?
+    # submitted: Optional[str] = None      # datetime string (e.g. 2025-01-10T19:51:11.424Z)
+    # updated: Optional[str] = None        # datetime string (e.g. 2025-01-10T19:51:11.424Z)
+    # projectSize: Optional[int] = None    # (in bytes)
+    # resultsSize: Optional[int] = None    # (in bytes)
+    # runtime: Optional[int] = None        # (in milliseconds)
+    # email: Optional[str] = None
+
+    @field_validator('id')
+    def validate_id(cls, v: str) -> str:
+        if v.find("-") >= 0:
+            raise ValueError("id must not container any dashes, looks like a uuid")
+        return v
+
+
+
+class SimulatorComparison(BaseModel):
+    simRun1: BiosimSimulationRun
+    simRun2: BiosimSimulationRun
+    equivalent: bool

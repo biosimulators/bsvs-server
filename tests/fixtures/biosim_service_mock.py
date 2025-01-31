@@ -2,9 +2,9 @@ import uuid
 
 from typing_extensions import override
 
-from biosim_server.common.biosim1_client import BiosimService, Hdf5DataValues, BiosimSimulationRun, HDF5File, \
-    BiosimSimulationRunStatus, BiosimSimulatorSpec
-from biosim_server.common.database.data_models import BiosimulatorVersion
+from biosim_server.common.biosim1_client import BiosimService, Hdf5DataValues, HDF5File
+from biosim_server.common.database.data_models import BiosimulatorVersion, BiosimSimulationRun, \
+    BiosimSimulationRunStatus
 
 
 class ObjectNotFoundError(Exception):

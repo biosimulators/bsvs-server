@@ -7,10 +7,12 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from biosim_server.common.biosim1_client import BiosimServiceRest
-from biosim_server.common.database.data_models import OmexFile
+from biosim_server.common.database.data_models import OmexFile, ComparisonStatistics
+from biosim_server.common.database.database_service import DatabaseService
 from biosim_server.common.storage import FileServiceLocal, FileServiceGCS
+from biosim_server.common.storage.data_cache import get_cached_omex_file_from_local
 from biosim_server.config import get_settings
-from biosim_server.workflows.verify import ComparisonStatistics, OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
+from biosim_server.workflows.verify import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput
 from tests.fixtures.gcs_fixtures import file_service_gcs_test_base_path
 

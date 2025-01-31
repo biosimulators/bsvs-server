@@ -6,9 +6,8 @@ from typing import AsyncGenerator, Optional
 
 from temporalio import workflow
 
-from biosim_server.common.biosim1_client import BiosimSimulatorSpec
-from biosim_server.common.database.data_models import OmexFile
-from biosim_server.common.storage.data_cache import get_cached_omex_file
+from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion
+from biosim_server.common.storage.data_cache import get_cached_omex_file_from_upload
 from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflow, RunsVerifyWorkflowStatus
 
@@ -22,7 +21,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from biosim_server.config import get_local_cache_dir
 from biosim_server.dependencies import get_file_service, get_temporal_client, init_standalone, shutdown_standalone, \
-    get_database_service
+    get_database_service, get_biosim_service
 from biosim_server.log_config import setup_logging
 from biosim_server.workflows.verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus

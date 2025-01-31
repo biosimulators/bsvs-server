@@ -6,9 +6,9 @@ from aiohttp import ClientResponseError
 from pydantic import BaseModel
 from temporalio import activity
 
-from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest, BiosimSimulatorSpec, \
-    BiosimSimulationRun, BiosimSimulationRunStatus, HDF5File, Hdf5DataValues
-from biosim_server.common.database.data_models import OmexFile
+from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest, HDF5File, Hdf5DataValues
+from biosim_server.common.database.data_models import OmexFile, BiosimSimulationRun, BiosimulatorVersion, \
+    DockerContainerInfo, BiosimSimulationRunStatus
 from biosim_server.common.storage import FileService
 from biosim_server.dependencies import get_file_service, get_biosim_service
 

@@ -10,9 +10,10 @@ from aiohttp import FormData
 from typing_extensions import override
 
 from biosim_server.common.biosim1_client.biosim_service import BiosimService
-from biosim_server.common.biosim1_client.models import BiosimSimulationRun, BiosimSimulationRunApiRequest, HDF5File, \
-    Hdf5DataValues, BiosimSimulationRunStatus, BiosimSimulatorSpec
-from biosim_server.common.database.data_models import BiosimulatorVersion, DockerContainerInfo
+from biosim_server.common.biosim1_client.models import BiosimSimulationRunApiRequest, HDF5File, \
+    Hdf5DataValues
+from biosim_server.common.database.data_models import BiosimulatorVersion, DockerContainerInfo, BiosimSimulationRun, \
+    BiosimSimulationRunStatus
 from biosim_server.config import get_settings
 
 logger = logging.getLogger(__name__)

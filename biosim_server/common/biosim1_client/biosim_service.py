@@ -1,8 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
 
-from biosim_server.common.biosim1_client.models import BiosimSimulationRun, HDF5File, Hdf5DataValues, BiosimSimulatorSpec
-from biosim_server.common.database.data_models import BiosimulatorVersion
+from biosim_server.common.biosim1_client.models import HDF5File, Hdf5DataValues
+from biosim_server.common.database.data_models import BiosimulatorVersion, BiosimSimulationRun
 
 logger = logging.getLogger(__name__)
 

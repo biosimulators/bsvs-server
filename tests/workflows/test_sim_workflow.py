@@ -5,13 +5,14 @@ import pytest
 from temporalio.client import Client, WorkflowHandle
 from temporalio.worker import Worker
 
-from biosim_server.common.biosim1_client import BiosimSimulatorSpec, BiosimSimulationRunStatus, BiosimSimulationRun
-from biosim_server.common.database.data_models import OmexFile
+from biosim_server.common.biosim1_client import BiosimServiceRest
+from biosim_server.common.database.data_models import BiosimSimulationRun, BiosimSimulationRunStatus, \
+    BiosimulatorVersion
+from biosim_server.common.database.database_service import DatabaseService
 from biosim_server.common.storage import FileServiceLocal
-from biosim_server.config import get_settings
+from biosim_server.common.storage.data_cache import get_cached_omex_file_from_local
 from biosim_server.workflows.simulate import OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput, \
     OmexSimWorkflowStatus
-from tests.fixtures.biosim_service_mock import BiosimServiceMock
 
 
 @pytest.mark.asyncio

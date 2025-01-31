@@ -9,8 +9,9 @@ from temporalio.worker import Worker
 
 from biosim_server.common.biosim1_client import BiosimServiceRest
 from biosim_server.common.storage import FileServiceGCS
-from biosim_server.workflows.verify import ComparisonStatistics, RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
+from biosim_server.workflows.verify import RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
+from biosim_server.common.database.data_models import ComparisonStatistics
 
 
 @pytest.mark.asyncio

@@ -5,7 +5,8 @@ from numpy.typing import NDArray
 from pydantic import BaseModel
 from temporalio import activity
 
-from biosim_server.common.biosim1_client import BiosimSimulationRun, Hdf5DataValues, HDF5File
+from biosim_server.common.biosim1_client import Hdf5DataValues, HDF5File
+from biosim_server.common.database.data_models import ComparisonStatistics, BiosimSimulationRun
 from biosim_server.workflows.simulate import get_hdf5_data, GetHdf5DataInput
 
 NDArray1b: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool]]
@@ -32,16 +33,6 @@ class RunData(BaseModel):
     dataset_name: str
     var_names: list[str]  # list of variables found this run for this dataset
     data: Hdf5DataValues  # n-dim array of data for this run, shape=(len(dataset_vars), len(times))
-
-
-class ComparisonStatistics(BaseModel):
-    dataset_name: str
-    simulator_version_i: str  # version of simulator used for run i <simulator_name>:<version>
-    simulator_version_j: str  # version of simulator used for run j <simulator_name>:<version>
-    var_names: list[str]
-    score: Optional[list[float]] = None
-    is_close: Optional[list[bool]] = None
-    error_message: Optional[str] = None
 
 
 class GenerateStatisticsOutput(BaseModel):

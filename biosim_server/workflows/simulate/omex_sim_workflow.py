@@ -6,9 +6,9 @@ from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from biosim_server.common.biosim1_client import BiosimSimulationRun, BiosimSimulationRunStatus, HDF5File, \
-    BiosimSimulatorSpec
-from biosim_server.common.database.data_models import OmexFile
+from biosim_server.common.biosim1_client import HDF5File
+from biosim_server.common.database.data_models import OmexFile, BiosimSimulationRun, BiosimulatorVersion, \
+    BiosimSimulationRunStatus
 from biosim_server.workflows.simulate import get_hdf5_metadata, get_sim_run, submit_biosim_sim, SubmitBiosimSimInput, \
     GetSimRunInput, GetHdf5MetadataInput
 
