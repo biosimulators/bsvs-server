@@ -1,5 +1,5 @@
 {
-  "workflow_id": "dc621c26af984780b8fa0c15607af1c3",
+  "workflow_id": "9ae2d9915470446785cf9a3845d58130",
   "workflow_input": {
     "user_description": "description",
     "biosimulations_run_ids": [
@@ -16,10 +16,10 @@
     ]
   },
   "workflow_status": "COMPLETED",
-  "timestamp": "2025-01-31 19:16:53.640816+00:00",
+  "timestamp": "2025-01-31 21:24:28.498750+00:00",
   "workflow_error": null,
   "actual_simulators": null,
-  "workflow_run_id": "b00e4adc-32ba-4d79-92f8-b50c2daf08b5",
+  "workflow_run_id": "d763a13b-9586-4a32-9787-a5fbc1e41a95",
   "workflow_results": {
     "sims_run_info": [
       {
@@ -30,10 +30,8 @@
             "id": "vcell",
             "name": "Virtual Cell",
             "version": "7.7.0.13",
-            "image": {
-              "url": "ghcr.io/biosimulators/vcell:7.7.0.13",
-              "digest": "sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216"
-            }
+            "image_url": "ghcr.io/biosimulators/vcell:7.7.0.13",
+            "image_digest": "sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216"
           },
           "status": "SUCCEEDED"
         },
@@ -478,10 +476,8 @@
             "id": "copasi",
             "name": "COPASI",
             "version": "4.45.296",
-            "image": {
-              "url": "ghcr.io/biosimulators/copasi:4.45.296",
-              "digest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df"
-            }
+            "image_url": "ghcr.io/biosimulators/copasi:4.45.296",
+            "image_digest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df"
           },
           "status": "SUCCEEDED"
         },

@@ -32,15 +32,15 @@ def runs_verify_workflow_id() -> str:
 @pytest.fixture(scope="function")
 def simulator_version_copasi() -> BiosimulatorVersion:
     return BiosimulatorVersion.model_validate_json(
-        '{"id":"copasi","name":"COPASI","version":"4.45.296","image":{"url":"ghcr.io/biosimulators/copasi:4.45.296",'
-        '"digest":"sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df"}}')
+        '{"id":"copasi","name":"COPASI","version":"4.45.296","image_url":"ghcr.io/biosimulators/copasi:4.45.296",'
+        '"image_digest":"sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df"}')
 
 
 @pytest.fixture(scope="function")
 def simulator_version_vcell() -> BiosimulatorVersion:
     return BiosimulatorVersion.model_validate_json(
-        '{"id":"vcell","name":"Virtual Cell","version":"7.7.0.13","image":{"url":"ghcr.io/biosimulators/vcell:7.7.0.13",'
-        '"digest":"sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216"}}')
+        '{"id":"vcell","name":"Virtual Cell","version":"7.7.0.13","image_url":"ghcr.io/biosimulators/vcell:7.7.0.13",'
+        '"image_digest":"sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216"}')
 
 
 @pytest.fixture(scope="function")

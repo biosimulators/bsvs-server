@@ -12,7 +12,7 @@ from typing_extensions import override
 from biosim_server.common.biosim1_client.biosim_service import BiosimService
 from biosim_server.common.biosim1_client.models import BiosimSimulationRunApiRequest, HDF5File, \
     Hdf5DataValues
-from biosim_server.common.database.data_models import BiosimulatorVersion, DockerContainerInfo, BiosimSimulationRun, \
+from biosim_server.common.database.data_models import BiosimulatorVersion, BiosimSimulationRun, \
     BiosimSimulationRunStatus
 from biosim_server.config import get_settings
 
@@ -70,7 +70,7 @@ class BiosimServiceRest(BiosimService):
         sim_digest: str = res['simulatorDigest']
         assert simulator_version.version == sim_ver
         assert simulator_version.id == sim_id
-        assert simulator_version.image.digest == sim_digest
+        assert simulator_version.image_digest == sim_digest
 
         sim_status = BiosimSimulationRunStatus(res['status'])
         simulator_version = await self._get_simulator_version(sim_id=sim_id, sim_ver=sim_ver, sim_digest=sim_digest)
@@ -84,7 +84,7 @@ class BiosimServiceRest(BiosimService):
     async def _get_simulator_version(self, sim_id: str, sim_ver: str, sim_digest: str) -> BiosimulatorVersion:
         simulator_version: BiosimulatorVersion
         for simulator_version in await self.get_simulator_versions():
-            if simulator_version.id == sim_id and simulator_version.version == sim_ver and simulator_version.image.digest == sim_digest:
+            if simulator_version.id == sim_id and simulator_version.version == sim_ver and simulator_version.image_digest == sim_digest:
                 return simulator_version
         raise Exception(f"Simulator version not found for simulator id: {sim_id}, version: {sim_ver}, digest: {sim_digest}")
 
@@ -130,9 +130,8 @@ class BiosimServiceRest(BiosimService):
                 simulation_versions: list[BiosimulatorVersion] = []
                 for sim in simulation_versions_dict:
                     if 'image' in sim and 'url' and sim['image'] and 'url' in sim['image'] and 'digest' in sim['image']:
-                        container_info = DockerContainerInfo(url=sim["image"]["url"], digest=sim["image"]["digest"])
                         sim_version = BiosimulatorVersion(id=sim["id"], name=sim["name"], version=sim["version"],
-                                                          image=container_info)
+                                                          image_url=sim["image"]["url"], image_digest=sim["image"]["digest"])
                         simulation_versions.append(sim_version)
                 return simulation_versions
 

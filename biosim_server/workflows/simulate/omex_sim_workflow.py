@@ -100,7 +100,7 @@ class OmexSimWorkflow:
 
         biosimulator_workflow_run = BiosimulatorWorkflowRun(workflow_id=self.sim_output.workflow_id,
                                                             file_hash_md5=self.sim_input.omex_file.file_hash_md5,
-                                                            sim_digest=self.sim_input.simulator_version.image.digest,
+                                                            sim_digest=self.sim_input.simulator_version.image_digest,
                                                             omex_file=self.sim_input.omex_file,
                                                             simulator_version=self.sim_input.simulator_version,
                                                             biosim_run=biosim_simulation_run,

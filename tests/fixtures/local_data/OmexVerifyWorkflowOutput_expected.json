@@ -1,5 +1,5 @@
 {
-  "workflow_id": "4ef7b8aa4df749a4ae4160e8a637ef4d",
+  "workflow_id": "d13f4a726d05473ca90d64cf71d6c464",
   "workflow_input": {
     "omex_file": {
       "file_hash_md5": "3b965a2208febec450825569e6089984",
@@ -15,19 +15,15 @@
         "id": "copasi",
         "name": "COPASI",
         "version": "4.45.296",
-        "image": {
-          "url": "ghcr.io/biosimulators/copasi:4.45.296",
-          "digest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df"
-        }
+        "image_url": "ghcr.io/biosimulators/copasi:4.45.296",
+        "image_digest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df"
       },
       {
         "id": "vcell",
         "name": "Virtual Cell",
         "version": "7.7.0.13",
-        "image": {
-          "url": "ghcr.io/biosimulators/vcell:7.7.0.13",
-          "digest": "sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216"
-        }
+        "image_url": "ghcr.io/biosimulators/vcell:7.7.0.13",
+        "image_digest": "sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216"
       }
     ],
     "include_outputs": false,
@@ -40,30 +36,28 @@
     ]
   },
   "workflow_status": "COMPLETED",
-  "timestamp": "2025-01-31 19:07:50.309766+00:00",
+  "timestamp": "2025-01-31 21:21:30.943543+00:00",
   "actual_simulators": null,
-  "workflow_run_id": "9db48327-b0f1-42b3-b0e7-55d5c8aa7fe9",
+  "workflow_run_id": "deaaf6e6-8d5a-484d-a718-31f4fbbb3766",
   "workflow_results": {
     "sims_run_info": [
       {
         "biosim_sim_run": {
-          "id": "679d1f86f8c41d74ce38a50e",
+          "id": "679d3edb55ff66742cf1484c",
           "name": "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex",
           "simulator_version": {
             "id": "copasi",
             "name": "COPASI",
             "version": "4.45.296",
-            "image": {
-              "url": "ghcr.io/biosimulators/copasi:4.45.296",
-              "digest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df"
-            }
+            "image_url": "ghcr.io/biosimulators/copasi:4.45.296",
+            "image_digest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df"
           },
           "status": "SUCCEEDED"
         },
         "hdf5_file": {
           "filename": "reports.h5",
-          "id": "679d1f86f8c41d74ce38a50e",
-          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/679d1f86f8c41d74ce38a50e/outputs/reports.h5",
+          "id": "679d3edb55ff66742cf1484c",
+          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/679d3edb55ff66742cf1484c/outputs/reports.h5",
           "groups": [
             {
               "name": "BIOMD0000000010_url.sedml",
@@ -495,23 +489,21 @@
       },
       {
         "biosim_sim_run": {
-          "id": "679d1f86f8c41d74ce38a50f",
+          "id": "679d3edb902399434ba95632",
           "name": "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex",
           "simulator_version": {
             "id": "vcell",
             "name": "Virtual Cell",
             "version": "7.7.0.13",
-            "image": {
-              "url": "ghcr.io/biosimulators/vcell:7.7.0.13",
-              "digest": "sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216"
-            }
+            "image_url": "ghcr.io/biosimulators/vcell:7.7.0.13",
+            "image_digest": "sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216"
           },
           "status": "SUCCEEDED"
         },
         "hdf5_file": {
           "filename": "reports.h5",
-          "id": "679d1f86f8c41d74ce38a50f",
-          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/679d1f86f8c41d74ce38a50f/outputs/reports.h5",
+          "id": "679d3edb902399434ba95632",
+          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/679d3edb902399434ba95632/outputs/reports.h5",
           "groups": [
             {
               "name": "BIOMD0000000010_url.sedml",
@@ -1045,25 +1037,25 @@
             ],
             "score": [
               0.0,
-              0.21124727867456133,
-              0.6168979758136826,
-              0.08086213363311923,
-              0.13417308042160112,
-              0.08458286973509317,
-              0.32114667690770726,
-              0.21478788321777986,
-              0.9625458406171437,
+              0.19520482348612309,
+              0.5733469498777034,
+              0.07456396784090855,
+              0.12396169525663402,
+              0.07828001923749059,
+              0.29933272886715745,
+              0.2004268991480218,
+              0.8911449893341556,
               0.0,
-              0.0064118939027096,
-              0.001257521550901106,
-              0.012609222175636446,
-              0.013103856342248347,
-              0.011341597937998972,
-              0.009681101722881868,
-              0.09644568407992742,
-              0.09908382305659139,
-              0.0020460421827101817,
-              0.019754244310102986
+              0.0059296935206195785,
+              0.0011678241047812237,
+              0.01165051415602138,
+              0.012094117814414683,
+              0.010579195522396468,
+              0.009020949943794137,
+              0.08963025772538413,
+              0.09177831504659288,
+              0.0018907352976844827,
+              0.01829085248840209
             ],
             "is_close": [
               true,
@@ -1119,25 +1111,25 @@
             ],
             "score": [
               0.0,
-              0.21125174131010804,
-              0.6168599218499676,
-              0.08086147976994093,
-              0.13417488068730682,
-              0.08458215431495913,
-              0.321136363720103,
-              0.2147832699333899,
-              0.9624532000846906,
+              0.19520863405281844,
+              0.5733140790898466,
+              0.07456341186652408,
+              0.12396323192587193,
+              0.07827940646614619,
+              0.2993237691270947,
+              0.20042288213434334,
+              0.8910655824712569,
               0.0,
-              0.006411889791473894,
-              0.0012575213927650808,
-              0.012609238074904883,
-              0.013103873513375951,
-              0.01134158507482918,
-              0.009681092350517884,
-              0.0964447539119007,
-              0.0990828413059198,
-              0.0020460426013391283,
-              0.01975420528716325
+              0.005929690004495138,
+              0.0011678239683999257,
+              0.011650527729485206,
+              0.01209413244120094,
+              0.010579184330470517,
+              0.009020941806047688,
+              0.0896294543742746,
+              0.09177747272841226,
+              0.0018907356551725468,
+              0.018290819032934807
             ],
             "is_close": [
               true,
@@ -1419,8 +1411,8 @@
             ],
             "score": [
               1.2053311887363872e-12,
-              0.21124727867456133,
-              0.6168979758136826
+              0.19520482348612309,
+              0.5733469498777034
             ],
             "is_close": [
               true,
@@ -1442,8 +1434,8 @@
             ],
             "score": [
               1.205331188736387e-12,
-              0.21125174131010804,
-              0.6168599218499676
+              0.19520863405281844,
+              0.5733140790898466
             ],
             "is_close": [
               true,

@@ -8,7 +8,7 @@ from temporalio import activity
 
 from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest, HDF5File, Hdf5DataValues
 from biosim_server.common.database.data_models import OmexFile, BiosimSimulationRun, BiosimulatorVersion, \
-    DockerContainerInfo, BiosimSimulationRunStatus, BiosimulatorWorkflowRun
+     BiosimSimulationRunStatus, BiosimulatorWorkflowRun
 from biosim_server.common.storage import FileService
 from biosim_server.dependencies import get_file_service, get_biosim_service, get_database_service
 
@@ -33,7 +33,7 @@ async def get_sim_run(get_sim_run_input: GetSimRunInput) -> BiosimSimulationRun:
                 return BiosimSimulationRun(
                     id=get_sim_run_input.biosim_run_id,
                     name="",
-                    simulator_version=BiosimulatorVersion(id="", name="", version="", image=DockerContainerInfo(url="", digest="")),
+                    simulator_version=BiosimulatorVersion(id="", name="", version="", image_url="", image_digest=""),
                     status=BiosimSimulationRunStatus.RUN_ID_NOT_FOUND,
                 )
         raise e

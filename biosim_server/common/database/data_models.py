@@ -27,16 +27,12 @@ class OmexFile(BaseModel):
         return v
 
 
-class DockerContainerInfo(BaseModel):
-    url: str
-    digest: str
-
-
 class BiosimulatorVersion(BaseModel):
     id: str
     name: str
     version: str
-    image: DockerContainerInfo
+    image_url: str
+    image_digest: str
 
 class BiosimSimulationRunStatus(StrEnum):
     CREATED = 'CREATED'
