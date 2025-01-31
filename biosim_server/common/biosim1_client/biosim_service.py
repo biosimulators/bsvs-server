@@ -25,7 +25,7 @@ class BiosimService(ABC):
         pass
 
     @abstractmethod
-    async def get_simulation_versions(self) -> list[BiosimulatorVersion]:
+    async def get_simulator_versions(self) -> list[BiosimulatorVersion]:
         pass
 
     @abstractmethod

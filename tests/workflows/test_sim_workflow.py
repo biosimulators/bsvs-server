@@ -17,11 +17,12 @@ from biosim_server.workflows.simulate import OmexSimWorkflow, OmexSimWorkflowInp
 
 @pytest.mark.asyncio
 async def test_sim_workflow(temporal_client: Client, temporal_verify_worker: Worker, omex_test_file: Path,
-                            biosim_service_rest: BiosimServiceMock, file_service_local: FileServiceLocal) -> None:
+                            biosim_service_rest: BiosimServiceRest, file_service_local: FileServiceLocal,
+                            database_service_mongo: DatabaseService) -> None:
     assert biosim_service_rest is not None
 
-    # set up the omex file to mock GCS
-    omex_file = OmexFile(file_hash_md5="hash", file_size=1000, uploaded_filename="BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex", bucket_name=get_settings().storage_bucket, omex_gcs_path="path/to/hash.omex")
+    omex_file = await get_cached_omex_file_from_local(omex_file=omex_test_file, filename=omex_test_file.name)
+
     await file_service_local.upload_file(file_path=omex_test_file, gcs_path=omex_file.omex_gcs_path)
 
     sim_spec = BiosimSimulatorSpec(simulator="vcell", version="latest")

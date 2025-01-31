@@ -8,8 +8,8 @@ from biosim_server.workflows.verify.hdf5_compare import get_results, compare_arr
 
 
 @pytest.mark.asyncio
-async def test_compare_arrays() -> None:
-    results_zip: Path = Path(__file__).parent.parent / "fixtures" / "local_data" / "modeldb-206365-outputs.zip"
+async def test_compare_arrays(fixture_data_dir: Path) -> None:
+    results_zip: Path = fixture_data_dir / "modeldb-206365-outputs.zip"
     results1 = get_results(results_zip_file=results_zip)
     results2 = get_results(results_zip_file=results_zip)
 

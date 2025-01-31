@@ -15,6 +15,10 @@ fixture_data_dir = Path(os.path.dirname(__file__)) / "local_data"
 temp_data_dir = get_local_cache_dir() / "test_temp_dir"
 temp_data_dir.mkdir(exist_ok=True)
 
+@pytest.fixture(scope="session")
+def fixture_data_dir() -> Path:
+    return Path(os.path.dirname(__file__)) / "local_data"
+
 
 @pytest.fixture(scope="function")
 def omex_verify_workflow_id() -> str:
@@ -73,7 +77,7 @@ def runs_verify_workflow_input() -> RunsVerifyWorkflowInput:
 
 
 @pytest.fixture(scope="function")
-def runs_verify_workflow_output_file() -> Path:
+def runs_verify_workflow_output_file(fixture_data_dir: Path) -> Path:
     return fixture_data_dir / "RunsVerifyWorkflowOutput_expected.json"
 
 
@@ -88,12 +92,12 @@ def runs_verify_workflow_output(runs_verify_workflow_input: RunsVerifyWorkflowIn
 
 
 @pytest.fixture(scope="function")
-def omex_test_file() -> Path:
+def omex_test_file(fixture_data_dir: Path) -> Path:
     return fixture_data_dir / "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex"
 
 
 @pytest.fixture(scope="function")
-def hdf5_json_test_file() -> Path:
+def hdf5_json_test_file(fixture_data_dir: Path) -> Path:
     return fixture_data_dir / "hdf5_file.json"
 
 

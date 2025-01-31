@@ -17,11 +17,14 @@ from biosim_server.common.database.data_models import BiosimulatorVersion, Docke
 from biosim_server.config import get_settings
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class BiosimServiceRest(BiosimService):
     @override
     async def get_sim_run(self, simulation_run_id: str) -> BiosimSimulationRun:
+        logger.info(f"Polling simulation with simulation run_id {simulation_run_id}")
+
         """ raises ClientResponseError if the response status is not 2xx """
         api_base_url = os.environ.get('API_BASE_URL') or "https://api.biosimulations.org"
         assert (api_base_url is not None)
@@ -37,10 +40,11 @@ class BiosimServiceRest(BiosimService):
 
         return sim_run
 
+
     @override
     async def run_biosim_sim(self, local_omex_path: str, omex_name: str,
                              simulator_spec: BiosimSimulatorSpec) -> BiosimSimulationRun:
-        """
+        logger.info(f"Submitting simulation for {omex_name} with local path {local_omex_path} with simulator {simulator_version.id}")
         This function runs the project on biosimulations.
         """
         api_base_url = get_settings().biosimulations_api_base_url
@@ -101,7 +105,7 @@ class BiosimServiceRest(BiosimService):
 
     @override
     @cached(ttl=3600, cache=SimpleMemoryCache)  # type: ignore
-    async def get_simulation_versions(self) -> list[BiosimulatorVersion]:
+    async def get_simulator_versions(self) -> list[BiosimulatorVersion]:
         api_base_url = get_settings().biosimulators_api_base_url
         assert (api_base_url is not None)
 

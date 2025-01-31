@@ -35,7 +35,8 @@ from tests.fixtures.workflow_fixtures import (  # noqa: F401
     runs_verify_workflow_output_file,
     omex_test_file,
     hdf5_json_test_file,
-    temp_test_data_dir
+    temp_test_data_dir,
+    fixture_data_dir
 )
 
 

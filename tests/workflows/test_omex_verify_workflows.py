@@ -25,16 +25,16 @@ async def test_omex_verify_workflow_GCS(temporal_client: Client, temporal_verify
                                        omex_verify_workflow_output: OmexVerifyWorkflowOutput,
                                        biosim_service_rest: BiosimServiceRest, file_service_gcs: FileServiceGCS,
                                        file_service_gcs_test_base_path: Path, omex_test_file: Path,
+                                       database_service_mongo: DatabaseService,
                                        omex_verify_workflow_output_file: Path) -> None:
     assert biosim_service_rest is not None
 
-    gcs_path = str(file_service_gcs_test_base_path / "omex" / f"omex{uuid.uuid4().hex}" / omex_test_file.name)
-    omex_file = OmexFile(omex_gcs_path=gcs_path, uploaded_filename=omex_test_file.name, file_hash_md5="hash", file_size=100, bucket_name="bucket")
+    omex_file = await get_cached_omex_file_from_local(omex_file=omex_test_file, filename=omex_test_file.name)
 
-
+    await file_service_gcs.upload_file(file_path=omex_test_file, gcs_path=omex_file.omex_gcs_path)
     await file_service_gcs.upload_file(file_path=omex_test_file, gcs_path=gcs_path)
     workflow_id = uuid.uuid4().hex
-    logging.info(f"Stored test omex file at {gcs_path}")
+    logging.info(f"Stored test omex file at {omex_file.omex_gcs_path}")
     omex_verify_workflow_input.omex_file = omex_file
 
     observed_results: OmexVerifyWorkflowOutput = await temporal_client.execute_workflow(
@@ -50,15 +50,12 @@ async def test_omex_verify_workflow_mockGCS(temporal_client: Client, temporal_ve
                                omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                omex_verify_workflow_output: OmexVerifyWorkflowOutput,
                                biosim_service_rest: BiosimServiceRest, file_service_local: FileServiceLocal,
-                               omex_verify_workflow_output_file: Path,
+                               omex_verify_workflow_output_file: Path, database_service_mongo: DatabaseService,
                                omex_test_file: Path) -> None:
     assert biosim_service_rest is not None
 
-    # set up the omex file to mock gcs (uploads on the fly)
-    gcs_path = "path/to/model.omex"
-    omex_file = OmexFile(omex_gcs_path=gcs_path, uploaded_filename=omex_test_file.name, file_hash_md5="hash",
-                         file_size=100, bucket_name="bucket")
-    await file_service_local.upload_file(file_path=omex_test_file, gcs_path=gcs_path)
+    omex_file = await get_cached_omex_file_from_local(omex_file=omex_test_file, filename=omex_test_file.name)
+
     workflow_id = uuid.uuid4().hex
     omex_verify_workflow_input.omex_file = omex_file
 

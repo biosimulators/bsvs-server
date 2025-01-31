@@ -55,9 +55,11 @@ async def submit_biosim_sim(input: SubmitBiosimSimInput) -> BiosimSimulationRun:
     if file_service is None:
         raise Exception("File service is not initialized")
     (_, local_omex_path) = await file_service.download_file(gcs_path=input.omex_file.omex_gcs_path)
+    activity.logger.info(f"Downloaded OMEX file from gcs_path {input.omex_file.omex_gcs_path} to local path {local_omex_path}")
     simulation_run = await biosim_service.run_biosim_sim(local_omex_path=local_omex_path, omex_name=input.omex_file.uploaded_filename,
                                                          simulator_spec=input.simulator_spec)
     os.remove(local_omex_path)
+    activity.logger.info(f"Deleted local OMEX file at {local_omex_path}")
     return simulation_run
 
 

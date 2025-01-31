@@ -39,7 +39,7 @@ class FileServiceLocal(FileService):
     async def download_file(self, gcs_path: str, file_path: Optional[Path]=None) -> tuple[str, str]:
         logger.info(f"Downloading {gcs_path} to {file_path}")
         if file_path is None:
-            file_path = Path(__file__).parent / ("temp_file_"+uuid.uuid4().hex)
+            file_path = get_local_cache_dir() / ("temp_file_"+uuid.uuid4().hex)
         # copy file from mock gcs to local file system
         gcs_file_path = self.BASE_DIR / gcs_path
         local_file_path = Path(file_path)

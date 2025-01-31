@@ -139,7 +139,7 @@ async def start_verify_omex(
                                                  description="List of observables to include in the return data.")
 ) -> OmexVerifyWorkflowOutput:
     # ---- using hash to avoid saving multiple copies, upload to cloud storage if needed ---- #
-    omex_file: OmexFile = await get_cached_omex_file(uploaded_file=uploaded_file)
+    omex_file: OmexFile = await get_cached_omex_file_from_upload(uploaded_file=uploaded_file)
 
     # ---- create workflow input ---- #
     simulator_specs: list[BiosimSimulatorSpec] = []

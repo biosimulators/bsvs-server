@@ -6,6 +6,9 @@ from biosim_server.common.biosim1_client import BiosimService, Hdf5DataValues, H
 from biosim_server.common.database.data_models import BiosimulatorVersion, BiosimSimulationRun, \
     BiosimSimulationRunStatus
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 
 class ObjectNotFoundError(Exception):
     def __init__(self, message: str) -> None:
@@ -30,6 +33,7 @@ class BiosimServiceMock(BiosimService):
 
     @override
     async def get_sim_run(self, simulation_run_id: str) -> BiosimSimulationRun:
+        logger.info(f"Polling MOCK simulation with simulation run_id {simulation_run_id}")
         sim_run = self.sim_runs[simulation_run_id]
         if sim_run:
             return sim_run
@@ -37,8 +41,8 @@ class BiosimServiceMock(BiosimService):
             raise ObjectNotFoundError("Simulation run not found")
 
     @override
-    async def run_biosim_sim(self, local_omex_path: str, omex_name: str, simulator_spec: BiosimSimulatorSpec) -> BiosimSimulationRun:
-        sim_id = str(uuid.uuid4())
+    async def run_biosim_sim(self, local_omex_path: str, omex_name: str, simulator_version: BiosimulatorVersion) -> BiosimSimulationRun:
+        logger.info(f"Submitting MOCK simulation for {omex_name} with local path {local_omex_path} with simulator {simulator_version.id}")
         sim_run = BiosimSimulationRun(
             id=sim_id,
             name=omex_name,
@@ -67,7 +71,7 @@ class BiosimServiceMock(BiosimService):
             raise ObjectNotFoundError("HDF5 metadata not found")
 
     @override
-    async def get_simulation_versions(self) -> list[BiosimulatorVersion]:
+    async def get_simulator_versions(self) -> list[BiosimulatorVersion]:
         sim_versions_ndjson: str = \
         """
         {"id":"ginsim","name":"GINsim","version":"3.0.0b","image":{"url":"ghcr.io/biosimulators/ginsim:3.0.0b","digest":"sha256:7b884d0a7d44a157d0e1a4e066ec15b70f8550c664e73c626f79760a82b9b538"}}

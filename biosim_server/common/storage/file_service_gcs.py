@@ -5,6 +5,7 @@ from temporalio import workflow
 
 from biosim_server.common.storage.gcs_aio import create_token, close_token, download_gcs_file, upload_file_to_gcs, \
     upload_bytes_to_gcs, get_gcs_modified_date, get_listing_of_gcs_path, get_gcs_file_contents
+from biosim_server.config import get_local_cache_dir
 
 with workflow.unsafe.imports_passed_through():
     from datetime import datetime
@@ -29,7 +30,7 @@ class FileServiceGCS(FileService):
     async def download_file(self, gcs_path: str, file_path: Optional[Path]=None) -> tuple[str, str]:
         logger.info(f"Downloading {gcs_path} to {file_path}")
         if file_path is None:
-            file_path = Path(__file__).parent / ("temp_file_"+uuid.uuid4().hex)
+            file_path = get_local_cache_dir() / ("temp_file_"+uuid.uuid4().hex)
         full_gcs_path = await download_gcs_file(gcs_path=gcs_path, file_path=file_path, token=self.token)
         return full_gcs_path, str(file_path)
 
