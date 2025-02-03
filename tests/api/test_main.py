@@ -10,10 +10,11 @@ from temporalio.worker import Worker
 from biosim_server.api.main import app
 from biosim_server.common.biosim1_client import BiosimServiceRest
 from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
-from biosim_server.common.storage import FileServiceGCS, FileServiceLocal
+from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
 from biosim_server.workflows.verify import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus, \
     RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
+from tests.fixtures.file_service_local import FileServiceLocal
 from tests.workflows.test_omex_verify_workflows import assert_omex_verify_results
 from tests.workflows.test_runs_verify_workflow import assert_runs_verify_results
 

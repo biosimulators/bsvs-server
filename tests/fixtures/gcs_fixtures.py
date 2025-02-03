@@ -1,12 +1,14 @@
 from pathlib import Path
 from typing import AsyncGenerator
-from gcloud.aio.auth import Token
+
 import pytest_asyncio
+from gcloud.aio.auth import Token
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from biosim_server.common.storage import FileServiceLocal, create_token
 from biosim_server.common.storage import FileServiceGCS
+from biosim_server.common.storage import create_token
 from biosim_server.dependencies import get_file_service, set_file_service
+from tests.fixtures.file_service_local import FileServiceLocal
 
 
 @pytest_asyncio.fixture(scope="session")
