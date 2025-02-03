@@ -129,9 +129,11 @@ class BiosimServiceRest(BiosimService):
                 simulation_versions_dict = await resp.json()
                 simulation_versions: list[BiosimulatorVersion] = []
                 for sim in simulation_versions_dict:
-                    if 'image' in sim and 'url' and sim['image'] and 'url' in sim['image'] and 'digest' in sim['image']:
+                    if 'image' in sim and 'url' and sim['image'] and 'url' in sim['image'] and 'digest' in sim['image'] \
+                        and 'biosimulators' in sim and 'created' in sim['biosimulators'] and 'updated' in sim['biosimulators']:
                         sim_version = BiosimulatorVersion(id=sim["id"], name=sim["name"], version=sim["version"],
-                                                          image_url=sim["image"]["url"], image_digest=sim["image"]["digest"])
+                                                          image_url=sim["image"]["url"], image_digest=sim["image"]["digest"],
+                                                          created=sim["biosimulators"]["created"], updated=sim["biosimulators"]["updated"])
                         simulation_versions.append(sim_version)
                 return simulation_versions
 

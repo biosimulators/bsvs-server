@@ -33,6 +33,8 @@ class BiosimulatorVersion(BaseModel):
     version: str
     image_url: str
     image_digest: str
+    created: str
+    updated: str
 
 class BiosimSimulationRunStatus(StrEnum):
     CREATED = 'CREATED'
