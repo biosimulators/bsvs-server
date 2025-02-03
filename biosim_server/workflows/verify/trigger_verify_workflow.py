@@ -1,7 +1,7 @@
 import asyncio
 import uuid
 
-from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion
+from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion, CompareSettings
 from biosim_server.dependencies import init_standalone, shutdown_standalone, get_temporal_client, get_biosim_service
 from biosim_server.workflows.verify import OmexVerifyWorkflow, OmexVerifyWorkflowInput
 
@@ -17,17 +17,15 @@ async def start_workflow() -> None:
     assert biosim_service is not None
     simulator_versions: list[BiosimulatorVersion] = await biosim_service.get_simulator_versions()
     workflow_id = uuid.uuid4().hex
+    compare_settings = CompareSettings(user_description="description", include_outputs=True,
+                                       rel_tol=1e-4, abs_tol_min=1e-3, abs_tol_scale=1e-5,
+                                       observables=["time", "concentration"])
     handle = await client.start_workflow(
         OmexVerifyWorkflow.run,
         args=[OmexVerifyWorkflowInput(
             omex_file=omex_file,
-            user_description="description",
             requested_simulators=[simulator_versions[0], simulator_versions[1]],
-            include_outputs=True,
-            rel_tol=1e-4,
-            abs_tol_min=1e-3,
-            abs_tol_scale=1e-5,
-            observables=["time", "concentration"],
+            compare_settings=compare_settings,
             cache_buster="0"
         )],
         task_queue="verification_tasks",

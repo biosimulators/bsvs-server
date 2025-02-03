@@ -6,7 +6,7 @@ from typing import AsyncGenerator, Optional
 
 from temporalio import workflow
 
-from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion
+from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion, CompareSettings
 from biosim_server.common.storage.data_cache import get_cached_omex_file_from_upload
 from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflow, RunsVerifyWorkflowStatus
@@ -165,16 +165,11 @@ async def start_verify_omex(
             raise HTTPException(status_code=400, detail=f"Simulator {simulator} not found.")
 
     workflow_id = f"{workflow_id_prefix}{uuid.uuid4()}"
-    omex_verify_workflow_input = OmexVerifyWorkflowInput(
-        omex_file=omex_file,
-        user_description=user_description,
-        requested_simulators=simulator_versions,
-        include_outputs=include_outputs,
-        rel_tol=rel_tol,
-        abs_tol_min=abs_tol_min,
-        abs_tol_scale=abs_tol_scale,
-        observables=observables,
-        cache_buster=cache_buster)
+    compare_settings = CompareSettings(user_description=user_description, include_outputs=include_outputs,
+                                       rel_tol=rel_tol, abs_tol_min=abs_tol_min, abs_tol_scale=abs_tol_scale,
+                                       observables=observables)
+    omex_verify_workflow_input = OmexVerifyWorkflowInput(omex_file=omex_file, requested_simulators=simulator_versions,
+                                                         compare_settings=compare_settings, cache_buster=cache_buster)
 
     # ---- invoke workflow ---- #
     logger.info(f"starting workflow for {omex_file}")
@@ -191,7 +186,7 @@ async def start_verify_omex(
 
     # ---- return initial workflow output ---- #
     omex_verify_workflow_output = OmexVerifyWorkflowOutput(
-        workflow_input=omex_verify_workflow_input,
+        compare_settings=compare_settings,
         workflow_status=OmexVerifyWorkflowStatus.PENDING,
         timestamp=str(datetime.now(UTC)),
         workflow_id=workflow_id,
@@ -250,14 +245,11 @@ async def start_verify_runs(
 
     # ---- create workflow input ---- #
     workflow_id = f"{workflow_id_prefix}{uuid.uuid4()}"
-    runs_verify_workflow_input = RunsVerifyWorkflowInput(
-        biosimulations_run_ids=biosimulations_run_ids,
-        user_description=user_description,
-        include_outputs=include_outputs,
-        rel_tol=rel_tol,
-        abs_tol_min=abs_tol_min,
-        abs_tol_scale=abs_tol_scale,
-        observables=observables)
+    compare_settings = CompareSettings(user_description=user_description, include_outputs=include_outputs,
+                                       rel_tol=rel_tol, abs_tol_min=abs_tol_min, abs_tol_scale=abs_tol_scale,
+                                       observables=observables)
+    runs_verify_workflow_input = RunsVerifyWorkflowInput(biosimulations_run_ids=biosimulations_run_ids,
+                                                         compare_settings=compare_settings)
 
     # ---- invoke workflow ---- #
     logger.info(f"starting verify workflow for biosim run IDs {biosimulations_run_ids}")
@@ -274,7 +266,7 @@ async def start_verify_runs(
 
     # ---- return initial workflow output ---- #
     runs_verify_workflow_output = RunsVerifyWorkflowOutput(
-        workflow_input=runs_verify_workflow_input,
+        compare_settings=compare_settings,
         workflow_status=RunsVerifyWorkflowStatus.PENDING,
         timestamp=str(datetime.now(UTC)),
         workflow_id=workflow_id,

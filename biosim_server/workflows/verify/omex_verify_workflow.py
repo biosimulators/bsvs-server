@@ -9,9 +9,9 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 from temporalio.workflow import ChildWorkflowHandle
 
-from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion
+from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion, CompareSettings
 from biosim_server.workflows.simulate import OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput
-from biosim_server.workflows.verify import generate_statistics, GenerateStatisticsInput, GenerateStatisticsOutput, \
+from biosim_server.workflows.verify import generate_statistics_activity, GenerateStatisticsActivityInput, GenerateStatisticsActivityOutput, \
     SimulationRunInfo
 
 
@@ -27,24 +27,19 @@ class OmexVerifyWorkflowStatus(StrEnum):
 
 class OmexVerifyWorkflowInput(BaseModel):
     omex_file: OmexFile
-    user_description: str
     requested_simulators: list[BiosimulatorVersion]
     cache_buster: str
-    include_outputs: bool
-    rel_tol: float
-    abs_tol_min: float
-    abs_tol_scale: float
-    observables: Optional[list[str]] = None
+    compare_settings: CompareSettings
 
 
 class OmexVerifyWorkflowOutput(BaseModel):
     workflow_id: str
-    workflow_input: OmexVerifyWorkflowInput
+    compare_settings: CompareSettings
     workflow_status: OmexVerifyWorkflowStatus
     timestamp: str
-    actual_simulators: Optional[list[BiosimulatorVersion]] = None
     workflow_run_id: Optional[str] = None
-    workflow_results: Optional[GenerateStatisticsOutput] = None
+    workflow_error: Optional[str] = None
+    workflow_results: Optional[GenerateStatisticsActivityOutput] = None
 
 
 @workflow.defn
@@ -58,7 +53,7 @@ class OmexVerifyWorkflow:
         # assert verify_input.workflow_id == workflow.info().workflow_id
         self.verify_output = OmexVerifyWorkflowOutput(
             workflow_id=workflow.info().workflow_id,
-            workflow_input=verify_input,
+            compare_settings=verify_input.compare_settings,
             workflow_run_id=workflow.info().run_id,
             workflow_status=OmexVerifyWorkflowStatus.IN_PROGRESS,
             timestamp=str(workflow.now()))
@@ -105,11 +100,9 @@ class OmexVerifyWorkflow:
                                               hdf5_file=omex_sim_workflow_output.biosimulator_workflow_run.hdf5_file))
 
         # Generate comparison report
-        generate_statistics_output: GenerateStatisticsOutput = await workflow.execute_activity(
-            generate_statistics,
-            arg=GenerateStatisticsInput(sim_run_info_list=run_data, include_outputs=verify_input.include_outputs,
-                                        abs_tol_min=verify_input.abs_tol_min, abs_tol_scale=verify_input.abs_tol_scale,
-                                        rel_tol=verify_input.rel_tol),
+        generate_statistics_output: GenerateStatisticsActivityOutput = await workflow.execute_activity(
+            generate_statistics_activity,
+            arg=GenerateStatisticsActivityInput(sim_run_info_list=run_data, compare_settings=verify_input.compare_settings),
             start_to_close_timeout=timedelta(minutes=10),
             retry_policy=RetryPolicy(maximum_attempts=100, backoff_coefficient=2.0,
                                      maximum_interval=timedelta(seconds=10)), )

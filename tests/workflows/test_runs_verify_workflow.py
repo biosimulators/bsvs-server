@@ -106,7 +106,7 @@ def assert_runs_verify_results(observed_results: RunsVerifyWorkflowOutput,
     assert expected_results.workflow_results is not None
     assert observed_results.workflow_results is not None
     ds_names = list(expected_results.workflow_results.comparison_statistics.keys())
-    num_simulators = len(expected_results_template.workflow_input.biosimulations_run_ids)
+    num_simulators = len(expected_results.workflow_results.sims_run_info)
     for ds_name in ds_names:
         for i in range(num_simulators):
             for j in range(num_simulators):

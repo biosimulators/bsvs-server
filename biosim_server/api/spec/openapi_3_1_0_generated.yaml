@@ -96,6 +96,17 @@ paths:
           default: 1.0e-05
           title: Abs Tol Scale
         description: Scale for absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale.
+      - name: cache_buster
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Optional unique id for cache busting (unique string to force
+            new simulation runs).
+          default: '0'
+          title: Cache Buster
+        description: Optional unique id for cache busting (unique string to force
+          new simulation runs).
       - name: observables
         in: query
         required: false
@@ -290,84 +301,23 @@ components:
         name:
           type: string
           title: Name
-        simulator:
-          type: string
-          title: Simulator
-        simulatorVersion:
-          type: string
-          title: Simulatorversion
+        simulator_version:
+          $ref: '#/components/schemas/BiosimulatorVersion'
         status:
           $ref: '#/components/schemas/BiosimSimulationRunStatus'
-        simulatorDigest:
+        error_message:
           anyOf:
           - type: string
           - type: 'null'
-          title: Simulatordigest
-        cpus:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Cpus
-        memory:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Memory
-        maxTime:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Maxtime
-        envVars:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          title: Envvars
-        purpose:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Purpose
-        submitted:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Submitted
-        updated:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Updated
-        projectSize:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Projectsize
-        resultsSize:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Resultssize
-        runtime:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Runtime
-        email:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Email
+          title: Error Message
       type: object
       required:
       - id
       - name
-      - simulator
-      - simulatorVersion
+      - simulator_version
       - status
       title: BiosimSimulationRun
+      description: 'data returned by api.biosimulations.org/runs/{run_id} '
     BiosimSimulationRunStatus:
       type: string
       enum:
@@ -381,20 +331,39 @@ components:
       - RUN_ID_NOT_FOUND
       - UNKNOWN
       title: BiosimSimulationRunStatus
-    BiosimSimulatorSpec:
+    BiosimulatorVersion:
       properties:
-        simulator:
+        id:
           type: string
-          title: Simulator
+          title: Id
+        name:
+          type: string
+          title: Name
         version:
-          anyOf:
-          - type: string
-          - type: 'null'
+          type: string
           title: Version
+        image_url:
+          type: string
+          title: Image Url
+        image_digest:
+          type: string
+          title: Image Digest
+        created:
+          type: string
+          title: Created
+        updated:
+          type: string
+          title: Updated
       type: object
       required:
-      - simulator
-      title: BiosimSimulatorSpec
+      - id
+      - name
+      - version
+      - image_url
+      - image_digest
+      - created
+      - updated
+      title: BiosimulatorVersion
     Body_start-verify-omex:
       properties:
         uploaded_file:
@@ -406,6 +375,38 @@ components:
       required:
       - uploaded_file
       title: Body_start-verify-omex
+    CompareSettings:
+      properties:
+        user_description:
+          type: string
+          title: User Description
+        include_outputs:
+          type: boolean
+          title: Include Outputs
+        rel_tol:
+          type: number
+          title: Rel Tol
+        abs_tol_min:
+          type: number
+          title: Abs Tol Min
+        abs_tol_scale:
+          type: number
+          title: Abs Tol Scale
+        observables:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Observables
+      type: object
+      required:
+      - user_description
+      - include_outputs
+      - rel_tol
+      - abs_tol_min
+      - abs_tol_scale
+      title: CompareSettings
     ComparisonStatistics:
       properties:
         dataset_name:
@@ -448,7 +449,7 @@ components:
       - simulator_version_j
       - var_names
       title: ComparisonStatistics
-    GenerateStatisticsOutput:
+    GenerateStatisticsActivityOutput:
       properties:
         sims_run_info:
           items:
@@ -475,7 +476,7 @@ components:
       required:
       - sims_run_info
       - comparison_statistics
-      title: GenerateStatisticsOutput
+      title: GenerateStatisticsActivityOutput
     HDF5Attribute:
       properties:
         key:
@@ -596,79 +597,36 @@ components:
       - shape
       - values
       title: Hdf5DataValues
-    OmexVerifyWorkflowInput:
-      properties:
-        source_omex:
-          $ref: '#/components/schemas/SourceOmex'
-        user_description:
-          type: string
-          title: User Description
-        requested_simulators:
-          items:
-            $ref: '#/components/schemas/BiosimSimulatorSpec'
-          type: array
-          title: Requested Simulators
-        include_outputs:
-          type: boolean
-          title: Include Outputs
-        rel_tol:
-          type: number
-          title: Rel Tol
-        abs_tol_min:
-          type: number
-          title: Abs Tol Min
-        abs_tol_scale:
-          type: number
-          title: Abs Tol Scale
-        observables:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          title: Observables
-      type: object
-      required:
-      - source_omex
-      - user_description
-      - requested_simulators
-      - include_outputs
-      - rel_tol
-      - abs_tol_min
-      - abs_tol_scale
-      title: OmexVerifyWorkflowInput
     OmexVerifyWorkflowOutput:
       properties:
         workflow_id:
           type: string
           title: Workflow Id
-        workflow_input:
-          $ref: '#/components/schemas/OmexVerifyWorkflowInput'
+        compare_settings:
+          $ref: '#/components/schemas/CompareSettings'
         workflow_status:
           $ref: '#/components/schemas/OmexVerifyWorkflowStatus'
         timestamp:
           type: string
           title: Timestamp
-        actual_simulators:
-          anyOf:
-          - items:
-              $ref: '#/components/schemas/BiosimSimulatorSpec'
-            type: array
-          - type: 'null'
-          title: Actual Simulators
         workflow_run_id:
           anyOf:
           - type: string
           - type: 'null'
           title: Workflow Run Id
+        workflow_error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Workflow Error
         workflow_results:
           anyOf:
-          - $ref: '#/components/schemas/GenerateStatisticsOutput'
+          - $ref: '#/components/schemas/GenerateStatisticsActivityOutput'
           - type: 'null'
       type: object
       required:
       - workflow_id
-      - workflow_input
+      - compare_settings
       - workflow_status
       - timestamp
       title: OmexVerifyWorkflowOutput
@@ -702,81 +660,36 @@ components:
       - var_names
       - data
       title: RunData
-    RunsVerifyWorkflowInput:
-      properties:
-        user_description:
-          type: string
-          title: User Description
-        biosimulations_run_ids:
-          items:
-            type: string
-          type: array
-          title: Biosimulations Run Ids
-        include_outputs:
-          type: boolean
-          title: Include Outputs
-        rel_tol:
-          type: number
-          title: Rel Tol
-        abs_tol_min:
-          type: number
-          title: Abs Tol Min
-        abs_tol_scale:
-          type: number
-          title: Abs Tol Scale
-        observables:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          title: Observables
-      type: object
-      required:
-      - user_description
-      - biosimulations_run_ids
-      - include_outputs
-      - rel_tol
-      - abs_tol_min
-      - abs_tol_scale
-      title: RunsVerifyWorkflowInput
     RunsVerifyWorkflowOutput:
       properties:
         workflow_id:
           type: string
           title: Workflow Id
-        workflow_input:
-          $ref: '#/components/schemas/RunsVerifyWorkflowInput'
+        compare_settings:
+          $ref: '#/components/schemas/CompareSettings'
         workflow_status:
           $ref: '#/components/schemas/RunsVerifyWorkflowStatus'
         timestamp:
           type: string
           title: Timestamp
-        workflow_error:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Workflow Error
-        actual_simulators:
-          anyOf:
-          - items:
-              $ref: '#/components/schemas/BiosimSimulatorSpec'
-            type: array
-          - type: 'null'
-          title: Actual Simulators
         workflow_run_id:
           anyOf:
           - type: string
           - type: 'null'
           title: Workflow Run Id
+        workflow_error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Workflow Error
         workflow_results:
           anyOf:
-          - $ref: '#/components/schemas/GenerateStatisticsOutput'
+          - $ref: '#/components/schemas/GenerateStatisticsActivityOutput'
           - type: 'null'
       type: object
       required:
       - workflow_id
-      - workflow_input
+      - compare_settings
       - workflow_status
       - timestamp
       title: RunsVerifyWorkflowOutput
@@ -800,19 +713,6 @@ components:
       - biosim_sim_run
       - hdf5_file
       title: SimulationRunInfo
-    SourceOmex:
-      properties:
-        name:
-          type: string
-          title: Name
-        omex_s3_file:
-          type: string
-          title: Omex S3 File
-      type: object
-      required:
-      - name
-      - omex_s3_file
-      title: SourceOmex
     ValidationError:
       properties:
         loc:

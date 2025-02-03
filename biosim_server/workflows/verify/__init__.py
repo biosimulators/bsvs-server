@@ -1,6 +1,5 @@
-from biosim_server.workflows.verify.activities import SimulationRunInfo, GenerateStatisticsInput, \
-    GenerateStatisticsOutput, RunData, generate_statistics
-from biosim_server.common.database.data_models import ComparisonStatistics
+from biosim_server.workflows.verify.activities import SimulationRunInfo, GenerateStatisticsActivityInput, \
+    GenerateStatisticsActivityOutput, RunData, generate_statistics_activity
 from biosim_server.workflows.verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowStatus, OmexVerifyWorkflowOutput
 from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
@@ -9,10 +8,10 @@ from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkfl
 
 __all__ = [
     "SimulationRunInfo",
-    "GenerateStatisticsInput",
-    "GenerateStatisticsOutput",
+    "GenerateStatisticsActivityInput",
+    "GenerateStatisticsActivityOutput",
     "RunData",
-    "generate_statistics",
+    "generate_statistics_activity",
     "OmexVerifyWorkflow",
     "OmexVerifyWorkflowInput",
     "OmexVerifyWorkflowStatus",

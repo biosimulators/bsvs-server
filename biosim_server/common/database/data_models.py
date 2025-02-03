@@ -3,7 +3,54 @@ from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
-from biosim_server.common.biosim1_client.models import HDF5File
+ATTRIBUTE_VALUE_TYPE = int | float | str | bool | list[str] | list[int] | list[float] | list[bool]
+
+
+class HDF5Attribute(BaseModel):
+    key: str
+    value: ATTRIBUTE_VALUE_TYPE
+
+
+class HDF5Dataset(BaseModel):
+    name: str
+    shape: list[int]
+    attributes: list[HDF5Attribute]
+
+    @property
+    def sedml_labels(self) -> list[str]:
+        for attr in self.attributes:
+            if attr.key == "sedmlDataSetLabels":
+                if isinstance(attr.value, list) and all(isinstance(v, str) for v in attr.value):
+                    return attr.value  # type: ignore
+        return []
+
+
+class HDF5Group(BaseModel):
+    name: str
+    attributes: list[HDF5Attribute]
+    datasets: list[HDF5Dataset]
+
+
+class HDF5File(BaseModel):
+    filename: str
+    id: str
+    uri: str
+    groups: list[HDF5Group]
+
+    @property
+    def datasets(self) -> dict[str, HDF5Dataset]:
+        dataset_dict: dict[str, HDF5Dataset] = {}
+        for group in self.groups:
+            for dataset in group.datasets:
+                dataset_dict[dataset.name] = dataset
+        return dataset_dict
+
+
+class Hdf5DataValues(BaseModel):
+    # simulation_run_id: str
+    # dataset_name: str
+    shape: list[int]
+    values: list[float]
 
 
 class OmexFile(BaseModel):
@@ -54,6 +101,7 @@ class BiosimSimulationRun(BaseModel):
     name: str
     simulator_version: BiosimulatorVersion
     status: BiosimSimulationRunStatus
+    error_message: str | None = None
     # cpus: Optional[int] = None
     # memory: Optional[int] = None         # (in GB)
     # maxTime: Optional[int] = None        # (in minutes)
@@ -69,7 +117,7 @@ class BiosimSimulationRun(BaseModel):
     @field_validator('id')
     def validate_id(cls, v: str) -> str:
         if v.find("-") >= 0:
-            raise ValueError("id must not container any dashes, looks like a uuid")
+            raise ValueError("id must not contain any dashes, looks like a uuid")
         return v
 
 
@@ -94,6 +142,14 @@ class ComparisonStatistics(BaseModel):
     is_close: Optional[list[bool]] = None
     error_message: Optional[str] = None
 
+
+class CompareSettings(BaseModel):
+    user_description: str
+    include_outputs: bool
+    rel_tol: float
+    abs_tol_min: float
+    abs_tol_scale: float
+    observables: Optional[list[str]] = None
 
 # class CompareReport(BaseModel):
 #     omex_file: OmexFile

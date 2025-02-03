@@ -1,32 +1,7 @@
 {
-  "workflow_id": "3ea78714d33843dbac8e1efc030e71cc",
-  "workflow_input": {
-    "omex_file": {
-      "file_hash_md5": "3b965a2208febec450825569e6089984",
-      "uploaded_filename": "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex",
-      "bucket_name": "files.biosimulations.org",
-      "omex_gcs_path": "verify/omex/3b965a2208febec450825569e6089984.omex",
-      "file_size": 283848,
-      "database_id": null
-    },
+  "workflow_id": "65e48e96b17c4a858f30e87b765462a4",
+  "compare_settings": {
     "user_description": "description",
-    "requested_simulators": [
-      {
-        "id": "copasi",
-        "name": "COPASI",
-        "version": "4.45.296",
-        "image_url": "ghcr.io/biosimulators/copasi:4.45.296",
-        "image_digest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df"
-      },
-      {
-        "id": "vcell",
-        "name": "Virtual Cell",
-        "version": "7.7.0.13",
-        "image_url": "ghcr.io/biosimulators/vcell:7.7.0.13",
-        "image_digest": "sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216"
-      }
-    ],
-    "cache_buster": "0",
     "include_outputs": false,
     "rel_tol": 0.0001,
     "abs_tol_min": 0.001,
@@ -37,14 +12,14 @@
     ]
   },
   "workflow_status": "COMPLETED",
-  "timestamp": "2025-01-31 22:26:18.575726+00:00",
-  "actual_simulators": null,
-  "workflow_run_id": "bcdb443c-2ecd-4507-a711-1844aa9cefa8",
+  "timestamp": "2025-02-03 15:35:52.452706+00:00",
+  "workflow_run_id": "0b7e75db-1e61-4ada-815c-f984311308a0",
+  "workflow_error": null,
   "workflow_results": {
     "sims_run_info": [
       {
         "biosim_sim_run": {
-          "id": "679d4e0a55ff66742cf14a9e",
+          "id": "67a0e258902399434ba9e075",
           "name": "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex",
           "simulator_version": {
             "id": "copasi",
@@ -59,8 +34,8 @@
         },
         "hdf5_file": {
           "filename": "reports.h5",
-          "id": "679d4e0a55ff66742cf14a9e",
-          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/679d4e0a55ff66742cf14a9e/outputs/reports.h5",
+          "id": "67a0e258902399434ba9e075",
+          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/67a0e258902399434ba9e075/outputs/reports.h5",
           "groups": [
             {
               "name": "BIOMD0000000010_url.sedml",
@@ -492,7 +467,7 @@
       },
       {
         "biosim_sim_run": {
-          "id": "679d4e0a55ff66742cf14a9f",
+          "id": "67a0e258f8c41d74ce393310",
           "name": "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex",
           "simulator_version": {
             "id": "vcell",
@@ -507,8 +482,8 @@
         },
         "hdf5_file": {
           "filename": "reports.h5",
-          "id": "679d4e0a55ff66742cf14a9f",
-          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/679d4e0a55ff66742cf14a9f/outputs/reports.h5",
+          "id": "67a0e258f8c41d74ce393310",
+          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/67a0e258f8c41d74ce393310/outputs/reports.h5",
           "groups": [
             {
               "name": "BIOMD0000000010_url.sedml",
@@ -1042,25 +1017,25 @@
             ],
             "score": [
               0.0,
-              0.2109208541519768,
-              0.6160117641611397,
-              0.08073399713312734,
-              0.13396543530030625,
-              0.0844545843285283,
-              0.3207037300083684,
-              0.21449570723816266,
-              0.96109237672241,
+              0.21124727867456133,
+              0.6168979758136826,
+              0.08086213363311923,
+              0.13417308042160112,
+              0.08458286973509317,
+              0.32114667690770726,
+              0.21478788321777986,
+              0.9625458406171437,
               0.0,
-              0.006402084786197194,
-              0.0012556976092903502,
-              0.012589597583596512,
-              0.01308331126907003,
-              0.011326124992810022,
-              0.009667698853151248,
-              0.09630682413689742,
-              0.09893510061030918,
-              0.0020428828371769213,
-              0.01972444866994348
+              0.0064118939027096,
+              0.001257521550901106,
+              0.012609222175636446,
+              0.013103856342248347,
+              0.011341597937998972,
+              0.009681101722881868,
+              0.09644568407992742,
+              0.09908382305659139,
+              0.0020460421827101817,
+              0.019754244310102986
             ],
             "is_close": [
               true,
@@ -1116,25 +1091,25 @@
             ],
             "score": [
               0.0,
-              0.21092530300648407,
-              0.6159738194492199,
-              0.08073334534056023,
-              0.1339672299981345,
-              0.08445387107687062,
-              0.3206934452499603,
-              0.21449110649600422,
-              0.9610000157434938,
+              0.21125174131010804,
+              0.6168599218499676,
+              0.08086147976994093,
+              0.13417488068730682,
+              0.08458215431495913,
+              0.321136363720103,
+              0.2147832699333899,
+              0.9624532000846906,
               0.0,
-              0.006402080687530857,
-              0.0012556974516127215,
-              0.012589613433413199,
-              0.0130833283863958,
-              0.011326112164713817,
-              0.009667689506720173,
-              0.09630589664539227,
-              0.09893412180457972,
-              0.0020428832545140354,
-              0.01972440976463269
+              0.006411889791473894,
+              0.0012575213927650808,
+              0.012609238074904883,
+              0.013103873513375951,
+              0.01134158507482918,
+              0.009681092350517884,
+              0.0964447539119007,
+              0.0990828413059198,
+              0.0020460426013391283,
+              0.01975420528716325
             ],
             "is_close": [
               true,
@@ -1416,8 +1391,8 @@
             ],
             "score": [
               1.2053311887363872e-12,
-              0.2109208541519768,
-              0.6160117641611397
+              0.21124727867456133,
+              0.6168979758136826
             ],
             "is_close": [
               true,
@@ -1439,8 +1414,8 @@
             ],
             "score": [
               1.205331188736387e-12,
-              0.21092530300648407,
-              0.6159738194492199
+              0.21125174131010804,
+              0.6168599218499676
             ],
             "is_close": [
               true,
@@ -1506,8 +1481,8 @@
             ],
             "score": [
               1.1516089720585092e-12,
-              0.14491019189531268,
-              0.15796435879920528
+              0.14491019327815513,
+              0.1579643601144332
             ],
             "is_close": [
               true,
@@ -1529,8 +1504,8 @@
             ],
             "score": [
               1.1516089720585092e-12,
-              0.1449122918221143,
-              0.157961863564756
+              0.14491229320499682,
+              0.15796186487994238
             ],
             "is_close": [
               true,

@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, TypeAlias
 
 import numpy as np
@@ -5,9 +6,11 @@ from numpy.typing import NDArray
 from pydantic import BaseModel
 from temporalio import activity
 
-from biosim_server.common.biosim1_client import Hdf5DataValues, HDF5File
-from biosim_server.common.database.data_models import ComparisonStatistics, BiosimSimulationRun
-from biosim_server.workflows.simulate import get_hdf5_data, GetHdf5DataInput
+from biosim_server.common.database.data_models import ComparisonStatistics, BiosimSimulationRun, \
+    BiosimulatorWorkflowRun, CompareSettings, Hdf5DataValues, HDF5File
+from biosim_server.common.storage.data_cache import get_cached_omex_file_from_raw
+from biosim_server.dependencies import get_file_service, get_database_service
+from biosim_server.workflows.simulate import get_hdf5_data_values_activity, GetHdf5DataValuesActivityInput
 
 NDArray1b: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool]]
 NDArray1f: TypeAlias = np.ndarray[tuple[int], np.dtype[np.float64]]
@@ -20,12 +23,9 @@ class SimulationRunInfo(BaseModel):
     hdf5_file: HDF5File
 
 
-class GenerateStatisticsInput(BaseModel):
+class GenerateStatisticsActivityInput(BaseModel):
     sim_run_info_list: list[SimulationRunInfo]
-    include_outputs: bool
-    abs_tol_min: float
-    abs_tol_scale: float
-    rel_tol: float
+    compare_settings: CompareSettings
 
 
 class RunData(BaseModel):
@@ -35,14 +35,14 @@ class RunData(BaseModel):
     data: Hdf5DataValues  # n-dim array of data for this run, shape=(len(dataset_vars), len(times))
 
 
-class GenerateStatisticsOutput(BaseModel):
+class GenerateStatisticsActivityOutput(BaseModel):
     sims_run_info: list[SimulationRunInfo]
     comparison_statistics: dict[str, list[list[ComparisonStatistics]]]  # matrix of comparison statistics per dataset
     sim_run_data: Optional[list[RunData]] = None
 
 
 @activity.defn
-async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> GenerateStatisticsOutput:
+async def generate_statistics_activity(gen_stats_input: GenerateStatisticsActivityInput) -> GenerateStatisticsActivityOutput:
     # Gather the data from each run for each dataset
     num_runs = len(gen_stats_input.sim_run_info_list)
     datasets: dict[str, dict[str, Hdf5DataValues]] = {}
@@ -54,8 +54,8 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
         datasets[run_id_i] = {}
         dataset_names_i = [dataset.name for group in sim_run_info_i.hdf5_file.groups for dataset in group.datasets]
         for dataset_name in dataset_names_i:
-            data: Hdf5DataValues = await get_hdf5_data(
-                GetHdf5DataInput(simulation_run_id=run_id_i, dataset_name=dataset_name))
+            data: Hdf5DataValues = await get_hdf5_data_values_activity(
+                GetHdf5DataValuesActivityInput(simulation_run_id=run_id_i, dataset_name=dataset_name))
             datasets[run_id_i][dataset_name] = data
             var_names = sim_run_info_i.hdf5_file.datasets[dataset_name].sedml_labels
             run_data: RunData = RunData(run_id=run_id_i, dataset_name=dataset_name, var_names=var_names, data=data)
@@ -122,9 +122,10 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
                     continue
 
                 # compute statistics
-                is_close, score = calc_stats(arr1=array_i, arr2=array_j, rel_tol=gen_stats_input.rel_tol,
-                                             abs_tol_min=gen_stats_input.abs_tol_min,
-                                             atol_scale=gen_stats_input.abs_tol_scale)
+                is_close, score = calc_stats(arr1=array_i, arr2=array_j,
+                                             rel_tol=gen_stats_input.compare_settings.rel_tol,
+                                             abs_tol_min=gen_stats_input.compare_settings.abs_tol_min,
+                                             atol_scale=gen_stats_input.compare_settings.abs_tol_scale)
                 is_close_list: list[bool] = is_close.tolist()
                 score_list: list[float] = score.tolist()
 
@@ -138,9 +139,9 @@ async def generate_statistics(gen_stats_input: GenerateStatisticsInput) -> Gener
             ds_comparison.append(ds_comparison_i)
         comparison_statistics[dataset_name] = ds_comparison
 
-    gen_stats_output = GenerateStatisticsOutput(sims_run_info=gen_stats_input.sim_run_info_list,
-                                                comparison_statistics=comparison_statistics)
-    if gen_stats_input.include_outputs:
+    gen_stats_output = GenerateStatisticsActivityOutput(sims_run_info=gen_stats_input.sim_run_info_list,
+                                                        comparison_statistics=comparison_statistics)
+    if gen_stats_input.compare_settings.include_outputs:
         gen_stats_output.sim_run_data = sims_run_data
 
     return gen_stats_output
@@ -185,3 +186,7 @@ def calc_stats(arr1: NDArray[np.float64], arr2: NDArray[np.float64],
     is_close: NDArray1b = np.less(score, 1.0)  # type: ignore
     assert len(is_close.shape) == 1 and len(score.shape) == 1 and is_close.shape == score.shape
     return is_close, score
+
+
+class CreateBiosimulatorWorkflowRunsActivityInput(BaseModel):
+    sim_run_infos: list[SimulationRunInfo]

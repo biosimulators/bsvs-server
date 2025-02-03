@@ -8,9 +8,10 @@ from temporalio.worker import Worker, UnsandboxedWorkflowRunner
 
 from biosim_server.common.temporal import pydantic_data_converter
 from biosim_server.dependencies import get_temporal_client, set_temporal_client
-from biosim_server.workflows.simulate import get_sim_run, submit_biosim_sim, get_hdf5_metadata, get_hdf5_data, \
+from biosim_server.workflows.simulate import get_biosim_simulation_run_activity, submit_biosim_simulation_run_activity, get_hdf5_file_activity, get_hdf5_data_values_activity, \
     OmexSimWorkflow, save_biosimulator_workflow_run_activity, get_biosimulator_workflow_runs_activity
-from biosim_server.workflows.verify import OmexVerifyWorkflow, RunsVerifyWorkflow, generate_statistics
+from biosim_server.workflows.verify import OmexVerifyWorkflow, RunsVerifyWorkflow, generate_statistics_activity
+from biosim_server.workflows.verify.activities import create_biosimulator_workflow_runs_activity
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -44,8 +45,9 @@ async def temporal_verify_worker(temporal_client: Client) -> AsyncGenerator[Work
             temporal_client,
             task_queue="verification_tasks",
             workflows=[OmexVerifyWorkflow, OmexSimWorkflow, RunsVerifyWorkflow],
-            activities=[generate_statistics, get_sim_run, submit_biosim_sim, get_hdf5_metadata, get_hdf5_data,
-                        save_biosimulator_workflow_run_activity, get_biosimulator_workflow_runs_activity],
+            activities=[generate_statistics_activity, get_biosim_simulation_run_activity, submit_biosim_simulation_run_activity, get_hdf5_file_activity, get_hdf5_data_values_activity,
+                        save_biosimulator_workflow_run_activity, get_biosimulator_workflow_runs_activity,
+                        create_biosimulator_workflow_runs_activity],
             debug_mode=True,
             workflow_runner=UnsandboxedWorkflowRunner()
     ) as worker:

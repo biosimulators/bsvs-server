@@ -6,12 +6,12 @@ from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from biosim_server.common.biosim1_client import HDF5File
 from biosim_server.common.database.data_models import OmexFile, BiosimSimulationRun, BiosimulatorVersion, \
-    BiosimSimulationRunStatus, BiosimulatorWorkflowRun
-from biosim_server.workflows.simulate import get_hdf5_metadata, get_sim_run, submit_biosim_sim, SubmitBiosimSimInput, \
-    GetSimRunInput, GetHdf5MetadataInput
-from biosim_server.workflows.simulate.biosim_activities import save_biosimulator_workflow_run_activity
+    BiosimSimulationRunStatus, BiosimulatorWorkflowRun, HDF5File
+from biosim_server.workflows.simulate import get_hdf5_file_activity, get_biosim_simulation_run_activity, submit_biosim_simulation_run_activity, SubmitBiosimSimulationRunActivityInput, \
+    GetBiosimSimulationRunActivityInput, GetHdf5FileActivityInput
+from biosim_server.workflows.simulate.biosim_activities import save_biosimulator_workflow_run_activity, \
+    SaveBiosimulatorWorkflowRunActivityInput
 
 
 class OmexSimWorkflowInput(BaseModel):
@@ -30,6 +30,7 @@ class OmexSimWorkflowStatus(StrEnum):
 class OmexSimWorkflowOutput(BaseModel):
     workflow_id: str
     workflow_status: OmexSimWorkflowStatus
+    error_message: str | None = None
     biosimulator_workflow_run: BiosimulatorWorkflowRun | None = None
 
 
@@ -55,10 +56,10 @@ class OmexSimWorkflow:
         workflow.logger.info(f"Child workflow started for {sim_input.simulator_version.id}.")
 
         workflow.logger.info(f"submitting job for simulator {sim_input.simulator_version.id}.")
-        submit_biosim_input = SubmitBiosimSimInput(omex_file=sim_input.omex_file,
-                                                   simulator_version=sim_input.simulator_version)
+        submit_biosim_input = SubmitBiosimSimulationRunActivityInput(omex_file=sim_input.omex_file,
+                                                                     simulator_version=sim_input.simulator_version)
         biosim_simulation_run: BiosimSimulationRun = await workflow.execute_activity(
-            submit_biosim_sim,
+            submit_biosim_simulation_run_activity,
             args=[submit_biosim_input],
             start_to_close_timeout=timedelta(seconds=60),  # Activity timeout
             retry_policy=RetryPolicy(maximum_attempts=1),
@@ -74,7 +75,7 @@ class OmexSimWorkflow:
             await workflow.sleep(2.0)
 
             biosim_simulation_run = await workflow.execute_activity(
-                get_sim_run, args=[GetSimRunInput(biosim_run_id=biosim_simulation_run.id)],
+                get_biosim_simulation_run_activity, args=[GetBiosimSimulationRunActivityInput(biosim_run_id=biosim_simulation_run.id)],
                 start_to_close_timeout=timedelta(seconds=60),
                 retry_policy=RetryPolicy(maximum_attempts=3)
             )
@@ -88,8 +89,8 @@ class OmexSimWorkflow:
                 return self.sim_output
 
         hdf5_file: HDF5File = await workflow.execute_activity(
-            get_hdf5_metadata,
-            args=[GetHdf5MetadataInput(simulation_run_id=biosim_simulation_run.id)],
+            get_hdf5_file_activity,
+            args=[GetHdf5FileActivityInput(simulation_run_id=biosim_simulation_run.id)],
             start_to_close_timeout=timedelta(seconds=60),  # Activity timeout
             retry_policy=RetryPolicy(maximum_attempts=100, maximum_interval=timedelta(seconds=5), backoff_coefficient=2.0),
         )
@@ -109,7 +110,7 @@ class OmexSimWorkflow:
                                                             hdf5_file=hdf5_file)
         saved_biosimulator_workflow_run = await workflow.execute_activity(
             save_biosimulator_workflow_run_activity,
-            args=[biosimulator_workflow_run],
+            args=[SaveBiosimulatorWorkflowRunActivityInput(biosim_workflow_run=biosimulator_workflow_run)],
             start_to_close_timeout=timedelta(seconds=60),  # Activity timeout
             retry_policy=RetryPolicy(maximum_attempts=100, maximum_interval=timedelta(seconds=5),
                                      backoff_coefficient=2.0),

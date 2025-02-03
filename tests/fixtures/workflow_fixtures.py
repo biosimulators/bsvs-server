@@ -6,7 +6,7 @@ from typing import Generator
 import pytest
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion
+from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion, CompareSettings
 from biosim_server.config import get_local_cache_dir
 from biosim_server.workflows.verify import OmexVerifyWorkflowOutput, OmexVerifyWorkflowInput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput
@@ -45,25 +45,23 @@ def simulator_version_vcell() -> BiosimulatorVersion:
         '"created":"2024-12-13T16:56:12.395Z","updated":"2024-12-13T16:56:12.395Z"}')
 
 
+@pytest.fixture(scope="session")
+def compare_settings() -> CompareSettings:
+    return CompareSettings(rel_tol=1e-4, abs_tol_min=1e-3, abs_tol_scale=1e-5, include_outputs=False,
+                           observables=["time", "concentration"], user_description="description")
 
 
 @pytest.fixture(scope="function")
 def omex_verify_workflow_input(simulator_version_copasi: BiosimulatorVersion,
-                               simulator_version_vcell: BiosimulatorVersion) -> OmexVerifyWorkflowInput:
+                               simulator_version_vcell: BiosimulatorVersion,
+                               compare_settings: CompareSettings) -> OmexVerifyWorkflowInput:
     path = "path/to/omex"
     omex_file = OmexFile(file_hash_md5="hash",
                          uploaded_filename="BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex",
                          file_size=100, omex_gcs_path=path, bucket_name="bucket")
     simulators = [simulator_version_copasi, simulator_version_vcell]
-    include_outputs = False
-    rel_tol = 1e-4
-    abs_tol_min = 1e-3
-    abs_tol_scale = 1e-5
-    observables = ["time", "concentration"]
-    omex_input = OmexVerifyWorkflowInput(omex_file=omex_file, user_description="description",
-                                         requested_simulators=simulators, include_outputs=include_outputs,
-                                         rel_tol=rel_tol, abs_tol_min=abs_tol_min, abs_tol_scale=abs_tol_scale,
-                                         observables=observables, cache_buster="0")
+    omex_input = OmexVerifyWorkflowInput(omex_file=omex_file, requested_simulators=simulators,
+                                         compare_settings=compare_settings, cache_buster="0")
     return omex_input
 
 
@@ -83,16 +81,9 @@ def omex_verify_workflow_output(omex_verify_workflow_input: OmexVerifyWorkflowIn
 
 
 @pytest.fixture(scope="function")
-def runs_verify_workflow_input() -> RunsVerifyWorkflowInput:
-    include_outputs = False
-    rel_tol = 1e-4
-    abs_tol_min = 1e-3
-    abs_tol_scale = 1e-5
-    observables = ["time", "concentration"]
+def runs_verify_workflow_input(compare_settings: CompareSettings) -> RunsVerifyWorkflowInput:
     run_ids = ["67817a2e1f52f47f628af971", "67817a2eba5a3f02b9f2938d"]
-    omex_input = RunsVerifyWorkflowInput(user_description="description", biosimulations_run_ids=run_ids,
-                                         include_outputs=include_outputs, rel_tol=rel_tol, abs_tol_min=abs_tol_min,
-                                         abs_tol_scale=abs_tol_scale, observables=observables)
+    omex_input = RunsVerifyWorkflowInput(biosimulations_run_ids=run_ids, compare_settings=compare_settings)
     return omex_input
 
 

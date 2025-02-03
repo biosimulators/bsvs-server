@@ -32,16 +32,16 @@ async def hash_bytes_md5(file_contents: bytes) -> str:
 
 async def get_cached_omex_file_from_upload(uploaded_file: UploadFile) -> OmexFile:
     contents = await uploaded_file.read()
-    return await _get_cached_omex_file_from_raw(contents, uploaded_file.filename)
+    return await get_cached_omex_file_from_raw(contents, uploaded_file.filename)
 
 
 async def get_cached_omex_file_from_local(omex_file: Path, filename: str) -> OmexFile:
     async with aiofiles_open(omex_file, 'rb') as file:
         contents = await file.read()
-    return await _get_cached_omex_file_from_raw(contents, filename)
+    return await get_cached_omex_file_from_raw(contents, filename)
 
 
-async def _get_cached_omex_file_from_raw(omex_file_contents: bytes, filename: str | None) -> OmexFile:
+async def get_cached_omex_file_from_raw(omex_file_contents: bytes, filename: str | None) -> OmexFile:
 
     file_hash_md5: str = hashlib.md5(omex_file_contents).hexdigest()
     logger.info(f"processing downloaded OMEX file with hash {file_hash_md5}")

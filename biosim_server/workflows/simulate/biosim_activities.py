@@ -6,20 +6,20 @@ from aiohttp import ClientResponseError
 from pydantic import BaseModel
 from temporalio import activity
 
-from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest, HDF5File, Hdf5DataValues
+from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest
 from biosim_server.common.database.data_models import OmexFile, BiosimSimulationRun, BiosimulatorVersion, \
-    BiosimSimulationRunStatus, BiosimulatorWorkflowRun
+    BiosimSimulationRunStatus, BiosimulatorWorkflowRun, HDF5File, Hdf5DataValues
 from biosim_server.common.storage import FileService
 from biosim_server.dependencies import get_file_service, get_biosim_service, get_database_service
 
 
-class GetSimRunInput(BaseModel):
+class GetBiosimSimulationRunActivityInput(BaseModel):
     biosim_run_id: str
     abort_on_not_found: Optional[bool] = False
 
 
 @activity.defn
-async def get_sim_run(get_sim_run_input: GetSimRunInput) -> BiosimSimulationRun:
+async def get_biosim_simulation_run_activity(get_sim_run_input: GetBiosimSimulationRunActivityInput) -> BiosimSimulationRun:
     activity.logger.setLevel(logging.INFO)
     biosim_service = BiosimServiceRest()
     try:
@@ -33,19 +33,20 @@ async def get_sim_run(get_sim_run_input: GetSimRunInput) -> BiosimSimulationRun:
                 return BiosimSimulationRun(
                     id=get_sim_run_input.biosim_run_id,
                     name="",
-                    simulator_version=BiosimulatorVersion(id="", name="", version="", image_url="", image_digest=""),
+                    simulator_version=BiosimulatorVersion(id="", name="", version="", image_url="", image_digest="", created="", updated=""),
                     status=BiosimSimulationRunStatus.RUN_ID_NOT_FOUND,
+                    error_message=f"Simulation run {get_sim_run_input.biosim_run_id} not found",
                 )
         raise e
 
 
-class SubmitBiosimSimInput(BaseModel):
+class SubmitBiosimSimulationRunActivityInput(BaseModel):
     omex_file: OmexFile
     simulator_version: BiosimulatorVersion
 
 
 @activity.defn
-async def submit_biosim_sim(input: SubmitBiosimSimInput) -> BiosimSimulationRun:
+async def submit_biosim_simulation_run_activity(input: SubmitBiosimSimulationRunActivityInput) -> BiosimSimulationRun:
     activity.logger.setLevel(logging.INFO)
     biosim_service: BiosimService | None = get_biosim_service()
     if biosim_service is None:
@@ -62,45 +63,54 @@ async def submit_biosim_sim(input: SubmitBiosimSimInput) -> BiosimSimulationRun:
     return simulation_run
 
 
-class GetHdf5MetadataInput(BaseModel):
+class GetHdf5FileActivityInput(BaseModel):
     simulation_run_id: str
 
 
 @activity.defn
-async def get_hdf5_metadata(input: GetHdf5MetadataInput) -> HDF5File:
+async def get_hdf5_file_activity(input: GetHdf5FileActivityInput) -> HDF5File:
     activity.logger.setLevel(logging.INFO)
     biosim_service = BiosimServiceRest()
     hdf5_file: HDF5File = await biosim_service.get_hdf5_metadata(input.simulation_run_id)
     return hdf5_file
 
 
-@activity.defn
-async def get_biosimulator_workflow_runs_activity(file_hash_md5: str, sim_digest: str,
-                                                  cache_buster: str) -> list[BiosimulatorWorkflowRun]:
-    activity.logger.setLevel(logging.INFO)
-    activity.logger.info(f"Getting biosimulator workflow runs with file hash {file_hash_md5} and sim digest {sim_digest}")
-    database_service = get_database_service()
-    assert database_service is not None
-    return await database_service.get_biosimulator_workflow_runs(file_hash_md5=file_hash_md5, sim_digest=sim_digest,
-                                                                 cache_buster=cache_buster)
+class GetBiosimulatorWorkflowRunsActivityInput(BaseModel):
+    file_hash_md5: str
+    sim_digest: str
+    cache_buster: str
 
 
 @activity.defn
-async def save_biosimulator_workflow_run_activity(input: BiosimulatorWorkflowRun) -> BiosimulatorWorkflowRun:
+async def get_biosimulator_workflow_runs_activity(input: GetBiosimulatorWorkflowRunsActivityInput) -> list[BiosimulatorWorkflowRun]:
     activity.logger.setLevel(logging.INFO)
-    activity.logger.info(f"Saving biosimulator workflow run with id {input.database_id}")
+    activity.logger.info(f"Getting biosimulator workflow runs with file hash {input.file_hash_md5} and sim digest {input.sim_digest}")
     database_service = get_database_service()
     assert database_service is not None
-    return await database_service.insert_biosimulator_workflow_run(input)
+    return await database_service.get_biosimulator_workflow_runs(file_hash_md5=input.file_hash_md5, image_digest=input.sim_digest,
+                                                                 cache_buster=input.cache_buster)
 
 
-class GetHdf5DataInput(BaseModel):
+class SaveBiosimulatorWorkflowRunActivityInput(BaseModel):
+    biosim_workflow_run: BiosimulatorWorkflowRun
+
+
+@activity.defn
+async def save_biosimulator_workflow_run_activity(input: SaveBiosimulatorWorkflowRunActivityInput) -> BiosimulatorWorkflowRun:
+    activity.logger.setLevel(logging.INFO)
+    activity.logger.info(f"Saving biosimulator workflow run with id {input.biosim_workflow_run.database_id}")
+    database_service = get_database_service()
+    assert database_service is not None
+    return await database_service.insert_biosimulator_workflow_run(sim_workflow_run=input.biosim_workflow_run)
+
+
+class GetHdf5DataValuesActivityInput(BaseModel):
     simulation_run_id: str
     dataset_name: str
 
 
 @activity.defn
-async def get_hdf5_data(get_input: GetHdf5DataInput) -> Hdf5DataValues:
+async def get_hdf5_data_values_activity(get_input: GetHdf5DataValuesActivityInput) -> Hdf5DataValues:
     activity.logger.setLevel(logging.INFO)
     biosim_service = BiosimServiceRest()
     hdf5_data_values: Hdf5DataValues = await biosim_service.get_hdf5_data(simulation_run_id=get_input.simulation_run_id,

@@ -62,11 +62,11 @@ class FileServiceLocal(FileService):
             async with aiofiles.open(gcs_file_path, mode='wb') as f2:
                 await f2.write(contents)
         self.gcs_files_written.append(gcs_file_path)
-        logging.info(f"Uploaded file to gcs at {gcs_file_path}")
         return str(gcs_path)
 
     @override
     async def upload_bytes(self, file_contents: bytes, gcs_path: str) -> str:
+        logger.info(f"Uploading bytes to {gcs_path}")
         # write bytes to mock gcs
         gcs_file_path = self.BASE_DIR / gcs_path
         gcs_file_path.parent.mkdir(parents=True, exist_ok=True)

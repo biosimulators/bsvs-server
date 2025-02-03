@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from biosim_server.common.biosim1_client import HDF5File
+from biosim_server.common.database.data_models import HDF5File
 
 
 def test_hdf5_json(hdf5_json_test_file: Path) -> None:

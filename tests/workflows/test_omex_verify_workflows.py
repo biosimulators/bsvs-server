@@ -77,7 +77,6 @@ def assert_omex_verify_results(observed_results: OmexVerifyWorkflowOutput,
     # customize expected results to match those things which vary between runs
     expected_results = expected_results_template.model_copy(deep=True)
     expected_results.workflow_id = observed_results.workflow_id
-    expected_results.workflow_input.omex_file = observed_results.workflow_input.omex_file
     expected_results.workflow_run_id = observed_results.workflow_run_id
     expected_results.timestamp = observed_results.timestamp
     if expected_results.workflow_results and observed_results.workflow_results:
@@ -96,7 +95,7 @@ def assert_omex_verify_results(observed_results: OmexVerifyWorkflowOutput,
     assert expected_results.workflow_results is not None
     assert observed_results.workflow_results is not None
     ds_names = list(expected_results.workflow_results.comparison_statistics.keys())
-    num_simulators = len(expected_results_template.workflow_input.requested_simulators)
+    num_simulators = len(expected_results.workflow_results.sims_run_info)
     for ds_name in ds_names:
         for i in range(num_simulators):
             for j in range(num_simulators):

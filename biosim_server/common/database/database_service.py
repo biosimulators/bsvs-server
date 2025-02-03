@@ -34,11 +34,11 @@ class DatabaseService(ABC):
         pass
 
     @abstractmethod
-    async def insert_biosimulator_workflow_run(self, input: BiosimulatorWorkflowRun) -> BiosimulatorWorkflowRun:
+    async def insert_biosimulator_workflow_run(self, sim_workflow_run: BiosimulatorWorkflowRun) -> BiosimulatorWorkflowRun:
         pass
 
     @abstractmethod
-    async def get_biosimulator_workflow_runs(self, file_hash_md5: str, sim_digest: str, cache_buster: str)\
+    async def get_biosimulator_workflow_runs(self, file_hash_md5: str, image_digest: str, cache_buster: str) \
             -> list[BiosimulatorWorkflowRun]:
         pass
 

@@ -21,7 +21,7 @@ async def test_mongo(mongo_test_collection: AsyncIOMotorCollection,
 
     # check that the document in the database is the same as the original document
     expected_verify_workflow_output = OmexVerifyWorkflowOutput(workflow_id=omex_verify_workflow_output.workflow_id,
-                                                               workflow_input=omex_verify_workflow_output.workflow_input,
+                                                               compare_settings=omex_verify_workflow_output.compare_settings,
                                                                workflow_status=omex_verify_workflow_output.workflow_status,
                                                                timestamp=omex_verify_workflow_output.timestamp,
                                                                workflow_run_id=omex_verify_workflow_output.workflow_run_id,

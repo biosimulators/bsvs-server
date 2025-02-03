@@ -77,14 +77,14 @@ class DatabaseServiceMongo(DatabaseService):
         return omex_files
 
     @override
-    async def insert_biosimulator_workflow_run(self, sim_output: BiosimulatorWorkflowRun) -> BiosimulatorWorkflowRun:
-        if sim_output.database_id is not None:
+    async def insert_biosimulator_workflow_run(self, sim_workflow_run: BiosimulatorWorkflowRun) -> BiosimulatorWorkflowRun:
+        if sim_workflow_run.database_id is not None:
             raise Exception("Cannot insert document that already has a database id")
-        sim_ver_str = f"{sim_output.simulator_version.id}:{sim_output.simulator_version.version}"
-        logger.info(f"Inserting OMEX sim output for {sim_ver_str} with OMEX hash {sim_output.file_hash_md5}")
-        result: InsertOneResult = await self._sim_output_col.insert_one(sim_output.model_dump())
+        sim_ver_str = f"{sim_workflow_run.simulator_version.id}:{sim_workflow_run.simulator_version.version}"
+        logger.info(f"Inserting OMEX sim output for {sim_ver_str} with OMEX hash {sim_workflow_run.file_hash_md5}")
+        result: InsertOneResult = await self._sim_output_col.insert_one(sim_workflow_run.model_dump())
         if result.acknowledged:
-            inserted_sim_output: BiosimulatorWorkflowRun = sim_output.model_copy(deep=True)
+            inserted_sim_output: BiosimulatorWorkflowRun = sim_workflow_run.model_copy(deep=True)
             inserted_sim_output.database_id = str(result.inserted_id)
             return inserted_sim_output
         else:
