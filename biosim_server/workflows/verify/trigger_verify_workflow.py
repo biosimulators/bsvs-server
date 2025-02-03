@@ -1,8 +1,9 @@
 import asyncio
 import uuid
 
-from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion, CompareSettings
+from biosim_server.common.database.data_models import BiosimulatorVersion, CompareSettings
 from biosim_server.dependencies import init_standalone, shutdown_standalone, get_temporal_client, get_biosim_service
+from biosim_server.omex_archives import OmexFile
 from biosim_server.workflows.verify import OmexVerifyWorkflow, OmexVerifyWorkflowInput
 
 

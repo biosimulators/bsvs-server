@@ -5,9 +5,10 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 from pymongo.results import InsertOneResult
 from typing_extensions import override
 
-from biosim_server.common.database.data_models import OmexFile, BiosimulatorWorkflowRun
+from biosim_server.common.database.data_models import BiosimulatorWorkflowRun
 from biosim_server.common.database.database_service import DatabaseService
 from biosim_server.config import get_settings
+from biosim_server.omex_archives import OmexFile
 
 logger = logging.getLogger(__name__)
 

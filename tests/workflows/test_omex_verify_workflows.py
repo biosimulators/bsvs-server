@@ -10,7 +10,7 @@ from biosim_server.common.biosim1_client import BiosimServiceRest
 from biosim_server.common.database.data_models import ComparisonStatistics
 from biosim_server.common.database.database_service import DatabaseService
 from biosim_server.common.storage import FileServiceGCS
-from biosim_server.common.storage.data_cache import get_cached_omex_file_from_local
+from biosim_server.omex_archives import get_cached_omex_file_from_local
 from biosim_server.config import get_settings
 from biosim_server.workflows.verify import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput

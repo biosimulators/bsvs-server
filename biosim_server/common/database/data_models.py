@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
+from biosim_server.omex_archives import OmexFile
+
 ATTRIBUTE_VALUE_TYPE = int | float | str | bool | list[str] | list[int] | list[float] | list[bool]
 
 
@@ -52,26 +54,6 @@ class Hdf5DataValues(BaseModel):
     shape: list[int]
     values: list[float]
 
-
-class OmexFile(BaseModel):
-    file_hash_md5: str
-    uploaded_filename: str
-    bucket_name: str
-    omex_gcs_path: str
-    file_size: int
-    database_id: Optional[str] = None
-
-    @field_validator('omex_gcs_path')
-    def validate_omex_gcs_path(cls, v: str) -> str:
-        if v.find("/") == 0:
-            raise ValueError("omex_gcs_path must not be an absolute path")
-        return v
-
-    @field_validator('uploaded_filename')
-    def validate_uploaded_filename(cls, v: str) -> str:
-        if v.find("/") >= 0:
-            raise ValueError("uploaded_filename must not contain any path separators")
-        return v
 
 
 class BiosimulatorVersion(BaseModel):

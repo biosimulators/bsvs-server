@@ -1,17 +1,15 @@
 import hashlib
 import logging
-import os
 import uuid
 from pathlib import Path
 
 import aiofiles
 from aiofiles import open as aiofiles_open
-from aiofiles import os as aiofiles_os
 from fastapi import UploadFile
 
-from biosim_server.common.database.data_models import OmexFile
 from biosim_server.config import get_local_cache_dir, get_settings
 from biosim_server.dependencies import get_database_service, get_file_service
+from biosim_server.omex_archives.models import OmexFile
 
 logger = logging.getLogger(__name__)
 

@@ -6,8 +6,8 @@ from typing import AsyncGenerator, Optional
 
 from temporalio import workflow
 
-from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion, CompareSettings
-from biosim_server.common.storage.data_cache import get_cached_omex_file_from_upload
+from biosim_server.common.database.data_models import BiosimulatorVersion, CompareSettings
+from biosim_server.omex_archives import OmexFile, get_cached_omex_file_from_upload
 from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflow, RunsVerifyWorkflowStatus
 

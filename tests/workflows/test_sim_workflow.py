@@ -8,7 +8,7 @@ from temporalio.worker import Worker
 from biosim_server.common.biosim1_client import BiosimServiceRest
 from biosim_server.common.database.data_models import BiosimulatorVersion
 from biosim_server.common.database.database_service import DatabaseService
-from biosim_server.common.storage.data_cache import get_cached_omex_file_from_local
+from biosim_server.omex_archives import get_cached_omex_file_from_local
 from biosim_server.workflows.simulate import OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput, \
     OmexSimWorkflowStatus
 from tests.fixtures.file_service_local import FileServiceLocal

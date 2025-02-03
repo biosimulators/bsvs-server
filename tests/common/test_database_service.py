@@ -1,7 +1,8 @@
 import pytest
 
-from biosim_server.common.database.data_models import OmexFile, BiosimulatorVersion, BiosimulatorWorkflowRun
+from biosim_server.common.database.data_models import BiosimulatorVersion, BiosimulatorWorkflowRun
 from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
+from biosim_server.omex_archives import OmexFile
 from biosim_server.workflows.verify import OmexVerifyWorkflowOutput
 
 

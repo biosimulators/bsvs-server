@@ -1,6 +1,7 @@
 from abc import abstractmethod, ABC
 
-from biosim_server.common.database.data_models import OmexFile, BiosimulatorWorkflowRun
+from biosim_server.common.database.data_models import BiosimulatorWorkflowRun
+from biosim_server.omex_archives import OmexFile
 
 
 class DocumentNotFoundError(Exception):
