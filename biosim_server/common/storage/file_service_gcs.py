@@ -55,7 +55,7 @@ class FileServiceGCS(FileService):
         return await get_listing_of_gcs_path(gcs_path, token=self.token)
 
     @override
-    async def get_file_contents(self, gcs_path: str) -> bytes:
+    async def get_file_contents(self, gcs_path: str) -> bytes | None:
         logger.info(f"Getting contents of {gcs_path}")
         return await get_gcs_file_contents(gcs_path=gcs_path, token=self.token)
 

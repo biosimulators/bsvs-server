@@ -91,11 +91,14 @@ async def get_listing_of_gcs_path(gcs_path: str, token: Token) -> list[ListingIt
         return files
 
 
-async def get_gcs_file_contents(gcs_path: str, token: Token) -> bytes:
+async def get_gcs_file_contents(gcs_path: str, token: Token) -> bytes | None:
     logger.info(f"Getting file contents for {gcs_path}")
-    async with Storage(token=token) as client:
-        return await client.download(bucket=get_settings().storage_bucket, object_name=gcs_path)
-
+    try:
+        async with Storage(token=token) as client:
+            return await client.download(bucket=get_settings().storage_bucket, object_name=gcs_path)
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {e}")
+        return None
 
 async def main() -> None:
     settings = get_settings()

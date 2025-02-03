@@ -90,7 +90,9 @@ class FileServiceLocal(FileService):
                 for file in gcs_dir_path.rglob("*")]
 
     @override
-    async def get_file_contents(self, gcs_path: str) -> bytes:
+    async def get_file_contents(self, gcs_path: str) -> bytes | None:
         # get the file contents from mock gcs
         gcs_file_path = self.BASE_DIR / gcs_path
+        if not gcs_file_path.exists():
+            return None
         return gcs_file_path.read_bytes()

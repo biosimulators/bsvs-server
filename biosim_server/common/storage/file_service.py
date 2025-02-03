@@ -39,7 +39,7 @@ class FileService(ABC):
         pass
 
     @abstractmethod
-    async def get_file_contents(self, gcs_path: str) -> bytes:
+    async def get_file_contents(self, gcs_path: str) -> bytes | None:
         pass
 
     @abstractmethod
