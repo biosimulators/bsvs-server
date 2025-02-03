@@ -190,3 +190,61 @@ def calc_stats(arr1: NDArray[np.float64], arr2: NDArray[np.float64],
 
 class CreateBiosimulatorWorkflowRunsActivityInput(BaseModel):
     sim_run_infos: list[SimulationRunInfo]
+
+
+@activity.defn
+async def create_biosimulator_workflow_runs_activity(input: CreateBiosimulatorWorkflowRunsActivityInput) -> list[
+    BiosimulatorWorkflowRun]:
+    activity.logger.setLevel(level=logging.INFO)
+    # invoke action to query or create/save-to-database the list of corresponding BiosimulatorWorkflowRuns
+    # 1) see if BiosimulatorWorkflowRuns are already present in our database with same run_ids
+    # 2) see if the omex file(s) are already present in database, if not save them
+    # 3) create BiosimulatorWorkflowRun and save to database for each run_id
+    database_service = get_database_service()
+    assert database_service is not None
+    file_service = get_file_service()
+    assert file_service is not None
+
+    saved_biosimulator_workflow_runs: list[BiosimulatorWorkflowRun] = []
+    for sim_run_info in input.sim_run_infos:
+        activity.logger.info(f"Processing run_id {sim_run_info.biosim_sim_run.id}")
+        #
+        # check if a BiosimulatorWorkflowRun already exists for this run_id
+        #
+        biosimulator_workflow_runs = await database_service.get_biosimulator_workflow_runs_by_biosim_runid(
+            biosim_run_id=sim_run_info.biosim_sim_run.id)
+        if len(biosimulator_workflow_runs) > 0:
+            if len(biosimulator_workflow_runs) > 1:
+                raise Exception( f"Found multiple BiosimulatorWorkflowRuns for biosim_run_id "
+                                 f"{sim_run_info.biosim_sim_run.id}")
+            saved_biosimulator_workflow_runs.append(biosimulator_workflow_runs[0])
+            continue
+
+        #
+        # BiosimulatorWorkflowRuns not found - create the OmexFile locally (with hash) and save it to the database
+        #
+        biosimulations_omex_path = f"simulations/{sim_run_info.biosim_sim_run.id}/archive.omex"
+        content: bytes | None = await file_service.get_file_contents(biosimulations_omex_path)
+        if content is None:
+            raise FileNotFoundError(f"Could not find file for run_id {sim_run_info.biosim_sim_run.id}")
+        omex_file = await get_cached_omex_file_from_raw(omex_file_contents=content, filename=biosimulations_omex_path.replace("/", "_"))
+
+        #
+        # save the BiosimulatorWorkflowRun to the database
+        #
+        cache_buster = f"imported biosimulations run_id {sim_run_info.biosim_sim_run.id}"
+        biosimulator_workflow_run = BiosimulatorWorkflowRun(
+            workflow_id="",
+            file_hash_md5=omex_file.file_hash_md5,
+            image_digest=sim_run_info.biosim_sim_run.simulator_version.image_digest,
+            cache_buster=cache_buster,
+            omex_file=omex_file,
+            simulator_version=sim_run_info.biosim_sim_run.simulator_version,
+            biosim_run=sim_run_info.biosim_sim_run,
+            hdf5_file=sim_run_info.hdf5_file
+        )
+        saved_biosimulator_workflow_run = await database_service.insert_biosimulator_workflow_run(
+            sim_workflow_run=biosimulator_workflow_run)
+        saved_biosimulator_workflow_runs.append(saved_biosimulator_workflow_run)
+
+    return saved_biosimulator_workflow_runs

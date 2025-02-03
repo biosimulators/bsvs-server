@@ -120,11 +120,14 @@ async def test_omex_verify_and_get_output_GCS(omex_verify_workflow_input: OmexVe
         assert_omex_verify_results(observed_results=output, expected_results_template=omex_verify_workflow_output)
 
 
+@pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
+                    reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
 async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                          runs_verify_workflow_output: RunsVerifyWorkflowOutput,
                                          omex_test_file: Path,
-                                         file_service_local: FileServiceLocal,
+                                         file_service_gcs: FileServiceGCS,
+                                         database_service_mongo: DatabaseServiceMongo,
                                          temporal_client: Client,
                                          temporal_verify_worker: Worker,
                                          biosim_service_rest: BiosimServiceRest) -> None:

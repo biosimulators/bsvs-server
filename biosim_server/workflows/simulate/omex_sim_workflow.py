@@ -70,7 +70,8 @@ class OmexSimWorkflow:
             f"status is {biosim_simulation_run.status}.")
 
         while biosim_simulation_run is not None and biosim_simulation_run.status not in [
-            BiosimSimulationRunStatus.SUCCEEDED, BiosimSimulationRunStatus.FAILED]:
+            BiosimSimulationRunStatus.SUCCEEDED, BiosimSimulationRunStatus.FAILED,
+            BiosimSimulationRunStatus.RUN_ID_NOT_FOUND]:
 
             await workflow.sleep(2.0)
 
@@ -87,6 +88,12 @@ class OmexSimWorkflow:
             if biosim_simulation_run.status == BiosimSimulationRunStatus.FAILED:
                 self.sim_output.workflow_status = OmexSimWorkflowStatus.FAILED
                 return self.sim_output
+
+        if biosim_simulation_run.status != BiosimSimulationRunStatus.SUCCEEDED:
+            self.sim_output.workflow_status = OmexSimWorkflowStatus.FAILED
+            self.sim_output.error_message = biosim_simulation_run.error_message
+            return self.sim_output
+
 
         hdf5_file: HDF5File = await workflow.execute_activity(
             get_hdf5_file_activity,

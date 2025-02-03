@@ -108,6 +108,21 @@ class DatabaseServiceMongo(DatabaseService):
             return []
 
     @override
+    async def get_biosimulator_workflow_runs_by_biosim_runid(self, biosim_run_id: str) -> list[BiosimulatorWorkflowRun]:
+        logger.info(f"Getting OMEX sim workflow output with biosim run id {biosim_run_id}")
+        document = await self._sim_output_col.find({"biosim_run.id": biosim_run_id}).to_list(length=100)
+        workflow_runs: list[BiosimulatorWorkflowRun] = []
+        if document is not None and type(document) is list:
+            for doc in document:
+                doc_dict = dict(doc)
+                doc_dict["database_id"] = str(doc["_id"])
+                del doc_dict["_id"]
+                workflow_runs.append(BiosimulatorWorkflowRun.model_validate(doc_dict))
+            return workflow_runs
+        else:
+            return []
+
+    @override
     async def delete_biosimulator_workflow_run(self, database_id: str) -> None:
         logger.info(f"Deleting OMEX sim workflow output with database_id {database_id}")
         result = await self._sim_output_col.delete_one({"_id": ObjectId(database_id)})

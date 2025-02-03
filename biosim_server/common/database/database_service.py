@@ -43,6 +43,10 @@ class DatabaseService(ABC):
         pass
 
     @abstractmethod
+    async def get_biosimulator_workflow_runs_by_biosim_runid(self, biosim_run_id: str) -> list[BiosimulatorWorkflowRun]:
+        pass
+
+    @abstractmethod
     async def delete_biosimulator_workflow_run(self, database_id: str) -> None:
         pass
 

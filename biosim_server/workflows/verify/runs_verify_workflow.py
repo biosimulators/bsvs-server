@@ -98,11 +98,12 @@ class RunsVerifyWorkflow:
                                          backoff_coefficient=2.0))
             run_data.append(SimulationRunInfo(biosim_sim_run=biosimulation_run, hdf5_file=hdf5_file))
 
-        generate_statistics_input = GenerateStatisticsInput(sim_run_info_list=run_data,
-                                                            include_outputs=self.verify_input.include_outputs,
-                                                            abs_tol_min=self.verify_input.abs_tol_min,
-                                                            abs_tol_scale=self.verify_input.abs_tol_scale,
-                                                            rel_tol=self.verify_input.rel_tol)
+        simulator_workflow_runs: list[BiosimulatorWorkflowRun] = await workflow.execute_activity(
+            create_biosimulator_workflow_runs_activity,
+            args=[CreateBiosimulatorWorkflowRunsActivityInput(sim_run_infos=run_data)],
+            start_to_close_timeout=timedelta(seconds=60),
+            retry_policy=RetryPolicy(maximum_attempts=100, maximum_interval=timedelta(seconds=5),
+                                     backoff_coefficient=2.0))
 
         generate_statistics_input = GenerateStatisticsActivityInput(sim_run_info_list=run_data,
                                                                     compare_settings=self.verify_input.compare_settings)
@@ -116,3 +117,5 @@ class RunsVerifyWorkflow:
         self.verify_output.workflow_results = generate_statistics_output
         self.verify_output.workflow_status = RunsVerifyWorkflowStatus.COMPLETED
         return self.verify_output
+
+

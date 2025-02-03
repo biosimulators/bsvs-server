@@ -8,6 +8,7 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from biosim_server.common.biosim1_client import BiosimServiceRest
+from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
 from biosim_server.common.storage import FileServiceGCS
 from biosim_server.workflows.verify import RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
@@ -19,7 +20,8 @@ async def test_run_verify_workflow(temporal_client: Client, temporal_verify_work
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                runs_verify_workflow_output: RunsVerifyWorkflowOutput,
                                runs_verify_workflow_output_file: Path,
-                               biosim_service_rest: BiosimServiceRest, file_service_gcs: FileServiceGCS) -> None:
+                               biosim_service_rest: BiosimServiceRest, file_service_gcs: FileServiceGCS,
+                               database_service_mongo: DatabaseServiceMongo) -> None:
     assert biosim_service_rest is not None
 
     workflow_id = uuid.uuid4().hex
