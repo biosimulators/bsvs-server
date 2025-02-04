@@ -9,8 +9,8 @@ from fastapi import UploadFile
 
 from biosim_server.common.storage import FileService
 from biosim_server.config import get_local_cache_dir, get_settings
-from biosim_server.omex_archives import OmexDatabaseService
-from biosim_server.omex_archives.models import OmexFile
+from biosim_server.biosim_omex import OmexDatabaseService
+from biosim_server.biosim_omex.models import OmexFile
 
 logger = logging.getLogger(__name__)
 

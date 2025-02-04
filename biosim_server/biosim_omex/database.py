@@ -7,7 +7,7 @@ from pymongo.results import InsertOneResult
 from typing_extensions import override
 
 from biosim_server.config import get_settings
-from biosim_server.omex_archives.models import OmexFile
+from biosim_server.biosim_omex.models import OmexFile
 
 logger = logging.getLogger(__name__)
 

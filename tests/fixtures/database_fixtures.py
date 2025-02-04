@@ -8,7 +8,7 @@ from testcontainers.mongodb import MongoDbContainer  # type: ignore
 from biosim_server.biosim_runs import DatabaseServiceMongo
 from biosim_server.dependencies import set_database_service, get_database_service, set_omex_database_service, \
     get_omex_database_service
-from biosim_server.omex_archives import OmexDatabaseServiceMongo
+from biosim_server.biosim_omex import OmexDatabaseServiceMongo
 
 MONGODB_DATABASE_NAME = "mydatabase"
 MONGODB_COLLECTION_NAME = "mycollection"

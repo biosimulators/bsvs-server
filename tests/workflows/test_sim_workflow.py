@@ -8,7 +8,7 @@ from temporalio.worker import Worker
 from biosim_server.biosim_runs import BiosimServiceRest, BiosimulatorVersion, DatabaseServiceMongo
 from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
-from biosim_server.omex_archives import get_cached_omex_file_from_local, OmexDatabaseServiceMongo
+from biosim_server.biosim_omex import get_cached_omex_file_from_local, OmexDatabaseServiceMongo
 from biosim_server.workflows.simulate import OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput, \
     OmexSimWorkflowStatus
 

@@ -11,7 +11,7 @@ from biosim_server.biosim_runs import BiosimServiceRest, DatabaseServiceMongo
 from biosim_server.biosim_verify import ComparisonStatistics
 from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
-from biosim_server.omex_archives import OmexDatabaseServiceMongo
+from biosim_server.biosim_omex import OmexDatabaseServiceMongo
 from biosim_server.workflows.verify import RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
 

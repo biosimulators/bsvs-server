@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
-from biosim_server.omex_archives import OmexFile
+from biosim_server.biosim_omex import OmexFile
 
 ATTRIBUTE_VALUE_TYPE = int | float | str | bool | list[str] | list[int] | list[float] | list[bool]
 

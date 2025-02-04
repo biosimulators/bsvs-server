@@ -8,7 +8,7 @@ from temporalio import workflow
 
 from biosim_server.biosim_runs import BiosimulatorVersion
 from biosim_server.biosim_verify import CompareSettings
-from biosim_server.omex_archives import OmexFile, get_cached_omex_file_from_upload
+from biosim_server.biosim_omex import OmexFile, get_cached_omex_file_from_upload
 from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflow, RunsVerifyWorkflowStatus
 

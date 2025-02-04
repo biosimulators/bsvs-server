@@ -10,7 +10,7 @@ from biosim_server.biosim_runs import BiosimService, BiosimServiceRest,  BiosimS
     BiosimSimulationRunStatus, BiosimulatorWorkflowRun, HDF5File, Hdf5DataValues
 from biosim_server.common.storage import FileService
 from biosim_server.dependencies import get_file_service, get_biosim_service, get_database_service
-from biosim_server.omex_archives import OmexFile
+from biosim_server.biosim_omex import OmexFile
 
 
 class GetBiosimSimulationRunActivityInput(BaseModel):

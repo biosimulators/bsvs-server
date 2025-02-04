@@ -4,7 +4,7 @@ import uuid
 from biosim_server.biosim_runs import BiosimulatorVersion
 from biosim_server.biosim_verify import CompareSettings
 from biosim_server.dependencies import init_standalone, shutdown_standalone, get_temporal_client, get_biosim_service
-from biosim_server.omex_archives import OmexFile
+from biosim_server.biosim_omex import OmexFile
 from biosim_server.workflows.verify import OmexVerifyWorkflow, OmexVerifyWorkflowInput
 
 

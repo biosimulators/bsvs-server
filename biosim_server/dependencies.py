@@ -4,7 +4,7 @@ from temporalio.client import Client as TemporalClient
 from biosim_server.biosim_runs import BiosimService, BiosimServiceRest, DatabaseService, DatabaseServiceMongo
 from biosim_server.common.storage import FileService, FileServiceGCS
 from biosim_server.config import get_settings
-from biosim_server.omex_archives.database import OmexDatabaseService, OmexDatabaseServiceMongo
+from biosim_server.biosim_omex.database import OmexDatabaseService, OmexDatabaseServiceMongo
 
 #------ file service (standalone or pytest) ------
 
