@@ -1,15 +1,50 @@
 import logging
+from abc import abstractmethod, ABC
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 from pymongo.results import InsertOneResult
 from typing_extensions import override
 
-from biosim_server.common.database.data_models import BiosimulatorWorkflowRun
-from biosim_server.common.database.database_service import DatabaseService
+from biosim_server.biosim_runs.models import BiosimulatorWorkflowRun
 from biosim_server.config import get_settings
 
 logger = logging.getLogger(__name__)
+
+
+
+
+class DocumentNotFoundError(Exception):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+
+class DatabaseService(ABC):
+
+    @abstractmethod
+    async def insert_biosimulator_workflow_run(self, sim_workflow_run: BiosimulatorWorkflowRun) -> BiosimulatorWorkflowRun:
+        pass
+
+    @abstractmethod
+    async def get_biosimulator_workflow_runs(self, file_hash_md5: str, image_digest: str, cache_buster: str) \
+            -> list[BiosimulatorWorkflowRun]:
+        pass
+
+    @abstractmethod
+    async def get_biosimulator_workflow_runs_by_biosim_runid(self, biosim_run_id: str) -> list[BiosimulatorWorkflowRun]:
+        pass
+
+    @abstractmethod
+    async def delete_biosimulator_workflow_run(self, database_id: str) -> None:
+        pass
+
+    @abstractmethod
+    async def delete_all_biosimulator_workflow_runs(self) -> None:
+        pass
+
+    @abstractmethod
+    async def close(self) -> None:
+        pass
 
 
 class DatabaseServiceMongo(DatabaseService):

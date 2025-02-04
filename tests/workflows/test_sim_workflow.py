@@ -5,9 +5,7 @@ import pytest
 from temporalio.client import Client, WorkflowHandle
 from temporalio.worker import Worker
 
-from biosim_server.common.biosim1_client import BiosimServiceRest
-from biosim_server.common.database.data_models import BiosimulatorVersion
-from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
+from biosim_server.biosim_runs import BiosimServiceRest, BiosimulatorVersion, DatabaseServiceMongo
 from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
 from biosim_server.omex_archives import get_cached_omex_file_from_local, OmexDatabaseServiceMongo

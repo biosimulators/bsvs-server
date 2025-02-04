@@ -1,5 +1,6 @@
 import logging
 import os
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import AsyncGenerator
 
@@ -9,14 +10,40 @@ from aiocache import SimpleMemoryCache, cached  # type: ignore
 from aiohttp import FormData
 from typing_extensions import override
 
-from biosim_server.common.biosim1_client.biosim_service import BiosimService
-from biosim_server.common.biosim1_client.models import BiosimSimulationRunApiRequest
-from biosim_server.common.database.data_models import BiosimulatorVersion, BiosimSimulationRun, \
-    BiosimSimulationRunStatus, HDF5File, Hdf5DataValues
+from biosim_server.biosim_runs.models import BiosimulatorVersion, BiosimSimulationRun, \
+    BiosimSimulationRunStatus, HDF5File, Hdf5DataValues, BiosimSimulationRunApiRequest
 from biosim_server.config import get_settings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
+class BiosimService(ABC):
+
+    @abstractmethod
+    async def get_sim_run(self, simulation_run_id: str) -> BiosimSimulationRun:
+        pass
+
+    @abstractmethod
+    async def run_biosim_sim(self, local_omex_path: str, omex_name: str, simulator_version: BiosimulatorVersion) -> BiosimSimulationRun:
+        pass
+
+    @abstractmethod
+    async def get_hdf5_metadata(self, simulation_run_id: str) -> HDF5File:
+        pass
+
+    @abstractmethod
+    async def get_hdf5_data(self, simulation_run_id: str, dataset_name: str) -> Hdf5DataValues:
+        pass
+
+    @abstractmethod
+    async def get_simulator_versions(self) -> list[BiosimulatorVersion]:
+        pass
+
+    @abstractmethod
+    async def close(self) -> None:
+        pass
+
 
 
 class BiosimServiceRest(BiosimService):

@@ -9,7 +9,8 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy
 from temporalio.workflow import ChildWorkflowHandle
 
-from biosim_server.common.database.data_models import BiosimulatorVersion, CompareSettings
+from biosim_server.biosim_runs import BiosimulatorVersion
+from biosim_server.biosim_verify import CompareSettings
 from biosim_server.omex_archives import OmexFile
 from biosim_server.workflows.simulate import OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput
 from biosim_server.workflows.verify import generate_statistics_activity, GenerateStatisticsActivityInput, \

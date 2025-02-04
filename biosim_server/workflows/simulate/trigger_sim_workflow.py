@@ -3,7 +3,7 @@ import uuid
 
 from temporalio.client import Client
 
-from biosim_server.common.biosim1_client import BiosimService
+from biosim_server.biosim_runs import BiosimService
 from biosim_server.common.temporal import pydantic_data_converter
 from biosim_server.dependencies import get_biosim_service, init_standalone, shutdown_standalone
 from biosim_server.omex_archives import OmexFile

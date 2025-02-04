@@ -3,8 +3,7 @@ import uuid
 
 from typing_extensions import override
 
-from biosim_server.common.biosim1_client import BiosimService
-from biosim_server.common.database.data_models import BiosimulatorVersion, BiosimSimulationRun, \
+from biosim_server.biosim_runs import BiosimService, BiosimulatorVersion, BiosimSimulationRun, \
     BiosimSimulationRunStatus, Hdf5DataValues, HDF5File
 
 logger = logging.getLogger(__name__)

@@ -5,7 +5,7 @@ import pytest_asyncio
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase, AsyncIOMotorCollection
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
+from biosim_server.biosim_runs import DatabaseServiceMongo
 from biosim_server.dependencies import set_database_service, get_database_service, set_omex_database_service, \
     get_omex_database_service
 from biosim_server.omex_archives import OmexDatabaseServiceMongo
