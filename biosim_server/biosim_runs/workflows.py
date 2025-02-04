@@ -6,13 +6,12 @@ from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from biosim_server.biosim_runs import BiosimSimulationRun, BiosimulatorVersion, \
-    BiosimSimulationRunStatus, BiosimulatorWorkflowRun, HDF5File
 from biosim_server.biosim_omex import OmexFile
-from biosim_server.workflows.simulate import get_hdf5_file_activity, get_biosim_simulation_run_activity, \
+from biosim_server.biosim_runs.models import BiosimSimulationRun, BiosimulatorVersion, \
+    BiosimSimulationRunStatus, BiosimulatorWorkflowRun, HDF5File
+from biosim_server.biosim_runs.activities import get_hdf5_file_activity, get_biosim_simulation_run_activity, \
     submit_biosim_simulation_run_activity, SubmitBiosimSimulationRunActivityInput, \
-    GetBiosimSimulationRunActivityInput, GetHdf5FileActivityInput
-from biosim_server.workflows.simulate.biosim_activities import save_biosimulator_workflow_run_activity, \
+    GetBiosimSimulationRunActivityInput, GetHdf5FileActivityInput, save_biosimulator_workflow_run_activity, \
     SaveBiosimulatorWorkflowRunActivityInput
 
 

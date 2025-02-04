@@ -7,13 +7,11 @@ from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from biosim_server.biosim_runs import BiosimSimulationRun, BiosimSimulationRunStatus, BiosimulatorWorkflowRun, HDF5File
+from biosim_server.biosim_runs import BiosimSimulationRun, BiosimSimulationRunStatus, BiosimulatorWorkflowRun, HDF5File, \
+    GetBiosimSimulationRunActivityInput, get_hdf5_file_activity, GetHdf5FileActivityInput, get_biosim_simulation_run_activity
 from biosim_server.biosim_verify import CompareSettings
-from biosim_server.workflows.simulate import GetBiosimSimulationRunActivityInput, get_hdf5_file_activity, \
-    GetHdf5FileActivityInput, get_biosim_simulation_run_activity
 from biosim_server.workflows.verify import generate_statistics_activity, GenerateStatisticsActivityOutput, \
-    GenerateStatisticsActivityInput, \
-    SimulationRunInfo
+    GenerateStatisticsActivityInput, SimulationRunInfo
 from biosim_server.workflows.verify.activities import create_biosimulator_workflow_runs_activity, \
     CreateBiosimulatorWorkflowRunsActivityInput
 

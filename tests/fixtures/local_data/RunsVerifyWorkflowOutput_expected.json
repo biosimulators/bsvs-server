@@ -1,5 +1,5 @@
 {
-  "workflow_id": "2deb9cddcb22409fbecd95bf15577784",
+  "workflow_id": "8b010df6c5264a68a3d4e5805087d5c6",
   "compare_settings": {
     "user_description": "description",
     "include_outputs": false,
@@ -12,8 +12,8 @@
     ]
   },
   "workflow_status": "COMPLETED",
-  "timestamp": "2025-02-04 03:32:50.783490+00:00",
-  "workflow_run_id": "ed71ae01-e086-4da2-9df5-697f10348c7e",
+  "timestamp": "2025-02-04 05:53:36.537579+00:00",
+  "workflow_run_id": "7e8a409d-0f5d-4988-8401-54664c9f734e",
   "workflow_error": null,
   "workflow_results": {
     "sims_run_info": [

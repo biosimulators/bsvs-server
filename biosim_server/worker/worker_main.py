@@ -4,12 +4,12 @@ import random
 
 from temporalio.worker import Worker, UnsandboxedWorkflowRunner
 
+from biosim_server.biosim_runs import get_hdf5_file_activity, get_hdf5_data_values_activity, \
+    save_biosimulator_workflow_run_activity, get_biosimulator_workflow_runs_activity, \
+    get_biosim_simulation_run_activity, submit_biosim_simulation_run_activity, OmexSimWorkflow
 from biosim_server.dependencies import get_temporal_client, init_standalone
-from biosim_server.workflows.simulate.biosim_activities import get_hdf5_file_activity, get_hdf5_data_values_activity, \
-    save_biosimulator_workflow_run_activity, get_biosimulator_workflow_runs_activity
-from biosim_server.workflows.simulate.biosim_activities import get_biosim_simulation_run_activity, submit_biosim_simulation_run_activity
-from biosim_server.workflows.simulate.omex_sim_workflow import OmexSimWorkflow
-from biosim_server.workflows.verify.activities import generate_statistics_activity, create_biosimulator_workflow_runs_activity
+from biosim_server.workflows.verify.activities import generate_statistics_activity, \
+    create_biosimulator_workflow_runs_activity
 from biosim_server.workflows.verify.omex_verify_workflow import OmexVerifyWorkflow
 from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflow
 
