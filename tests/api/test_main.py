@@ -14,8 +14,8 @@ from biosim_server.config import get_settings
 from biosim_server.biosim_omex import OmexDatabaseServiceMongo
 from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus
 from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
-from tests.workflows.test_omex_verify_workflows import assert_omex_verify_results
-from tests.workflows.test_runs_verify_workflow import assert_runs_verify_results
+from tests.biosim_verify.test_omex_verify_workflows import assert_omex_verify_results
+from tests.biosim_verify.test_runs_verify_workflow import assert_runs_verify_results
 
 
 @pytest.mark.asyncio
