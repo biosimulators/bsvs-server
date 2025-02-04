@@ -21,7 +21,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from biosim_server.config import get_local_cache_dir
 from biosim_server.dependencies import get_file_service, get_temporal_client, init_standalone, shutdown_standalone, \
-    get_database_service, get_biosim_service
+    get_database_service, get_biosim_service, get_omex_database_service
 from biosim_server.log_config import setup_logging
 from biosim_server.workflows.verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus
@@ -122,7 +122,7 @@ def root() -> dict[str, str]:
     response_model=OmexVerifyWorkflowOutput,
     operation_id="start-verify-omex",
     tags=["Verification"],
-    dependencies=[Depends(get_temporal_client), Depends(get_file_service), Depends(get_local_cache_dir), Depends(get_database_service)],
+    dependencies=[Depends(get_temporal_client), Depends(get_file_service), Depends(get_local_cache_dir), Depends(get_omex_database_service)],
     summary="Request verification report for OMEX/COMBINE archive")
 async def start_verify_omex(
         uploaded_file: UploadFile = File(..., description="OMEX/COMBINE archive containing a deterministic SBML model"),
@@ -140,7 +140,12 @@ async def start_verify_omex(
                                                  description="List of observables to include in the return data.")
 ) -> OmexVerifyWorkflowOutput:
     # ---- using hash to avoid saving multiple copies, upload to cloud storage if needed ---- #
-    omex_file: OmexFile = await get_cached_omex_file_from_upload(uploaded_file=uploaded_file)
+    file_service = get_file_service()
+    assert file_service is not None
+    omex_database = get_omex_database_service()
+    assert omex_database is not None
+    omex_file: OmexFile = await get_cached_omex_file_from_upload(file_service=file_service, omex_database=omex_database,
+                                                                 uploaded_file=uploaded_file)
 
     # ---- create workflow input ---- #
     simulator_versions: list[BiosimulatorVersion] = []

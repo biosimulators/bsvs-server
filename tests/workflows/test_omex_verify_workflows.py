@@ -10,11 +10,10 @@ from biosim_server.common.biosim1_client import BiosimServiceRest
 from biosim_server.common.database.data_models import ComparisonStatistics
 from biosim_server.common.database.database_service import DatabaseService
 from biosim_server.common.storage import FileServiceGCS
-from biosim_server.omex_archives import get_cached_omex_file_from_local
 from biosim_server.config import get_settings
-from biosim_server.workflows.verify import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
-    OmexVerifyWorkflowOutput
-from tests.fixtures.file_service_local import FileServiceLocal
+from biosim_server.omex_archives import get_cached_omex_file_from_local, OmexDatabaseService
+from biosim_server.workflows.verify import OmexVerifyWorkflow, OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput
+from tests.fixtures.database_fixtures import omex_database_service_mongo
 from tests.fixtures.gcs_fixtures import file_service_gcs_test_base_path
 
 
@@ -24,39 +23,20 @@ from tests.fixtures.gcs_fixtures import file_service_gcs_test_base_path
 async def test_omex_verify_workflow_GCS(temporal_client: Client, temporal_verify_worker: Worker,
                                        omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                        omex_verify_workflow_output: OmexVerifyWorkflowOutput,
-                                       biosim_service_rest: BiosimServiceRest, file_service_gcs: FileServiceGCS,
-                                       file_service_gcs_test_base_path: Path, omex_test_file: Path,
+                                       biosim_service_rest: BiosimServiceRest,
+                                       file_service_gcs: FileServiceGCS,
+                                       file_service_gcs_test_base_path: Path,
+                                       omex_test_file: Path,
                                        database_service_mongo: DatabaseService,
+                                       omex_database_service_mongo: OmexDatabaseService,
                                        omex_verify_workflow_output_file: Path) -> None:
     assert biosim_service_rest is not None
 
-    omex_file = await get_cached_omex_file_from_local(omex_file=omex_test_file, filename=omex_test_file.name)
+    omex_file = await get_cached_omex_file_from_local(file_service=file_service_gcs, omex_database=omex_database_service_mongo, omex_file=omex_test_file, filename=omex_test_file.name)
 
     await file_service_gcs.upload_file(file_path=omex_test_file, gcs_path=omex_file.omex_gcs_path)
     workflow_id = uuid.uuid4().hex
     logging.info(f"Stored test omex file at {omex_file.omex_gcs_path}")
-    omex_verify_workflow_input.omex_file = omex_file
-
-    observed_results: OmexVerifyWorkflowOutput = await temporal_client.execute_workflow(
-        OmexVerifyWorkflow.run, args=[omex_verify_workflow_input],
-        # result_type=OmexVerifyWorkflowOutput,
-        id=workflow_id, task_queue="verification_tasks")
-
-    assert_omex_verify_results(observed_results=observed_results, expected_results_template=omex_verify_workflow_output)
-
-
-@pytest.mark.asyncio
-async def test_omex_verify_workflow_mockGCS(temporal_client: Client, temporal_verify_worker: Worker,
-                               omex_verify_workflow_input: OmexVerifyWorkflowInput,
-                               omex_verify_workflow_output: OmexVerifyWorkflowOutput,
-                               biosim_service_rest: BiosimServiceRest, file_service_local: FileServiceLocal,
-                               omex_verify_workflow_output_file: Path, database_service_mongo: DatabaseService,
-                               omex_test_file: Path) -> None:
-    assert biosim_service_rest is not None
-
-    omex_file = await get_cached_omex_file_from_local(omex_file=omex_test_file, filename=omex_test_file.name)
-
-    workflow_id = uuid.uuid4().hex
     omex_verify_workflow_input.omex_file = omex_file
 
     observed_results: OmexVerifyWorkflowOutput = await temporal_client.execute_workflow(
@@ -69,7 +49,6 @@ async def test_omex_verify_workflow_mockGCS(temporal_client: Client, temporal_ve
     #     f.write(observed_results.model_dump_json(indent=2))
 
     assert_omex_verify_results(observed_results=observed_results, expected_results_template=omex_verify_workflow_output)
-
 
 
 def assert_omex_verify_results(observed_results: OmexVerifyWorkflowOutput,

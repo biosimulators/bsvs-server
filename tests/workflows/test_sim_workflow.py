@@ -7,20 +7,27 @@ from temporalio.worker import Worker
 
 from biosim_server.common.biosim1_client import BiosimServiceRest
 from biosim_server.common.database.data_models import BiosimulatorVersion
-from biosim_server.common.database.database_service import DatabaseService
-from biosim_server.omex_archives import get_cached_omex_file_from_local
+from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
+from biosim_server.common.storage import FileServiceGCS
+from biosim_server.config import get_settings
+from biosim_server.omex_archives import get_cached_omex_file_from_local, OmexDatabaseServiceMongo
 from biosim_server.workflows.simulate import OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput, \
     OmexSimWorkflowStatus
-from tests.fixtures.file_service_local import FileServiceLocal
 
 
+@pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
+                    reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
-async def test_sim_workflow(temporal_client: Client, temporal_verify_worker: Worker, omex_test_file: Path,
-                            biosim_service_rest: BiosimServiceRest, file_service_local: FileServiceLocal,
-                            database_service_mongo: DatabaseService) -> None:
+async def test_sim_workflow(temporal_client: Client,
+                            temporal_verify_worker: Worker,
+                            omex_test_file: Path,
+                            biosim_service_rest: BiosimServiceRest,
+                            file_service_gcs: FileServiceGCS,
+                            omex_database_service_mongo: OmexDatabaseServiceMongo,
+                            database_service_mongo: DatabaseServiceMongo) -> None:
     assert biosim_service_rest is not None
 
-    omex_file = await get_cached_omex_file_from_local(omex_file=omex_test_file, filename=omex_test_file.name)
+    omex_file = await get_cached_omex_file_from_local(file_service=file_service_gcs, omex_database=omex_database_service_mongo, omex_file=omex_test_file, filename=omex_test_file.name)
 
     simulator_versions = await biosim_service_rest.get_simulator_versions()
     simulator_version: BiosimulatorVersion | None = None

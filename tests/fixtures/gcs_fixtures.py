@@ -11,7 +11,7 @@ from biosim_server.dependencies import get_file_service, set_file_service
 from tests.fixtures.file_service_local import FileServiceLocal
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def file_service_local() -> AsyncGenerator[FileServiceLocal, None]:
     file_service_local = FileServiceLocal()
     file_service_local.init()
@@ -24,7 +24,7 @@ async def file_service_local() -> AsyncGenerator[FileServiceLocal, None]:
     set_file_service(saved_file_service)
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def file_service_gcs() -> AsyncGenerator[FileServiceGCS, None]:
     file_service_gcs: FileServiceGCS = FileServiceGCS()
     saved_file_service = get_file_service()

@@ -39,7 +39,8 @@ async def test_file_service_local(file_service_local: FileServiceLocal) -> None:
 @pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
                     reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
-async def test_file_service_gcs(file_service_gcs: FileServiceGCS, file_service_gcs_test_base_path: Path) -> None:
+async def test_file_service_gcs(file_service_gcs: FileServiceGCS,
+                                file_service_gcs_test_base_path: Path) -> None:
     expected_file_content = b"Hello, World!"
     file_service = file_service_gcs
 

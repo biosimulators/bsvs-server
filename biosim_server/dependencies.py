@@ -6,6 +6,7 @@ from biosim_server.common.database.database_service import DatabaseService
 from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
 from biosim_server.common.storage import FileService, FileServiceGCS
 from biosim_server.config import get_settings
+from biosim_server.omex_archives.database import OmexDatabaseService, OmexDatabaseServiceMongo
 
 #------ file service (standalone or pytest) ------
 
@@ -30,6 +31,18 @@ def set_database_service(database_service: DatabaseService | None) -> None:
 def get_database_service() -> DatabaseService | None:
     global global_database_service
     return global_database_service
+
+#------- database service (standalone or pytest) ------
+
+global_omex_database_service: OmexDatabaseService | None = None
+
+def set_omex_database_service(omex_database_service: OmexDatabaseService | None) -> None:
+    global global_omex_database_service
+    global_omex_database_service = omex_database_service
+
+def get_omex_database_service() -> OmexDatabaseService | None:
+    global global_omex_database_service
+    return global_omex_database_service
 
 #------- biosim service (standalone or pytest) ------
 
@@ -63,6 +76,7 @@ async def init_standalone() -> None:
     set_biosim_service(BiosimServiceRest())
     set_temporal_client(await TemporalClient.connect(settings.temporal_service_url))
     set_database_service(DatabaseServiceMongo(db_client=AsyncIOMotorClient(get_settings().mongo_url)))
+    set_omex_database_service(OmexDatabaseServiceMongo(db_client=AsyncIOMotorClient(get_settings().mongo_url)))
 
 async def shutdown_standalone() -> None:
     db_service = get_database_service()

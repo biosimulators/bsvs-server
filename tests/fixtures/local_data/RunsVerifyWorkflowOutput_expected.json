@@ -1,5 +1,5 @@
 {
-  "workflow_id": "8070c9d4694844d1ab84f7e935752c3b",
+  "workflow_id": "2deb9cddcb22409fbecd95bf15577784",
   "compare_settings": {
     "user_description": "description",
     "include_outputs": false,
@@ -12,8 +12,8 @@
     ]
   },
   "workflow_status": "COMPLETED",
-  "timestamp": "2025-02-03 15:32:45.740517+00:00",
-  "workflow_run_id": "46421c59-4289-4b07-aef2-dbd7ddc3fe4e",
+  "timestamp": "2025-02-04 03:32:50.783490+00:00",
+  "workflow_run_id": "ed71ae01-e086-4da2-9df5-697f10348c7e",
   "workflow_error": null,
   "workflow_results": {
     "sims_run_info": [
@@ -30,7 +30,8 @@
             "created": "2024-12-13T16:56:12.395Z",
             "updated": "2024-12-13T16:56:12.395Z"
           },
-          "status": "SUCCEEDED"
+          "status": "SUCCEEDED",
+          "error_message": null
         },
         "hdf5_file": {
           "filename": "reports.h5",
@@ -478,7 +479,8 @@
             "created": "2024-11-18T15:34:26.233Z",
             "updated": "2024-11-18T15:34:26.233Z"
           },
-          "status": "SUCCEEDED"
+          "status": "SUCCEEDED",
+          "error_message": null
         },
         "hdf5_file": {
           "filename": "reports.h5",

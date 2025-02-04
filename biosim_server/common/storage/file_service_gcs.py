@@ -19,6 +19,7 @@ from biosim_server.common.storage.file_service import FileService, ListingItem
 
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class FileServiceGCS(FileService):
     token: Token

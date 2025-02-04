@@ -2,17 +2,17 @@ import pytest
 
 from biosim_server.common.database.data_models import BiosimulatorVersion, BiosimulatorWorkflowRun
 from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
-from biosim_server.omex_archives import OmexFile
+from biosim_server.omex_archives import OmexFile, OmexDatabaseServiceMongo
 from biosim_server.workflows.verify import OmexVerifyWorkflowOutput
 
 
 @pytest.mark.asyncio
-async def test_omex_file(database_service_mongo: DatabaseServiceMongo) -> None:
+async def test_omex_file(omex_database_service_mongo: OmexDatabaseServiceMongo) -> None:
     omex_file = OmexFile(file_hash_md5="1234", bucket_name="test_bucket",
                          uploaded_filename="BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex",
                          omex_gcs_path="path/to/omex", file_size=100000)
-    inserted_omex_file = await database_service_mongo.insert_omex_file(omex_file=omex_file)
-    database_omex_file = await database_service_mongo.get_omex_file(file_hash_md5=omex_file.file_hash_md5)
+    inserted_omex_file = await omex_database_service_mongo.insert_omex_file(omex_file=omex_file)
+    database_omex_file = await omex_database_service_mongo.get_omex_file(file_hash_md5=omex_file.file_hash_md5)
     assert database_omex_file == inserted_omex_file
 
     assert database_omex_file.database_id is not None
@@ -20,12 +20,12 @@ async def test_omex_file(database_service_mongo: DatabaseServiceMongo) -> None:
     database_omex_file.database_id = None
     assert database_omex_file == omex_file
 
-    await database_service_mongo.delete_omex_file(database_id=database_id)
+    await omex_database_service_mongo.delete_omex_file(database_id=database_id)
 
-    assert await database_service_mongo.get_omex_file(file_hash_md5=omex_file.file_hash_md5) is None
+    assert await omex_database_service_mongo.get_omex_file(file_hash_md5=omex_file.file_hash_md5) is None
 
     with pytest.raises(Exception):
-        await database_service_mongo.delete_omex_file(database_id=database_id)
+        await omex_database_service_mongo.delete_omex_file(database_id=database_id)
 
 
 @pytest.mark.asyncio

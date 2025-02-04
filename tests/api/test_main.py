@@ -12,9 +12,9 @@ from biosim_server.common.biosim1_client import BiosimServiceRest
 from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
 from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
+from biosim_server.omex_archives import OmexDatabaseServiceMongo
 from biosim_server.workflows.verify import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus, \
     RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
-from tests.fixtures.file_service_local import FileServiceLocal
 from tests.workflows.test_omex_verify_workflows import assert_omex_verify_results
 from tests.workflows.test_runs_verify_workflow import assert_runs_verify_results
 
@@ -37,54 +37,14 @@ async def test_get_output_not_found(omex_verify_workflow_input: OmexVerifyWorkfl
         assert response.status_code == 404
 
 
-@pytest.mark.asyncio
-async def test_omex_verify_and_get_output_mockGCS(omex_verify_workflow_input: OmexVerifyWorkflowInput,
-                                         omex_verify_workflow_output: OmexVerifyWorkflowOutput,
-                                         omex_test_file: Path,
-                                         database_service_mongo: DatabaseServiceMongo,
-                                         file_service_local: FileServiceLocal,
-                                         temporal_client: Client,
-                                         temporal_verify_worker: Worker,
-                                         biosim_service_rest: BiosimServiceRest) -> None:
-    assert omex_verify_workflow_input.compare_settings.observables is not None
-    query_params: dict[str, float | str | list[str]] = {
-        "workflow_id_prefix": "verification-",
-        "simulators": [f"{sim.id}:{sim.version}" for sim in omex_verify_workflow_input.requested_simulators],
-        "include_outputs": omex_verify_workflow_input.compare_settings.include_outputs,
-        "user_description": omex_verify_workflow_input.compare_settings.user_description,
-        "observables": omex_verify_workflow_input.compare_settings.observables,
-        "rel_tol": omex_verify_workflow_input.compare_settings.rel_tol,
-        "abs_tol_min": omex_verify_workflow_input.compare_settings.abs_tol_min,
-        "abs_tol_scale": omex_verify_workflow_input.compare_settings.abs_tol_scale
-    }
-
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
-        with open(omex_test_file, "rb") as file:
-            upload_filename = omex_test_file.name
-            files = {"uploaded_file": (upload_filename, file, "application/zip")}
-            response = await test_client.post("/verify_omex", files=files, params=query_params)
-            assert response.status_code == 200
-
-        output = OmexVerifyWorkflowOutput.model_validate(response.json())
-
-        # poll api until job is completed
-        while output.workflow_status != OmexVerifyWorkflowStatus.COMPLETED:
-            await asyncio.sleep(5)
-            response = await test_client.get(f"/verify_omex/{output.workflow_id}")
-            if response.status_code == 200:
-                output = OmexVerifyWorkflowOutput.model_validate(response.json())
-                logging.info(f"polling, job status is: {output.workflow_status}")
-
-        assert_omex_verify_results(observed_results=output, expected_results_template=omex_verify_workflow_output)
-
-
 @pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
                     reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
-async def test_omex_verify_and_get_output_GCS(omex_verify_workflow_input: OmexVerifyWorkflowInput,
+async def test_omex_verify_and_get_output(omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                          omex_verify_workflow_output: OmexVerifyWorkflowOutput,
                                          omex_test_file: Path,
                                          database_service_mongo: DatabaseServiceMongo,
+                                         omex_database_service_mongo: OmexDatabaseServiceMongo,
                                          file_service_gcs: FileServiceGCS,
                                          temporal_client: Client,
                                          temporal_verify_worker: Worker,
@@ -129,6 +89,7 @@ async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerify
                                          omex_test_file: Path,
                                          file_service_gcs: FileServiceGCS,
                                          database_service_mongo: DatabaseServiceMongo,
+                                         omex_database_service_mongo: OmexDatabaseServiceMongo,
                                          temporal_client: Client,
                                          temporal_verify_worker: Worker,
                                          biosim_service_rest: BiosimServiceRest) -> None:
@@ -162,11 +123,13 @@ async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerify
         assert_runs_verify_results(observed_results=output, expected_results_template=runs_verify_workflow_output)
 
 
+@pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
+                    reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
 async def test_runs_verify_not_found(runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                          runs_verify_workflow_output: RunsVerifyWorkflowOutput,
                                          omex_test_file: Path,
-                                         file_service_local: FileServiceLocal,
+                                         file_service_gcs: FileServiceGCS,
                                          temporal_client: Client,
                                          temporal_verify_worker: Worker,
                                          biosim_service_rest: BiosimServiceRest) -> None:

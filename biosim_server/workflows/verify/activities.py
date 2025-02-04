@@ -8,7 +8,7 @@ from temporalio import activity
 
 from biosim_server.common.database.data_models import ComparisonStatistics, BiosimSimulationRun, \
     BiosimulatorWorkflowRun, CompareSettings, Hdf5DataValues, HDF5File
-from biosim_server.dependencies import get_file_service, get_database_service
+from biosim_server.dependencies import get_file_service, get_database_service, get_omex_database_service
 from biosim_server.omex_archives import get_cached_omex_file_from_raw
 from biosim_server.workflows.simulate import get_hdf5_data_values_activity, GetHdf5DataValuesActivityInput
 
@@ -200,6 +200,8 @@ async def create_biosimulator_workflow_runs_activity(input: CreateBiosimulatorWo
     # 1) see if BiosimulatorWorkflowRuns are already present in our database with same run_ids
     # 2) see if the omex file(s) are already present in database, if not save them
     # 3) create BiosimulatorWorkflowRun and save to database for each run_id
+    omex_database_service = get_omex_database_service()
+    assert omex_database_service is not None
     database_service = get_database_service()
     assert database_service is not None
     file_service = get_file_service()
@@ -227,7 +229,9 @@ async def create_biosimulator_workflow_runs_activity(input: CreateBiosimulatorWo
         content: bytes | None = await file_service.get_file_contents(biosimulations_omex_path)
         if content is None:
             raise FileNotFoundError(f"Could not find file for run_id {sim_run_info.biosim_sim_run.id}")
-        omex_file = await get_cached_omex_file_from_raw(omex_file_contents=content, filename=biosimulations_omex_path.replace("/", "_"))
+        omex_file = await get_cached_omex_file_from_raw(file_service=file_service, omex_database=omex_database_service,
+                                                        omex_file_contents=content,
+                                                        filename=biosimulations_omex_path.replace("/", "_"))
 
         #
         # save the BiosimulatorWorkflowRun to the database

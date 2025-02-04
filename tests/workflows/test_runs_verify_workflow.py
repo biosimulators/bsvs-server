@@ -8,22 +8,26 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from biosim_server.common.biosim1_client import BiosimServiceRest
+from biosim_server.common.database.data_models import ComparisonStatistics
 from biosim_server.common.database.database_service_mongo import DatabaseServiceMongo
 from biosim_server.common.storage import FileServiceGCS
+from biosim_server.config import get_settings
+from biosim_server.omex_archives import OmexDatabaseServiceMongo
 from biosim_server.workflows.verify import RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
-from biosim_server.common.database.data_models import ComparisonStatistics
 
 
+@pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
+                    reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
 async def test_run_verify_workflow(temporal_client: Client, temporal_verify_worker: Worker,
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                runs_verify_workflow_output: RunsVerifyWorkflowOutput,
                                runs_verify_workflow_output_file: Path,
-                               biosim_service_rest: BiosimServiceRest, file_service_gcs: FileServiceGCS,
-                               database_service_mongo: DatabaseServiceMongo) -> None:
-    assert biosim_service_rest is not None
-
+                               biosim_service_rest: BiosimServiceRest,
+                               file_service_gcs: FileServiceGCS,
+                               database_service_mongo: DatabaseServiceMongo,
+                               omex_database_service_mongo: OmexDatabaseServiceMongo) -> None:
     workflow_id = uuid.uuid4().hex
 
     observed_results: RunsVerifyWorkflowOutput = await temporal_client.execute_workflow(
@@ -32,19 +36,21 @@ async def test_run_verify_workflow(temporal_client: Client, temporal_verify_work
         id=workflow_id, task_queue="verification_tasks")
 
     # uncomment to update fixture for future tests
-    # with open(runs_verify_workflow_output_file, "w") as f:
-    #     f.write(observed_results.model_dump_json(indent=2))
+    with open(runs_verify_workflow_output_file, "w") as f:
+        f.write(observed_results.model_dump_json(indent=2))
 
     assert_runs_verify_results(observed_results=observed_results, expected_results_template=runs_verify_workflow_output)
 
 
+
+@pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
+                    reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
 async def test_run_verify_workflow_not_found_execute(temporal_client: Client, temporal_verify_worker: Worker,
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                runs_verify_workflow_output: RunsVerifyWorkflowOutput,
-                               biosim_service_rest: BiosimServiceRest, file_service_gcs: FileServiceGCS) -> None:
-    assert biosim_service_rest is not None
-
+                               biosim_service_rest: BiosimServiceRest,
+                               file_service_gcs: FileServiceGCS) -> None:
     workflow_id = uuid.uuid4().hex
 
     runs_verify_workflow_input = runs_verify_workflow_input.model_copy(deep=True)
@@ -56,13 +62,14 @@ async def test_run_verify_workflow_not_found_execute(temporal_client: Client, te
     assert observed_results.workflow_error == "Simulation run with id bad_id not found."
 
 
+@pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
+                    reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
 async def test_run_verify_workflow_not_found_poll(temporal_client: Client, temporal_verify_worker: Worker,
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                runs_verify_workflow_output: RunsVerifyWorkflowOutput,
-                               biosim_service_rest: BiosimServiceRest, file_service_gcs: FileServiceGCS) -> None:
-    assert biosim_service_rest is not None
-
+                               biosim_service_rest: BiosimServiceRest,
+                               file_service_gcs: FileServiceGCS) -> None:
     workflow_id = uuid.uuid4().hex
 
     runs_verify_workflow_input = runs_verify_workflow_input.model_copy(deep=True)

@@ -13,6 +13,7 @@ from biosim_server.common.storage import ListingItem
 from biosim_server.config import get_settings
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class _StorageWithListPrefix(Storage):
