@@ -2,7 +2,7 @@ import pytest
 
 from biosim_server.biosim_runs import BiosimulatorVersion, BiosimulatorWorkflowRun, DatabaseServiceMongo
 from biosim_server.biosim_omex import OmexFile
-from biosim_server.workflows.verify import OmexVerifyWorkflowOutput
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowOutput
 
 
 @pytest.mark.asyncio

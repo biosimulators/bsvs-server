@@ -3,8 +3,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from biosim_server.workflows.verify.activities import calc_stats
-from biosim_server.workflows.verify.hdf5_compare import get_results, compare_arrays, compare_datasets
+from biosim_server.biosim_verify.activities import calc_stats
+from biosim_server.biosim_verify.hdf5_compare import get_results, compare_arrays, compare_datasets
 
 
 @pytest.mark.asyncio

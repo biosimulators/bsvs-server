@@ -9,7 +9,7 @@ from temporalio import workflow
 from biosim_server.biosim_runs import BiosimulatorVersion
 from biosim_server.biosim_verify import CompareSettings
 from biosim_server.biosim_omex import OmexFile, get_cached_omex_file_from_upload
-from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
+from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflow, RunsVerifyWorkflowStatus
 
 with workflow.unsafe.imports_passed_through():
@@ -24,7 +24,7 @@ from biosim_server.config import get_local_cache_dir
 from biosim_server.dependencies import get_file_service, get_temporal_client, init_standalone, shutdown_standalone, \
     get_biosim_service, get_omex_database_service
 from biosim_server.log_config import setup_logging
-from biosim_server.workflows.verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus
 
 logger = logging.getLogger(__name__)

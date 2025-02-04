@@ -6,12 +6,12 @@ from typing import Generator
 import pytest
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
+from biosim_server.biosim_omex import OmexFile
 from biosim_server.biosim_runs import BiosimulatorVersion
 from biosim_server.biosim_verify import CompareSettings
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowOutput, OmexVerifyWorkflowInput
+from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput
 from biosim_server.config import get_local_cache_dir
-from biosim_server.biosim_omex import OmexFile
-from biosim_server.workflows.verify import OmexVerifyWorkflowOutput, OmexVerifyWorkflowInput, RunsVerifyWorkflowInput, \
-    RunsVerifyWorkflowOutput
 
 temp_data_dir = get_local_cache_dir() / "test_temp_dir"
 temp_data_dir.mkdir(exist_ok=True)

@@ -12,7 +12,7 @@ from biosim_server.biosim_verify import ComparisonStatistics
 from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
 from biosim_server.biosim_omex import OmexDatabaseServiceMongo
-from biosim_server.workflows.verify import RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
+from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
     RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
 
 

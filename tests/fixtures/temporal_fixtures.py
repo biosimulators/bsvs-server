@@ -6,13 +6,15 @@ from temporalio.client import Client
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import Worker, UnsandboxedWorkflowRunner
 
-from biosim_server.common.temporal import pydantic_data_converter
-from biosim_server.dependencies import get_temporal_client, set_temporal_client
 from biosim_server.biosim_runs import get_biosim_simulation_run_activity, submit_biosim_simulation_run_activity, \
     get_hdf5_file_activity, get_hdf5_data_values_activity, OmexSimWorkflow, save_biosimulator_workflow_run_activity, \
     get_biosimulator_workflow_runs_activity
-from biosim_server.workflows.verify import OmexVerifyWorkflow, RunsVerifyWorkflow, generate_statistics_activity
-from biosim_server.workflows.verify.activities import create_biosimulator_workflow_runs_activity
+from biosim_server.biosim_verify.activities import create_biosimulator_workflow_runs_activity, \
+    generate_statistics_activity
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflow
+from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflow
+from biosim_server.common.temporal import pydantic_data_converter
+from biosim_server.dependencies import get_temporal_client, set_temporal_client
 
 
 @pytest_asyncio.fixture(scope="session")

@@ -3,7 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 from pymongo.results import InsertOneResult
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from biosim_server.workflows.verify import OmexVerifyWorkflowOutput
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowOutput
 from tests.fixtures.database_fixtures import mongo_test_collection
 
 

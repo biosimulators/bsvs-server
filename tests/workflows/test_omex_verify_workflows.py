@@ -11,7 +11,7 @@ from biosim_server.biosim_verify import ComparisonStatistics
 from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
 from biosim_server.biosim_omex import get_cached_omex_file_from_local, OmexDatabaseService
-from biosim_server.workflows.verify import OmexVerifyWorkflow, OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput
 from tests.fixtures.database_fixtures import omex_database_service_mongo
 from tests.fixtures.gcs_fixtures import file_service_gcs_test_base_path
 

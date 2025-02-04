@@ -12,7 +12,7 @@ from temporalio.workflow import ChildWorkflowHandle
 from biosim_server.biosim_runs import BiosimulatorVersion, OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput
 from biosim_server.biosim_verify import CompareSettings
 from biosim_server.biosim_omex import OmexFile
-from biosim_server.workflows.verify import generate_statistics_activity, GenerateStatisticsActivityInput, \
+from biosim_server.biosim_verify.activities import generate_statistics_activity, GenerateStatisticsActivityInput, \
     GenerateStatisticsActivityOutput, SimulationRunInfo
 
 
