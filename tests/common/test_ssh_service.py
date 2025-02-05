@@ -11,8 +11,9 @@ from biosim_server.config import get_settings
                     reason="slurm ssh key file not supplied")
 @pytest.mark.asyncio
 async def test_ssh_command(ssh_service: SSHService) -> None:
-    result: str = await ssh_service.run_command("hostname")
-    assert result.strip("\n") == ssh_service.hostname
+    return_code, stdout, stderr = await ssh_service.run_command("hostname")
+    assert return_code == 0
+    assert stdout.strip("\n") == ssh_service.hostname
 
 
 @pytest.mark.skipif(len(get_settings().slurm_submit_key) == 0,
@@ -33,7 +34,8 @@ async def test_scp_upload_download(ssh_service: SSHService) -> None:
     with open(local_path_2, "r") as f:
         assert f.read() == "hello world"
 
-    await ssh_service.run_command(f"rm {remote_path}")
+    return_code, stdout, stderr = await ssh_service.run_command(f"rm {remote_path}")
+    assert return_code == 0
     local_path.unlink()
     local_path_2.unlink()
 

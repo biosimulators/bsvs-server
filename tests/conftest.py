@@ -43,7 +43,9 @@ from tests.fixtures.workflow_fixtures import (  # noqa: F401
     fixture_data_dir
 )
 from tests.fixtures.slurm_fixtures import (  # noqa: F401
-    ssh_service
+    slurm_service,
+    ssh_service,
+    slurm_template_hello,
 )
 
 
