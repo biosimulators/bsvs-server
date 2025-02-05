@@ -42,6 +42,9 @@ from tests.fixtures.workflow_fixtures import (  # noqa: F401
     simulator_version_copasi,
     fixture_data_dir
 )
+from tests.fixtures.slurm_fixtures import (  # noqa: F401
+    ssh_service
+)
 
 
 # Add the --workflow-environment option

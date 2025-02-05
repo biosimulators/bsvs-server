@@ -43,6 +43,11 @@ class Settings(BaseSettings):
     biosimulators_api_base_url: str = "https://api.biosimulators.org"
     biosimulations_api_base_url: str = "https://api.biosimulations.org"
 
+    slurm_submit_host: str = "mantis-sub-1.cam.uchc.edu"
+    # slurm_submit_host: str = "mantis-sub-2.cam.uchc.edu"
+    slurm_submit_user: str = "crbmapi"
+    slurm_submit_key: str = "/Users/jimschaff/.ssh/crbmapi"
+
 
 @lru_cache
 def get_settings() -> Settings:
