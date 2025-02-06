@@ -1,12 +1,15 @@
 #!/bin/bash
 
+# version is an optional argument, defaults to 'latest'
+version=${1:-latest}
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 for architecture in amd64 arm64; do
 
   for service in api worker; do
 
-    tag="${architecture}_latest"
+    tag="${architecture}_${version}"
     platform="linux/${architecture}"
     dockerfile="${ROOT_DIR}/Dockerfile-${service}"
     image_name="ghcr.io/biosimulations/biosim-${service}:${tag}"
