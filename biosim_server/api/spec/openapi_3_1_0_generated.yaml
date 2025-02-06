@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: biosim-server
-  version: 0.0.1
+  version: 0.1.0
 paths:
   /:
     get:
@@ -17,6 +17,18 @@ paths:
                   type: string
                 type: object
                 title: Response Root  Get
+  /version:
+    get:
+      summary: Get Version
+      operationId: get_version_version_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: string
+                title: Response Get Version Version Get
   /verify_omex:
     post:
       tags:

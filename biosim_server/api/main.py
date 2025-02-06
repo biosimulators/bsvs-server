@@ -26,6 +26,7 @@ from biosim_server.dependencies import get_file_service, get_temporal_client, in
 from biosim_server.log_config import setup_logging
 from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
     OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus
+from biosim_server.version import __version__
 
 logger = logging.getLogger(__name__)
 setup_logging(logger)
@@ -36,19 +37,7 @@ DEV_ENV_PATH = os.path.join(REPO_ROOT, 'assets', 'dev', 'config', '.dev_env')
 dotenv.load_dotenv(DEV_ENV_PATH)  # NOTE: create an env config at this filepath if dev
 
 # -- constraints -- #
-
-version_path = os.path.join(
-    os.path.dirname(__file__),
-    ".VERSION"
-)
-if os.path.exists(version_path):
-    with open(version_path, 'r') as f:
-        APP_VERSION = f.read().strip()
-else:
-    APP_VERSION = "0.0.1"
-
-MONGO_URI = os.getenv("MONGO_URI")
-GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+APP_VERSION = __version__
 APP_TITLE = "biosim-server"
 APP_ORIGINS = [
     'http://127.0.0.1:8000',
@@ -114,8 +103,14 @@ app.add_middleware(
 @app.get("/")
 def root() -> dict[str, str]:
     return {
-        'docs': 'https://biosim.biosimulations.org/docs'
+        'docs': 'https://biosim.biosimulations.org/docs',
+        'version': APP_VERSION
     }
+
+
+@app.get("/version")
+def get_version() -> str:
+    return APP_VERSION
 
 
 @app.post(

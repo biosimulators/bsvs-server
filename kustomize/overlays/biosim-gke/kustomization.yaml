@@ -5,9 +5,9 @@ namespace: biosim-gke
 
 images:
 - name: ghcr.io/biosimulations/biosim-api
-  newTag: amd64_latest
+  newTag: amd64_0.1.0
 - name: ghcr.io/biosimulations/biosim-worker
-  newTag: amd64_latest
+  newTag: amd64_0.1.0
 
 replicas:
 - count: 1
