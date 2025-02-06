@@ -3,17 +3,19 @@ import logging
 from pathlib import Path
 
 import pytest
+from biosim_server.api.main import app
+from biosim_server.biosim_omex import OmexDatabaseServiceMongo
+from biosim_server.biosim_runs import BiosimServiceRest, DatabaseServiceMongo
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, \
+    OmexVerifyWorkflowStatus
+from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, \
+    RunsVerifyWorkflowStatus
+from biosim_server.common.storage import FileServiceGCS
+from biosim_server.config import get_settings
+from biosim_server.version import __version__
 from httpx import ASGITransport, AsyncClient
 from temporalio.client import Client
 from temporalio.worker import Worker
-
-from biosim_server.api.main import app
-from biosim_server.biosim_runs import BiosimServiceRest, DatabaseServiceMongo
-from biosim_server.common.storage import FileServiceGCS
-from biosim_server.config import get_settings
-from biosim_server.biosim_omex import OmexDatabaseServiceMongo
-from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus
-from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
 from tests.biosim_verify.test_omex_verify_workflows import assert_omex_verify_results
 from tests.biosim_verify.test_runs_verify_workflow import assert_runs_verify_results
 
@@ -23,7 +25,15 @@ async def test_root() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         response = await test_client.get("/")
         assert response.status_code == 200
-        assert response.json() == {'docs': 'https://biosim.biosimulations.org/docs'}
+        assert response.json() == {'docs': 'https://biosim.biosimulations.org/docs', 'version': __version__ }
+
+
+@pytest.mark.asyncio
+async def test_root() -> None:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
+        response = await test_client.get("/version")
+        assert response.status_code == 200
+        assert response.json() == __version__
 
 
 @pytest.mark.asyncio
