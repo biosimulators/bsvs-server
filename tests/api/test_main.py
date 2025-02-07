@@ -29,7 +29,7 @@ async def test_root() -> None:
 
 
 @pytest.mark.asyncio
-async def test_root() -> None:
+async def test_version() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         response = await test_client.get("/version")
         assert response.status_code == 200

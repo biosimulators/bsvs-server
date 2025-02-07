@@ -7,7 +7,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 # version.py is of form:
 # __version__ = "0.1.0"
 declared_version=$(grep -oE '__version__ = \"[^\"]+\"' "${ROOT_DIR}/biosim_server/version.py" | awk -F'"' '{print $2}')
-version=${1:-declared_version}
+version=${1:-${declared_version}}
 
 echo "building and pushing images for version ${version}"
 
