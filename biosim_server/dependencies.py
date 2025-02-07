@@ -74,8 +74,10 @@ async def init_standalone() -> None:
     set_file_service(FileServiceGCS())
     set_biosim_service(BiosimServiceRest())
     set_temporal_client(await TemporalClient.connect(settings.temporal_service_url))
-    set_database_service(DatabaseServiceMongo(db_client=AsyncIOMotorClient(get_settings().mongo_url)))
-    set_omex_database_service(OmexDatabaseServiceMongo(db_client=AsyncIOMotorClient(get_settings().mongo_url)))
+
+    motor_client = AsyncIOMotorClient(get_settings().mongodb_uri)
+    set_database_service(DatabaseServiceMongo(db_client=motor_client))
+    set_omex_database_service(OmexDatabaseServiceMongo(db_client=motor_client))
 
 async def shutdown_standalone() -> None:
     db_service = get_database_service()

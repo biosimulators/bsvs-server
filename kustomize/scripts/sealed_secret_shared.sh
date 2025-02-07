@@ -3,11 +3,10 @@
 # This script is used to create a sealed secret for the gcs storage
 # this script should take 3 arguments as input:
 #   namespace
-#   mongo_username
-#   mongo_password
+#   mongodb_uri
 #   storage_gcs_credentials_file
 #   and an optional --cert <filename.pem> argument to specify the certificate file for kubeseal
-# Example: ./sealed_secret_shared.sh [--cert <filename.pem>] <namespace> <mongo_username> <mongo_password> <storage_gcs_credentials_file> > output.yaml
+# Example: ./sealed_secret_shared.sh [--cert <filename.pem>] <namespace> <mongodb_uri> <storage_gcs_credentials_file> > output.yaml
 
 # note that for GKE, the cert file is needed and can be extracted by running:
 # kubeseal --fetch-cert > filename.pem
@@ -33,21 +32,19 @@ while [[ "$1" == --* ]]; do
 done
 
 # Validate the number of positional arguments
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 3 ]; then
     echo "Illegal number of parameters"
-    echo "Usage: ./sealed_secret_shared.sh [--cert <filename.pem>] <namespace> <mongo_username> <mongo_password> <storage_gcs_credentials_file>"
+    echo "Usage: ./sealed_secret_shared.sh [--cert <filename.pem>] <namespace> <mongodb_uri> <storage_gcs_credentials_file>"
     exit 1
 fi
 
 SECRET_NAME="shared-secrets"
 NAMESPACE=$1
-MONGO_USERNAME=$2
-MONGO_PASSWORD=$3
-STORAGE_GCS_CREDENTIALS_FILE=$4
+MONGODB_URI=$2
+STORAGE_GCS_CREDENTIALS_FILE=$3
 
 # Create the generic secret and seal it
 kubectl create secret generic ${SECRET_NAME} --dry-run=client \
-      --from-literal=mongo-username="${MONGO_USERNAME}" \
-      --from-literal=mongo-password="${MONGO_PASSWORD}" \
+      --from-literal=mongodb-uri="${MONGODB_URI}" \
       --from-file=gcs_credentials.json="${STORAGE_GCS_CREDENTIALS_FILE}" \
       --namespace="${NAMESPACE}" -o yaml | kubeseal --format yaml ${CERT_ARG:+--cert=$CERT_ARG}

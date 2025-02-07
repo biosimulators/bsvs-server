@@ -44,8 +44,8 @@ class OmexDatabaseServiceMongo(OmexDatabaseService):
 
     def __init__(self, db_client: AsyncIOMotorClient) -> None:
         self._db_client = db_client
-        database = self._db_client.get_database(get_settings().mongo_db_name)
-        self._omex_file_col = database.get_collection(get_settings().mongo_collection_omex_files)
+        database = self._db_client.get_database(get_settings().mongodb_database)
+        self._omex_file_col = database.get_collection(get_settings().mongodb_collection_omex)
 
     @override
     async def insert_omex_file(self, omex_file: OmexFile) -> OmexFile:

@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: mongodb
-          image: mongo
+          image: docker.io/library/mongo:8.0.4
 #          args: ["--dbpath","/data/db"]
 #          livenessProbe:
 #            exec:
@@ -48,12 +48,12 @@ spec:
             - name: MONGODB_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: biochecknet-api-secrets
+                  name: shared-secrets
                   key: mongo-password
             - name: MONGODB_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: biochecknet-api-secrets
+                  name: shared-secrets
                   key: mongo-username
           ports:
             - containerPort: 27017
@@ -67,8 +67,6 @@ spec:
             - mountPath: /data/db
               name: mongodb-data-dir
       restartPolicy: Always
-      imagePullSecrets:
-        - name: ghcr-secret
       volumes:
         - name: mongodb-data-dir
           persistentVolumeClaim:

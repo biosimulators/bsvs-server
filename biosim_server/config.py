@@ -34,10 +34,11 @@ class Settings(BaseSettings):
 
     storage_gcs_credentials_file: str = ""
 
-    mongo_url: str = "mongodb://localhost:27017"
-    mongo_db_name: str = "biosimulations"
-    mongo_collection_omex_files: str = "omex_files"
-    mongo_collection_sim_outputs: str = "sim_outputs"
+    mongodb_uri: str = "mongodb://localhost:27017"
+    mongodb_database: str = "biosimulations"
+    mongodb_collection_omex: str = "BiosimOmex"
+    mongodb_collection_sims: str = "BiosimSims"
+    mongodb_collection_compare: str = "BiosimCompare"
 
     simdata_api_base_url: str = "https://simdata.api.biosimulations.org"
     biosimulators_api_base_url: str = "https://api.biosimulators.org"

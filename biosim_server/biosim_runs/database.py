@@ -53,8 +53,8 @@ class DatabaseServiceMongo(DatabaseService):
 
     def __init__(self, db_client: AsyncIOMotorClient) -> None:
         self._db_client = db_client
-        database = self._db_client.get_database(get_settings().mongo_db_name)
-        self._sim_output_col = database.get_collection(get_settings().mongo_collection_sim_outputs)
+        database = self._db_client.get_database(get_settings().mongodb_database)
+        self._sim_output_col = database.get_collection(get_settings().mongodb_collection_sims)
 
     @override
     async def insert_biosimulator_workflow_run(self, sim_workflow_run: BiosimulatorWorkflowRun) -> BiosimulatorWorkflowRun:

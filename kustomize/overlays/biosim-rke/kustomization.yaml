@@ -8,16 +8,23 @@ images:
   newTag: amd64_0.1.0
 - name: ghcr.io/biosimulations/biosim-worker
   newTag: amd64_0.1.0
+- name: docker.io/library/mongo
+  newTag: 8.0.4
 
 replicas:
 - count: 1
   name: api
 - count: 1
   name: worker
+- count: 1
+  name: mongodb
 
 resources:
 - ingress.yaml
 - secret-ghcr.yaml
 - secret-shared.yaml
+- api-pvc.yaml
+- worker-pvc.yaml
+- mongodb-pvc.yaml
 - ../../config/biosim-rke
 - ../../base
