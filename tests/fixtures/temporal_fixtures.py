@@ -21,7 +21,7 @@ from biosim_server.dependencies import get_temporal_client, set_temporal_client
 async def temporal_env(request: pytest.FixtureRequest) -> AsyncGenerator[WorkflowEnvironment, None]:
     env_type = request.config.getoption("--workflow-environment")
     if env_type == "local":
-        env = await WorkflowEnvironment.start_local(data_converter=pydantic_data_converter)
+        env = await WorkflowEnvironment.start_local(ui=True, data_converter=pydantic_data_converter)
     elif env_type == "time-skipping":
         env = await WorkflowEnvironment.start_time_skipping(data_converter=pydantic_data_converter)
     else:
