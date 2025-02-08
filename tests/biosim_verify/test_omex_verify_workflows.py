@@ -6,12 +6,13 @@ import pytest
 from temporalio.client import Client
 from temporalio.worker import Worker
 
+from biosim_server.biosim_omex import get_cached_omex_file_from_local, OmexDatabaseService
 from biosim_server.biosim_runs import BiosimServiceRest, DatabaseService
 from biosim_server.biosim_verify import ComparisonStatistics
+from biosim_server.biosim_verify.models import VerifyWorkflowOutput
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
 from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
-from biosim_server.biosim_omex import get_cached_omex_file_from_local, OmexDatabaseService
-from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput
 from tests.fixtures.database_fixtures import omex_database_service_mongo
 from tests.fixtures.gcs_fixtures import file_service_gcs_test_base_path
 
@@ -21,7 +22,7 @@ from tests.fixtures.gcs_fixtures import file_service_gcs_test_base_path
 @pytest.mark.asyncio
 async def test_omex_verify_workflow_GCS(temporal_client: Client, temporal_verify_worker: Worker,
                                        omex_verify_workflow_input: OmexVerifyWorkflowInput,
-                                       omex_verify_workflow_output: OmexVerifyWorkflowOutput,
+                                       omex_verify_workflow_output: VerifyWorkflowOutput,
                                        biosim_service_rest: BiosimServiceRest,
                                        file_service_gcs: FileServiceGCS,
                                        file_service_gcs_test_base_path: Path,
@@ -38,9 +39,9 @@ async def test_omex_verify_workflow_GCS(temporal_client: Client, temporal_verify
     logging.info(f"Stored test omex file at {omex_file.omex_gcs_path}")
     omex_verify_workflow_input.omex_file = omex_file
 
-    observed_results: OmexVerifyWorkflowOutput = await temporal_client.execute_workflow(
+    observed_results: VerifyWorkflowOutput = await temporal_client.execute_workflow(
         OmexVerifyWorkflow.run, args=[omex_verify_workflow_input],
-        # result_type=OmexVerifyWorkflowOutput,
+        # result_type=VerifyWorkflowOutput,
         id=workflow_id, task_queue="verification_tasks")
 
     # uncomment to refresh the expected results
@@ -50,8 +51,8 @@ async def test_omex_verify_workflow_GCS(temporal_client: Client, temporal_verify
     assert_omex_verify_results(observed_results=observed_results, expected_results_template=omex_verify_workflow_output)
 
 
-def assert_omex_verify_results(observed_results: OmexVerifyWorkflowOutput,
-                               expected_results_template: OmexVerifyWorkflowOutput) -> None:
+def assert_omex_verify_results(observed_results: VerifyWorkflowOutput,
+                               expected_results_template: VerifyWorkflowOutput) -> None:
 
     # customize expected results to match those things which vary between runs
     expected_results = expected_results_template.model_copy(deep=True)

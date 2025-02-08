@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, TypeAlias
+from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -7,9 +7,10 @@ from pydantic import BaseModel
 from temporalio import activity
 
 from biosim_server.biosim_omex import get_cached_omex_file_from_raw
-from biosim_server.biosim_runs import BiosimSimulationRun, BiosimulatorWorkflowRun, Hdf5DataValues, HDF5File, \
-    get_hdf5_data_values_activity, GetHdf5DataValuesActivityInput
+from biosim_server.biosim_runs import BiosimulatorWorkflowRun, Hdf5DataValues, get_hdf5_data_values_activity, \
+    GetHdf5DataValuesActivityInput
 from biosim_server.biosim_verify import CompareSettings, ComparisonStatistics
+from biosim_server.biosim_verify.models import SimulationRunInfo, GenerateStatisticsActivityOutput, RunData
 from biosim_server.dependencies import get_file_service, get_database_service, get_omex_database_service
 
 NDArray1b: TypeAlias = np.ndarray[tuple[int], np.dtype[np.bool]]
@@ -18,27 +19,9 @@ NDArray2f: TypeAlias = np.ndarray[tuple[int, int], np.dtype[np.float64]]
 NDArray3f: TypeAlias = np.ndarray[tuple[int, int, int], np.dtype[np.float64]]
 
 
-class SimulationRunInfo(BaseModel):
-    biosim_sim_run: BiosimSimulationRun
-    hdf5_file: HDF5File
-
-
 class GenerateStatisticsActivityInput(BaseModel):
     sim_run_info_list: list[SimulationRunInfo]
     compare_settings: CompareSettings
-
-
-class RunData(BaseModel):
-    run_id: str
-    dataset_name: str
-    var_names: list[str]  # list of variables found this run for this dataset
-    data: Hdf5DataValues  # n-dim array of data for this run, shape=(len(dataset_vars), len(times))
-
-
-class GenerateStatisticsActivityOutput(BaseModel):
-    sims_run_info: list[SimulationRunInfo]
-    comparison_statistics: dict[str, list[list[ComparisonStatistics]]]  # matrix of comparison statistics per dataset
-    sim_run_data: Optional[list[RunData]] = None
 
 
 @activity.defn

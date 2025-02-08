@@ -3,13 +3,13 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 from pymongo.results import InsertOneResult
 from testcontainers.mongodb import MongoDbContainer  # type: ignore
 
-from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowOutput
+from biosim_server.biosim_verify.models import VerifyWorkflowOutput
 from tests.fixtures.database_fixtures import mongo_test_collection
 
 
 @pytest.mark.asyncio
 async def test_mongo(mongo_test_collection: AsyncIOMotorCollection,
-                     omex_verify_workflow_output: OmexVerifyWorkflowOutput) -> None:
+                     omex_verify_workflow_output: VerifyWorkflowOutput) -> None:
 
      # insert a document into the database
     result: InsertOneResult = await mongo_test_collection.insert_one(omex_verify_workflow_output.model_dump())
@@ -20,7 +20,7 @@ async def test_mongo(mongo_test_collection: AsyncIOMotorCollection,
     assert document is not None
 
     # check that the document in the database is the same as the original document
-    expected_verify_workflow_output = OmexVerifyWorkflowOutput(workflow_id=omex_verify_workflow_output.workflow_id,
+    expected_verify_workflow_output = VerifyWorkflowOutput(workflow_id=omex_verify_workflow_output.workflow_id,
                                                                compare_settings=omex_verify_workflow_output.compare_settings,
                                                                workflow_status=omex_verify_workflow_output.workflow_status,
                                                                timestamp=omex_verify_workflow_output.timestamp,

@@ -9,8 +9,9 @@ from testcontainers.mongodb import MongoDbContainer  # type: ignore
 from biosim_server.biosim_omex import OmexFile
 from biosim_server.biosim_runs import BiosimulatorVersion
 from biosim_server.biosim_verify import CompareSettings
-from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowOutput, OmexVerifyWorkflowInput
-from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput
+from biosim_server.biosim_verify.models import VerifyWorkflowOutput
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowInput
+from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowInput
 from biosim_server.config import get_local_cache_dir
 
 temp_data_dir = get_local_cache_dir() / "test_temp_dir"
@@ -75,9 +76,9 @@ def omex_verify_workflow_output_file(fixture_data_dir: Path) -> Path:
 @pytest.fixture(scope="function")
 def omex_verify_workflow_output(omex_verify_workflow_input: OmexVerifyWorkflowInput,
                                 omex_verify_workflow_output_file: Path,
-                                omex_verify_workflow_id: str) -> OmexVerifyWorkflowOutput:
+                                omex_verify_workflow_id: str) -> VerifyWorkflowOutput:
     with open(omex_verify_workflow_output_file) as f:
-        workflow_output = OmexVerifyWorkflowOutput.model_validate_json(f.read())
+        workflow_output = VerifyWorkflowOutput.model_validate_json(f.read())
         workflow_output.workflow_id = omex_verify_workflow_id
         return workflow_output
 
@@ -97,9 +98,9 @@ def runs_verify_workflow_output_file(fixture_data_dir: Path) -> Path:
 @pytest.fixture(scope="function")
 def runs_verify_workflow_output(runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                 runs_verify_workflow_output_file: Path,
-                                runs_verify_workflow_id: str) -> RunsVerifyWorkflowOutput:
+                                runs_verify_workflow_id: str) -> VerifyWorkflowOutput:
     with open(runs_verify_workflow_output_file) as f:
-        workflow_output = RunsVerifyWorkflowOutput.model_validate_json(f.read())
+        workflow_output = VerifyWorkflowOutput.model_validate_json(f.read())
         workflow_output.workflow_id = runs_verify_workflow_id
         return workflow_output
 

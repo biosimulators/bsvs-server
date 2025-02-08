@@ -2,30 +2,24 @@ import logging
 import os
 import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime, UTC, timedelta
 from typing import AsyncGenerator, Optional
-
-from temporalio import workflow
-
-from biosim_server.biosim_runs import BiosimulatorVersion
-from biosim_server.biosim_verify import CompareSettings
-from biosim_server.biosim_omex import OmexFile, get_cached_omex_file_from_upload
-from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
-    RunsVerifyWorkflow, RunsVerifyWorkflowStatus
-
-with workflow.unsafe.imports_passed_through():
-    from datetime import datetime, UTC, timedelta
 
 import dotenv
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, Query, APIRouter, Depends, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
+from biosim_server.biosim_omex import OmexFile, get_cached_omex_file_from_upload
+from biosim_server.biosim_runs import BiosimulatorVersion
+from biosim_server.biosim_verify import CompareSettings
+from biosim_server.biosim_verify.models import VerifyWorkflowOutput, VerifyWorkflowStatus
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
+from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflow
 from biosim_server.config import get_local_cache_dir
 from biosim_server.dependencies import get_file_service, get_temporal_client, init_standalone, shutdown_standalone, \
     get_biosim_service, get_omex_database_service
 from biosim_server.log_config import setup_logging
-from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
-    OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus
 from biosim_server.version import __version__
 
 logger = logging.getLogger(__name__)
@@ -114,13 +108,13 @@ def get_version() -> str:
 
 
 @app.post(
-    "/verify_omex",
-    response_model=OmexVerifyWorkflowOutput,
-    operation_id="start-verify-omex",
+    "/verify/omex",
+    response_model=VerifyWorkflowOutput,
+    operation_id="verify-omex",
     tags=["Verification"],
     dependencies=[Depends(get_temporal_client), Depends(get_file_service), Depends(get_local_cache_dir), Depends(get_omex_database_service)],
-    summary="Request verification report for OMEX/COMBINE archive")
-async def start_verify_omex(
+    summary="Request verification report for OMEX/COMBINE archive across simulators")
+async def verify_omex(
         uploaded_file: UploadFile = File(..., description="OMEX/COMBINE archive containing a deterministic SBML model"),
         workflow_id_prefix: str = Query(default="omex-verification-", description="Prefix for the workflow id."),
         simulators: list[str] = Query(default=["amici", "copasi", "pysces", "tellurium", "vcell"],
@@ -134,7 +128,7 @@ async def start_verify_omex(
         cache_buster: str = Query(default="0", description="Optional unique id for cache busting (unique string to force new simulation runs)."),
         observables: Optional[list[str]] = Query(default=None,
                                                  description="List of observables to include in the return data.")
-) -> OmexVerifyWorkflowOutput:
+) -> VerifyWorkflowOutput:
     # ---- using hash to avoid saving multiple copies, upload to cloud storage if needed ---- #
     file_service = get_file_service()
     assert file_service is not None
@@ -186,9 +180,9 @@ async def start_verify_omex(
     assert workflow_handle.id == workflow_id
 
     # ---- return initial workflow output ---- #
-    omex_verify_workflow_output = OmexVerifyWorkflowOutput(
+    omex_verify_workflow_output = VerifyWorkflowOutput(
         compare_settings=compare_settings,
-        workflow_status=OmexVerifyWorkflowStatus.PENDING,
+        workflow_status=VerifyWorkflowStatus.PENDING,
         timestamp=str(datetime.now(UTC)),
         workflow_id=workflow_id,
         workflow_run_id=workflow_handle.run_id
@@ -197,23 +191,24 @@ async def start_verify_omex(
 
 
 @app.get(
-    "/verify_omex/{workflow_id}",
-    response_model=OmexVerifyWorkflowOutput,
-    operation_id='get-verify-omex',
+    "/verify/{workflow_id}",
+    response_model=VerifyWorkflowOutput,
+    operation_id='get-verify-output',
+    name="Retrieve verification report",
     tags=["Verification"],
     dependencies=[Depends(get_temporal_client)],
     summary='Retrieve verification report for OMEX/COMBINE archive')
-async def get_verify_omex(workflow_id: str) -> OmexVerifyWorkflowOutput:
-    logger.info(f"in get /verify_omex/{workflow_id}")
+async def get_verify_output(workflow_id: str) -> VerifyWorkflowOutput:
+    logger.info(f"in get /verify/{workflow_id}")
 
     try:
         # query temporal for the workflow output
         temporal_client = get_temporal_client()
         assert temporal_client is not None
         workflow_handle = temporal_client.get_workflow_handle(workflow_id=workflow_id,
-                                                              result_type=OmexVerifyWorkflowOutput)
-        workflow_output: OmexVerifyWorkflowOutput = await workflow_handle.query("get_output",
-                                                                                result_type=OmexVerifyWorkflowOutput,
+                                                              result_type=VerifyWorkflowOutput)
+        workflow_output: VerifyWorkflowOutput = await workflow_handle.query("get_output",
+                                                                                result_type=VerifyWorkflowOutput,
                                                                                 rpc_timeout=timedelta(seconds=60))
         return workflow_output
     except Exception as e2:
@@ -224,13 +219,13 @@ async def get_verify_omex(workflow_id: str) -> OmexVerifyWorkflowOutput:
 
 
 @app.post(
-    "/verify_runs",
-    response_model=RunsVerifyWorkflowOutput,
-    operation_id="start-verify-runs",
+    "/verify/runs",
+    response_model=VerifyWorkflowOutput,
+    operation_id="verify-runs",
     tags=["Verification"],
     dependencies=[Depends(get_temporal_client)],
-    summary="Request verification report for biosimulation runs")
-async def start_verify_runs(
+    summary="Request verification report for biosimulation runs by run IDs")
+async def verify_runs(
         workflow_id_prefix: str = Query(default="runs-verification-", description="Prefix for the workflow id."),
         biosimulations_run_ids: list[str] = Query(default=["67817a2e1f52f47f628af971","67817a2eba5a3f02b9f2938d"],
                                                   description="List of biosimulations run IDs to compare."),
@@ -242,7 +237,7 @@ async def start_verify_runs(
         abs_tol_scale: float = Query(default=0.00001, description="Scale for absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale."),
         observables: Optional[list[str]] = Query(default=None,
                                                  description="List of observables to include in the return data.")
-) -> RunsVerifyWorkflowOutput:
+) -> VerifyWorkflowOutput:
 
     # ---- create workflow input ---- #
     workflow_id = f"{workflow_id_prefix}{uuid.uuid4()}"
@@ -266,42 +261,14 @@ async def start_verify_runs(
     assert workflow_handle.id == workflow_id
 
     # ---- return initial workflow output ---- #
-    runs_verify_workflow_output = RunsVerifyWorkflowOutput(
+    runs_verify_workflow_output = VerifyWorkflowOutput(
         compare_settings=compare_settings,
-        workflow_status=RunsVerifyWorkflowStatus.PENDING,
+        workflow_status=VerifyWorkflowStatus.PENDING,
         timestamp=str(datetime.now(UTC)),
         workflow_id=workflow_id,
         workflow_run_id=workflow_handle.run_id
     )
     return runs_verify_workflow_output
-
-
-@app.get(
-    "/verify_runs/{workflow_id}",
-    response_model=RunsVerifyWorkflowOutput,
-    operation_id='get-verify-runs',
-    name="Retrieve biosimulation run verification",
-    tags=["Verification"],
-    dependencies=[Depends(get_temporal_client)],
-    summary='Get verification report for biosimulation runs')
-async def get_verify_runs(workflow_id: str) -> RunsVerifyWorkflowOutput:
-    logger.info(f"in get /verify_runs/{workflow_id}")
-
-    try:
-        # query temporal for the workflow output
-        temporal_client = get_temporal_client()
-        assert temporal_client is not None
-        workflow_handle = temporal_client.get_workflow_handle(workflow_id=workflow_id,
-                                                              result_type=RunsVerifyWorkflowOutput)
-        workflow_output: RunsVerifyWorkflowOutput = await workflow_handle.query("get_output",
-                                                                                result_type=RunsVerifyWorkflowOutput,
-                                                                                rpc_timeout=timedelta(seconds=60))
-        return workflow_output
-    except Exception as e2:
-        exc_message = str(e2)
-        msg = f"error retrieving verification job output with id: {workflow_id}: {exc_message}"
-        logger.error(msg, exc_info=e2)
-        raise HTTPException(status_code=404, detail=msg)
 
 
 if __name__ == "__main__":

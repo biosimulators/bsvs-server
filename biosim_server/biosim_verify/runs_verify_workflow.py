@@ -1,7 +1,5 @@
 import logging
 from datetime import timedelta
-from enum import StrEnum
-from typing import Optional
 
 from pydantic import BaseModel
 from temporalio import workflow
@@ -11,22 +9,10 @@ from biosim_server.biosim_runs import BiosimSimulationRun, BiosimSimulationRunSt
     GetBiosimSimulationRunActivityInput, get_hdf5_file_activity, GetHdf5FileActivityInput, \
     get_biosim_simulation_run_activity
 from biosim_server.biosim_verify import CompareSettings
-from biosim_server.biosim_verify.activities import generate_statistics_activity, GenerateStatisticsActivityOutput, \
-    GenerateStatisticsActivityInput, SimulationRunInfo, create_biosimulator_workflow_runs_activity, \
-    CreateBiosimulatorWorkflowRunsActivityInput
-
-
-class RunsVerifyWorkflowStatus(StrEnum):
-    PENDING = "PENDING"
-    IN_PROGRESS = "IN_PROGRESS"
-    COMPLETED = "COMPLETED"
-    FAILED = "FAILED"
-    RUN_ID_NOT_FOUND = "RUN_ID_NOT_FOUND"
-
-    @property
-    def is_done(self) -> bool:
-        return self in [RunsVerifyWorkflowStatus.COMPLETED, RunsVerifyWorkflowStatus.FAILED,
-                        RunsVerifyWorkflowStatus.RUN_ID_NOT_FOUND]
+from biosim_server.biosim_verify.activities import generate_statistics_activity, GenerateStatisticsActivityInput, \
+    create_biosimulator_workflow_runs_activity, CreateBiosimulatorWorkflowRunsActivityInput
+from biosim_server.biosim_verify.models import GenerateStatisticsActivityOutput, SimulationRunInfo, \
+    VerifyWorkflowOutput, VerifyWorkflowStatus
 
 
 class RunsVerifyWorkflowInput(BaseModel):
@@ -34,35 +20,25 @@ class RunsVerifyWorkflowInput(BaseModel):
     compare_settings: CompareSettings
 
 
-class RunsVerifyWorkflowOutput(BaseModel):
-    workflow_id: str
-    compare_settings: CompareSettings
-    workflow_status: RunsVerifyWorkflowStatus
-    timestamp: str
-    workflow_run_id: Optional[str] = None
-    workflow_error: Optional[str] = None
-    workflow_results: Optional[GenerateStatisticsActivityOutput] = None
-
-
 @workflow.defn
 class RunsVerifyWorkflow:
     verify_input: RunsVerifyWorkflowInput
-    verify_output: RunsVerifyWorkflowOutput
+    verify_output: VerifyWorkflowOutput
 
     @workflow.init
     def __init__(self, verify_input: RunsVerifyWorkflowInput) -> None:
         self.verify_input = verify_input
         # assert verify_input.workflow_id == workflow.info().workflow_id
-        self.verify_output = RunsVerifyWorkflowOutput(workflow_id=workflow.info().workflow_id,
+        self.verify_output = VerifyWorkflowOutput(workflow_id=workflow.info().workflow_id,
             compare_settings=verify_input.compare_settings, workflow_run_id=workflow.info().run_id,
-            workflow_status=RunsVerifyWorkflowStatus.IN_PROGRESS, timestamp=str(workflow.now()))
+            workflow_status=VerifyWorkflowStatus.IN_PROGRESS, timestamp=str(workflow.now()))
 
     @workflow.query(name="get_output")
-    def get_runs_sim_workflow_output(self) -> RunsVerifyWorkflowOutput:
+    def get_runs_sim_workflow_output(self) -> VerifyWorkflowOutput:
         return self.verify_output
 
     @workflow.run
-    async def run(self, verify_input: RunsVerifyWorkflowInput) -> RunsVerifyWorkflowOutput:
+    async def run(self, verify_input: RunsVerifyWorkflowInput) -> VerifyWorkflowOutput:
         workflow.logger.setLevel(level=logging.INFO)
         workflow.logger.info("Main workflow started.")
 
@@ -78,9 +54,9 @@ class RunsVerifyWorkflow:
             if biosimulation_run.status == BiosimSimulationRunStatus.RUN_ID_NOT_FOUND:
                 # important to update the state of the workflow before returning, 
                 # so that subsequent workflow queries get the correct state
-                self.verify_output = RunsVerifyWorkflowOutput(workflow_id=workflow.info().workflow_id,
+                self.verify_output = VerifyWorkflowOutput(workflow_id=workflow.info().workflow_id,
                     compare_settings=verify_input.compare_settings, workflow_run_id=workflow.info().run_id,
-                    workflow_status=RunsVerifyWorkflowStatus.RUN_ID_NOT_FOUND, timestamp=str(workflow.now()),
+                    workflow_status=VerifyWorkflowStatus.RUN_ID_NOT_FOUND, timestamp=str(workflow.now()),
                     workflow_error=f"Simulation run with id {biosimulation_run_id} not found.")
                 return self.verify_output
 
@@ -115,7 +91,7 @@ class RunsVerifyWorkflow:
             retry_policy=RetryPolicy(maximum_attempts=100, backoff_coefficient=2.0,
                                      maximum_interval=timedelta(seconds=10)))
         self.verify_output.workflow_results = generate_statistics_output
-        self.verify_output.workflow_status = RunsVerifyWorkflowStatus.COMPLETED
+        self.verify_output.workflow_status = VerifyWorkflowStatus.COMPLETED
         return self.verify_output
 
 

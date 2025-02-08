@@ -7,13 +7,13 @@ import pytest
 from temporalio.client import Client
 from temporalio.worker import Worker
 
+from biosim_server.biosim_omex import OmexDatabaseServiceMongo
 from biosim_server.biosim_runs import BiosimServiceRest, DatabaseServiceMongo
 from biosim_server.biosim_verify import ComparisonStatistics
+from biosim_server.biosim_verify.models import VerifyWorkflowOutput, VerifyWorkflowStatus
+from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflow, RunsVerifyWorkflowInput
 from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
-from biosim_server.biosim_omex import OmexDatabaseServiceMongo
-from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflow, RunsVerifyWorkflowInput, \
-    RunsVerifyWorkflowOutput, RunsVerifyWorkflowStatus
 
 
 @pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
@@ -21,7 +21,7 @@ from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflow,
 @pytest.mark.asyncio
 async def test_run_verify_workflow(temporal_client: Client, temporal_verify_worker: Worker,
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
-                               runs_verify_workflow_output: RunsVerifyWorkflowOutput,
+                               runs_verify_workflow_output: VerifyWorkflowOutput,
                                runs_verify_workflow_output_file: Path,
                                biosim_service_rest: BiosimServiceRest,
                                file_service_gcs: FileServiceGCS,
@@ -29,14 +29,14 @@ async def test_run_verify_workflow(temporal_client: Client, temporal_verify_work
                                omex_database_service_mongo: OmexDatabaseServiceMongo) -> None:
     workflow_id = uuid.uuid4().hex
 
-    observed_results: RunsVerifyWorkflowOutput = await temporal_client.execute_workflow(
+    observed_results: VerifyWorkflowOutput = await temporal_client.execute_workflow(
         RunsVerifyWorkflow.run, args=[runs_verify_workflow_input],
         # result_type=RunsVerifyWorkflowOutput,
         id=workflow_id, task_queue="verification_tasks")
 
     # uncomment to update fixture for future tests
-    with open(runs_verify_workflow_output_file, "w") as f:
-        f.write(observed_results.model_dump_json(indent=2))
+    # with open(runs_verify_workflow_output_file, "w") as f:
+    #     f.write(observed_results.model_dump_json(indent=2))
 
     assert_runs_verify_results(observed_results=observed_results, expected_results_template=runs_verify_workflow_output)
 
@@ -47,7 +47,7 @@ async def test_run_verify_workflow(temporal_client: Client, temporal_verify_work
 @pytest.mark.asyncio
 async def test_run_verify_workflow_not_found_execute(temporal_client: Client, temporal_verify_worker: Worker,
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
-                               runs_verify_workflow_output: RunsVerifyWorkflowOutput,
+                               runs_verify_workflow_output: VerifyWorkflowOutput,
                                biosim_service_rest: BiosimServiceRest,
                                file_service_gcs: FileServiceGCS) -> None:
     workflow_id = uuid.uuid4().hex
@@ -55,9 +55,9 @@ async def test_run_verify_workflow_not_found_execute(temporal_client: Client, te
     runs_verify_workflow_input = runs_verify_workflow_input.model_copy(deep=True)
     runs_verify_workflow_input.biosimulations_run_ids[0] = "bad_id"
 
-    observed_results: RunsVerifyWorkflowOutput = await temporal_client.execute_workflow(
+    observed_results: VerifyWorkflowOutput = await temporal_client.execute_workflow(
         RunsVerifyWorkflow.run, args=[runs_verify_workflow_input], id=workflow_id, task_queue="verification_tasks")
-    assert observed_results.workflow_status == RunsVerifyWorkflowStatus.RUN_ID_NOT_FOUND
+    assert observed_results.workflow_status == VerifyWorkflowStatus.RUN_ID_NOT_FOUND
     assert observed_results.workflow_error == "Simulation run with id bad_id not found."
 
 
@@ -66,7 +66,7 @@ async def test_run_verify_workflow_not_found_execute(temporal_client: Client, te
 @pytest.mark.asyncio
 async def test_run_verify_workflow_not_found_poll(temporal_client: Client, temporal_verify_worker: Worker,
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
-                               runs_verify_workflow_output: RunsVerifyWorkflowOutput,
+                               runs_verify_workflow_output: VerifyWorkflowOutput,
                                biosim_service_rest: BiosimServiceRest,
                                file_service_gcs: FileServiceGCS) -> None:
     workflow_id = uuid.uuid4().hex
@@ -80,18 +80,18 @@ async def test_run_verify_workflow_not_found_poll(temporal_client: Client, tempo
         id=workflow_id, task_queue="verification_tasks")
 
     # poll until the workflow completes using workflow query mechanism
-    observed_results: RunsVerifyWorkflowOutput = await handle.query("get_output", result_type=RunsVerifyWorkflowOutput)
+    observed_results: VerifyWorkflowOutput = await handle.query("get_output", result_type=VerifyWorkflowOutput)
     while not observed_results.workflow_status.is_done:
         await asyncio.sleep(1)
-        observed_results = await handle.query("get_output", result_type=RunsVerifyWorkflowOutput)
+        observed_results = await handle.query("get_output", result_type=VerifyWorkflowOutput)
         logging.log(logging.INFO, f"Workflow status: {observed_results.workflow_status}")
 
-    assert observed_results.workflow_status == RunsVerifyWorkflowStatus.RUN_ID_NOT_FOUND
+    assert observed_results.workflow_status == VerifyWorkflowStatus.RUN_ID_NOT_FOUND
     assert observed_results.workflow_error == "Simulation run with id bad_id not found."
 
 
-def assert_runs_verify_results(observed_results: RunsVerifyWorkflowOutput,
-                               expected_results_template: RunsVerifyWorkflowOutput) -> None:
+def assert_runs_verify_results(observed_results: VerifyWorkflowOutput,
+                               expected_results_template: VerifyWorkflowOutput) -> None:
 
     # customize expected results to match those things which vary between runs
     expected_results = expected_results_template.model_copy(deep=True)

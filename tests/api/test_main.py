@@ -6,10 +6,9 @@ import pytest
 from biosim_server.api.main import app
 from biosim_server.biosim_omex import OmexDatabaseServiceMongo
 from biosim_server.biosim_runs import BiosimServiceRest, DatabaseServiceMongo
-from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowInput, OmexVerifyWorkflowOutput, \
-    OmexVerifyWorkflowStatus
-from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflowOutput, \
-    RunsVerifyWorkflowStatus
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowInput
+from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowInput
+from biosim_server.biosim_verify.models import VerifyWorkflowOutput, VerifyWorkflowStatus
 from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
 from biosim_server.version import __version__
@@ -38,7 +37,7 @@ async def test_version() -> None:
 
 @pytest.mark.asyncio
 async def test_get_output_not_found(omex_verify_workflow_input: OmexVerifyWorkflowInput,
-                                    omex_verify_workflow_output: OmexVerifyWorkflowOutput) -> None:
+                                    omex_verify_workflow_output: VerifyWorkflowOutput) -> None:
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         # test with non-existent verification_id
@@ -50,7 +49,7 @@ async def test_get_output_not_found(omex_verify_workflow_input: OmexVerifyWorkfl
                     reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
 async def test_omex_verify_and_get_output(omex_verify_workflow_input: OmexVerifyWorkflowInput,
-                                         omex_verify_workflow_output: OmexVerifyWorkflowOutput,
+                                         omex_verify_workflow_output: VerifyWorkflowOutput,
                                          omex_test_file: Path,
                                          database_service_mongo: DatabaseServiceMongo,
                                          omex_database_service_mongo: OmexDatabaseServiceMongo,
@@ -74,17 +73,17 @@ async def test_omex_verify_and_get_output(omex_verify_workflow_input: OmexVerify
         with open(omex_test_file, "rb") as file:
             upload_filename = omex_test_file.name
             files = {"uploaded_file": (upload_filename, file, "application/zip")}
-            response = await test_client.post("/verify_omex", files=files, params=query_params)
+            response = await test_client.post("/verify/omex", files=files, params=query_params)
             assert response.status_code == 200
 
-        output = OmexVerifyWorkflowOutput.model_validate(response.json())
+        output = VerifyWorkflowOutput.model_validate(response.json())
 
         # poll api until job is completed
-        while output.workflow_status != OmexVerifyWorkflowStatus.COMPLETED:
+        while output.workflow_status != VerifyWorkflowStatus.COMPLETED:
             await asyncio.sleep(5)
-            response = await test_client.get(f"/verify_omex/{output.workflow_id}")
+            response = await test_client.get(f"/verify/{output.workflow_id}")
             if response.status_code == 200:
-                output = OmexVerifyWorkflowOutput.model_validate(response.json())
+                output = VerifyWorkflowOutput.model_validate(response.json())
                 logging.info(f"polling, job status is: {output.workflow_status}")
 
         assert_omex_verify_results(observed_results=output, expected_results_template=omex_verify_workflow_output)
@@ -94,7 +93,7 @@ async def test_omex_verify_and_get_output(omex_verify_workflow_input: OmexVerify
                     reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
 async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerifyWorkflowInput,
-                                         runs_verify_workflow_output: RunsVerifyWorkflowOutput,
+                                         runs_verify_workflow_output: VerifyWorkflowOutput,
                                          omex_test_file: Path,
                                          file_service_gcs: FileServiceGCS,
                                          database_service_mongo: DatabaseServiceMongo,
@@ -116,17 +115,17 @@ async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerify
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         with open(omex_test_file, "rb") as file:
-            response = await test_client.post("/verify_runs", params=query_params)
+            response = await test_client.post("/verify/runs", params=query_params)
             assert response.status_code == 200
 
-        output = RunsVerifyWorkflowOutput.model_validate(response.json())
+        output = VerifyWorkflowOutput.model_validate(response.json())
 
         # poll api until job is completed
-        while output.workflow_status != RunsVerifyWorkflowStatus.COMPLETED:
+        while output.workflow_status != VerifyWorkflowStatus.COMPLETED:
             await asyncio.sleep(5)
-            response = await test_client.get(f"/verify_runs/{output.workflow_id}")
+            response = await test_client.get(f"/verify/{output.workflow_id}")
             if response.status_code == 200:
-                output = RunsVerifyWorkflowOutput.model_validate(response.json())
+                output = VerifyWorkflowOutput.model_validate(response.json())
                 logging.info(f"polling workflow_id {output.workflow_id}, workflow status is: {output.workflow_status}")
 
         assert_runs_verify_results(observed_results=output, expected_results_template=runs_verify_workflow_output)
@@ -136,7 +135,7 @@ async def test_runs_verify_and_get_output(runs_verify_workflow_input: RunsVerify
                     reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
 async def test_runs_verify_not_found(runs_verify_workflow_input: RunsVerifyWorkflowInput,
-                                         runs_verify_workflow_output: RunsVerifyWorkflowOutput,
+                                         runs_verify_workflow_output: VerifyWorkflowOutput,
                                          omex_test_file: Path,
                                          file_service_gcs: FileServiceGCS,
                                          temporal_client: Client,
@@ -156,19 +155,19 @@ async def test_runs_verify_not_found(runs_verify_workflow_input: RunsVerifyWorkf
 
     async with (AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client):
         with open(omex_test_file, "rb") as file:
-            response = await test_client.post("/verify_runs", params=query_params)
+            response = await test_client.post("/verify/runs", params=query_params)
             assert response.status_code == 200
 
-        output = RunsVerifyWorkflowOutput.model_validate(response.json())
+        output = VerifyWorkflowOutput.model_validate(response.json())
 
         # poll api until job is completed
         while not output.workflow_status.is_done:
             await asyncio.sleep(5)
-            response = await test_client.get(f"/verify_runs/{output.workflow_id}")
+            response = await test_client.get(f"/verify/{output.workflow_id}")
             if response.status_code == 200:
-                output = RunsVerifyWorkflowOutput.model_validate(response.json())
+                output = VerifyWorkflowOutput.model_validate(response.json())
                 logging.info(f"polling, job status is: {output.workflow_status}")
 
-        assert output.workflow_status == RunsVerifyWorkflowStatus.RUN_ID_NOT_FOUND
+        assert output.workflow_status == VerifyWorkflowStatus.RUN_ID_NOT_FOUND
         assert output.workflow_error in [ "Simulation run with id bad_run_id_1 not found.",
                                           "Simulation run with id bad_run_id_2 not found."]

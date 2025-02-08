@@ -5,8 +5,8 @@ import pytest
 
 from biosim_server.common.hpc.models import SlurmJob
 from biosim_server.common.hpc.slurm_service import SlurmService
-from biosim_server.common.ssh.ssh_service import SSHService
 from biosim_server.config import get_settings
+
 
 @pytest.mark.skipif(len(get_settings().slurm_submit_key) == 0,
                     reason="slurm ssh key file not supplied")
@@ -41,3 +41,4 @@ async def test_slurm_job_submit(slurm_service: SlurmService, slurm_template_hell
     assert submitted_job[0].job_id == job_id
     assert submitted_job[0].name == "my_test_job"
 
+    local_sbatch_file.unlink()

@@ -29,12 +29,12 @@ paths:
               schema:
                 type: string
                 title: Response Get Version Version Get
-  /verify_omex:
+  /verify/omex:
     post:
       tags:
       - Verification
-      summary: Request verification report for OMEX/COMBINE archive
-      operationId: start-verify-omex
+      summary: Request verification report for OMEX/COMBINE archive across simulators
+      operationId: verify-omex
       parameters:
       - name: workflow_id_prefix
         in: query
@@ -136,26 +136,26 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Body_start-verify-omex'
+              $ref: '#/components/schemas/Body_verify-omex'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OmexVerifyWorkflowOutput'
+                $ref: '#/components/schemas/VerifyWorkflowOutput'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /verify_omex/{workflow_id}:
+  /verify/{workflow_id}:
     get:
       tags:
       - Verification
       summary: Retrieve verification report for OMEX/COMBINE archive
-      operationId: get-verify-omex
+      operationId: get-verify-output
       parameters:
       - name: workflow_id
         in: path
@@ -169,19 +169,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OmexVerifyWorkflowOutput'
+                $ref: '#/components/schemas/VerifyWorkflowOutput'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /verify_runs:
+  /verify/runs:
     post:
       tags:
       - Verification
-      summary: Request verification report for biosimulation runs
-      operationId: start-verify-runs
+      summary: Request verification report for biosimulation runs by run IDs
+      operationId: verify-runs
       parameters:
       - name: workflow_id_prefix
         in: query
@@ -270,33 +270,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunsVerifyWorkflowOutput'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /verify_runs/{workflow_id}:
-    get:
-      tags:
-      - Verification
-      summary: Get verification report for biosimulation runs
-      operationId: get-verify-runs
-      parameters:
-      - name: workflow_id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Workflow Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RunsVerifyWorkflowOutput'
+                $ref: '#/components/schemas/VerifyWorkflowOutput'
         '422':
           description: Validation Error
           content:
@@ -376,7 +350,7 @@ components:
       - created
       - updated
       title: BiosimulatorVersion
-    Body_start-verify-omex:
+    Body_verify-omex:
       properties:
         uploaded_file:
           type: string
@@ -386,7 +360,7 @@ components:
       type: object
       required:
       - uploaded_file
-      title: Body_start-verify-omex
+      title: Body_verify-omex
     CompareSettings:
       properties:
         user_description:
@@ -609,47 +583,6 @@ components:
       - shape
       - values
       title: Hdf5DataValues
-    OmexVerifyWorkflowOutput:
-      properties:
-        workflow_id:
-          type: string
-          title: Workflow Id
-        compare_settings:
-          $ref: '#/components/schemas/CompareSettings'
-        workflow_status:
-          $ref: '#/components/schemas/OmexVerifyWorkflowStatus'
-        timestamp:
-          type: string
-          title: Timestamp
-        workflow_run_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Workflow Run Id
-        workflow_error:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Workflow Error
-        workflow_results:
-          anyOf:
-          - $ref: '#/components/schemas/GenerateStatisticsActivityOutput'
-          - type: 'null'
-      type: object
-      required:
-      - workflow_id
-      - compare_settings
-      - workflow_status
-      - timestamp
-      title: OmexVerifyWorkflowOutput
-    OmexVerifyWorkflowStatus:
-      type: string
-      enum:
-      - PENDING
-      - IN_PROGRESS
-      - COMPLETED
-      - FAILED
-      title: OmexVerifyWorkflowStatus
     RunData:
       properties:
         run_id:
@@ -672,48 +605,6 @@ components:
       - var_names
       - data
       title: RunData
-    RunsVerifyWorkflowOutput:
-      properties:
-        workflow_id:
-          type: string
-          title: Workflow Id
-        compare_settings:
-          $ref: '#/components/schemas/CompareSettings'
-        workflow_status:
-          $ref: '#/components/schemas/RunsVerifyWorkflowStatus'
-        timestamp:
-          type: string
-          title: Timestamp
-        workflow_run_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Workflow Run Id
-        workflow_error:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Workflow Error
-        workflow_results:
-          anyOf:
-          - $ref: '#/components/schemas/GenerateStatisticsActivityOutput'
-          - type: 'null'
-      type: object
-      required:
-      - workflow_id
-      - compare_settings
-      - workflow_status
-      - timestamp
-      title: RunsVerifyWorkflowOutput
-    RunsVerifyWorkflowStatus:
-      type: string
-      enum:
-      - PENDING
-      - IN_PROGRESS
-      - COMPLETED
-      - FAILED
-      - RUN_ID_NOT_FOUND
-      title: RunsVerifyWorkflowStatus
     SimulationRunInfo:
       properties:
         biosim_sim_run:
@@ -746,3 +637,45 @@ components:
       - msg
       - type
       title: ValidationError
+    VerifyWorkflowOutput:
+      properties:
+        workflow_id:
+          type: string
+          title: Workflow Id
+        compare_settings:
+          $ref: '#/components/schemas/CompareSettings'
+        workflow_status:
+          $ref: '#/components/schemas/VerifyWorkflowStatus'
+        timestamp:
+          type: string
+          title: Timestamp
+        workflow_run_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Workflow Run Id
+        workflow_error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Workflow Error
+        workflow_results:
+          anyOf:
+          - $ref: '#/components/schemas/GenerateStatisticsActivityOutput'
+          - type: 'null'
+      type: object
+      required:
+      - workflow_id
+      - compare_settings
+      - workflow_status
+      - timestamp
+      title: VerifyWorkflowOutput
+    VerifyWorkflowStatus:
+      type: string
+      enum:
+      - PENDING
+      - IN_PROGRESS
+      - COMPLETED
+      - FAILED
+      - RUN_ID_NOT_FOUND
+      title: VerifyWorkflowStatus

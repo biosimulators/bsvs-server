@@ -2,12 +2,12 @@ import pytest
 
 from biosim_server.biosim_runs import BiosimulatorVersion, BiosimulatorWorkflowRun, DatabaseServiceMongo
 from biosim_server.biosim_omex import OmexFile
-from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflowOutput
+from biosim_server.biosim_verify.models import VerifyWorkflowOutput
 
 
 @pytest.mark.asyncio
 async def test_biosimulator_workflow_run(database_service_mongo: DatabaseServiceMongo,
-                                        omex_verify_workflow_output: OmexVerifyWorkflowOutput) -> None:
+                                        omex_verify_workflow_output: VerifyWorkflowOutput) -> None:
     workflow_id = "workflow_id"
     cache_buster = "1234"
     omex_file = OmexFile(file_hash_md5="1234", bucket_name="test_bucket",

@@ -1,29 +1,19 @@
 import asyncio
 import logging
 from datetime import timedelta
-from enum import StrEnum
-from typing import Any, Optional, Coroutine
+from typing import Any, Coroutine
 
 from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 from temporalio.workflow import ChildWorkflowHandle
 
+from biosim_server.biosim_omex import OmexFile
 from biosim_server.biosim_runs import BiosimulatorVersion, OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput
 from biosim_server.biosim_verify import CompareSettings
-from biosim_server.biosim_omex import OmexFile
-from biosim_server.biosim_verify.activities import generate_statistics_activity, GenerateStatisticsActivityInput, \
-    GenerateStatisticsActivityOutput, SimulationRunInfo
-
-
-class OmexVerifyWorkflowStatus(StrEnum):
-    PENDING = "PENDING"
-    IN_PROGRESS = "IN_PROGRESS"
-    COMPLETED = "COMPLETED"
-    FAILED = "FAILED"
-
-    def __str__(self) -> str:
-        return str(self.value)
+from biosim_server.biosim_verify.activities import generate_statistics_activity, GenerateStatisticsActivityInput
+from biosim_server.biosim_verify.models import GenerateStatisticsActivityOutput, SimulationRunInfo, \
+    VerifyWorkflowStatus, VerifyWorkflowOutput
 
 
 class OmexVerifyWorkflowInput(BaseModel):
@@ -33,38 +23,28 @@ class OmexVerifyWorkflowInput(BaseModel):
     compare_settings: CompareSettings
 
 
-class OmexVerifyWorkflowOutput(BaseModel):
-    workflow_id: str
-    compare_settings: CompareSettings
-    workflow_status: OmexVerifyWorkflowStatus
-    timestamp: str
-    workflow_run_id: Optional[str] = None
-    workflow_error: Optional[str] = None
-    workflow_results: Optional[GenerateStatisticsActivityOutput] = None
-
-
 @workflow.defn
 class OmexVerifyWorkflow:
     verify_input: OmexVerifyWorkflowInput
-    verify_output: OmexVerifyWorkflowOutput
+    verify_output: VerifyWorkflowOutput
 
     @workflow.init
     def __init__(self, verify_input: OmexVerifyWorkflowInput) -> None:
         self.verify_input = verify_input
         # assert verify_input.workflow_id == workflow.info().workflow_id
-        self.verify_output = OmexVerifyWorkflowOutput(
+        self.verify_output = VerifyWorkflowOutput(
             workflow_id=workflow.info().workflow_id,
             compare_settings=verify_input.compare_settings,
             workflow_run_id=workflow.info().run_id,
-            workflow_status=OmexVerifyWorkflowStatus.IN_PROGRESS,
+            workflow_status=VerifyWorkflowStatus.IN_PROGRESS,
             timestamp=str(workflow.now()))
 
     @workflow.query(name="get_output")
-    def get_omex_sim_workflow_output(self) -> OmexVerifyWorkflowOutput:
+    def get_omex_sim_workflow_output(self) -> VerifyWorkflowOutput:
         return self.verify_output
 
     @workflow.run
-    async def run(self, verify_input: OmexVerifyWorkflowInput) -> OmexVerifyWorkflowOutput:
+    async def run(self, verify_input: OmexVerifyWorkflowInput) -> VerifyWorkflowOutput:
         workflow.logger.setLevel(level=logging.INFO)
         workflow.logger.info("Main workflow started.")
 
@@ -109,5 +89,5 @@ class OmexVerifyWorkflow:
                                      maximum_interval=timedelta(seconds=10)), )
         self.verify_output.workflow_results = generate_statistics_output
 
-        self.verify_output.workflow_status = OmexVerifyWorkflowStatus.COMPLETED
+        self.verify_output.workflow_status = VerifyWorkflowStatus.COMPLETED
         return self.verify_output
