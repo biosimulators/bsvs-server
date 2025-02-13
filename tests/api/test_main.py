@@ -138,6 +138,7 @@ async def test_runs_verify_not_found(runs_verify_workflow_input: RunsVerifyWorkf
                                          runs_verify_workflow_output: VerifyWorkflowOutput,
                                          omex_test_file: Path,
                                          file_service_gcs: FileServiceGCS,
+                                         database_service_mongo: DatabaseServiceMongo,
                                          temporal_client: Client,
                                          temporal_verify_worker: Worker,
                                          biosim_service_rest: BiosimServiceRest) -> None:

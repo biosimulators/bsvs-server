@@ -2,14 +2,16 @@ import uuid
 from pathlib import Path
 
 import pytest
-from temporalio.client import Client, WorkflowHandle
+from temporalio.client import Client
+from temporalio.common import RetryPolicy
 from temporalio.worker import Worker
 
-from biosim_server.biosim_runs import BiosimServiceRest, BiosimulatorVersion, DatabaseServiceMongo, OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput, \
+from biosim_server.biosim_omex import get_cached_omex_file_from_local, OmexDatabaseServiceMongo
+from biosim_server.biosim_runs import BiosimServiceRest, BiosimulatorVersion, DatabaseServiceMongo, OmexSimWorkflow, \
+    OmexSimWorkflowInput, OmexSimWorkflowOutput, \
     OmexSimWorkflowStatus
 from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
-from biosim_server.biosim_omex import get_cached_omex_file_from_local, OmexDatabaseServiceMongo
 
 
 @pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
@@ -34,20 +36,9 @@ async def test_sim_workflow(temporal_client: Client,
     assert simulator_version is not None
 
     sim_workflow_input = OmexSimWorkflowInput(omex_file=omex_file, simulator_version=simulator_version, cache_buster="0")
-    workflow_handle = await temporal_client.start_workflow(OmexSimWorkflow.run, args=[sim_workflow_input],
-        id=uuid.uuid4().hex, task_queue="verification_tasks", )
-    assert isinstance(workflow_handle, WorkflowHandle)
-    workflow_handle_result: OmexSimWorkflowOutput = await workflow_handle.result()
-    workflow_run = workflow_handle_result.biosimulator_workflow_run
-    expected_results = OmexSimWorkflowOutput(workflow_id=workflow_handle_result.workflow_id,
-                                             workflow_status=OmexSimWorkflowStatus.COMPLETED,
-                                             biosimulator_workflow_run=workflow_run)
-    assert expected_results.biosimulator_workflow_run is not None
-    expected_biosim_run = expected_results.biosimulator_workflow_run.biosim_run
-    assert expected_biosim_run is not None
-    assert workflow_handle_result is not None
-    assert workflow_run is not None
-    if expected_biosim_run and workflow_run.biosim_run:
-        expected_biosim_run.id = workflow_run.biosim_run.id
-        expected_biosim_run.simulator_version = workflow_run.biosim_run.simulator_version
-    assert workflow_handle_result == expected_results
+    workflow_result: OmexSimWorkflowOutput = await temporal_client.execute_workflow(OmexSimWorkflow.run, args=[sim_workflow_input],
+        id=uuid.uuid4().hex, task_queue="verification_tasks", retry_policy=RetryPolicy(maximum_attempts=1))
+    assert workflow_result.error_message is None
+    assert workflow_result.workflow_status == OmexSimWorkflowStatus.COMPLETED
+    assert workflow_result.workflow_id is not None
+    assert workflow_result.biosimulator_workflow_run is not None

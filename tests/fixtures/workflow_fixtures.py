@@ -41,11 +41,11 @@ def simulator_version_copasi() -> BiosimulatorVersion:
 
 
 @pytest.fixture(scope="function")
-def simulator_version_vcell() -> BiosimulatorVersion:
+def simulator_version_tellurium() -> BiosimulatorVersion:
     return BiosimulatorVersion.model_validate_json(
-        '{"id":"vcell","name":"Virtual Cell","version":"7.7.0.13","image_url":"ghcr.io/biosimulators/vcell:7.7.0.13",'
-        '"image_digest":"sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216",'
-        '"created":"2024-12-13T16:56:12.395Z","updated":"2024-12-13T16:56:12.395Z"}')
+        '{"id":"tellurium","name":"tellurium","version":"2.2.10","image_url":"ghcr.io/biosimulators/tellurium:2.2.10",'
+        '"image_digest":"sha256:0c22827b4682273810d48ea606ef50c7163e5f5289740951c00c64c669409eae",'
+        '"created":"2024-10-10T22:00:50.110Z","updated":"2024-10-10T22:00:50.110Z"}')
 
 
 @pytest.fixture(scope="session")
@@ -56,13 +56,13 @@ def compare_settings() -> CompareSettings:
 
 @pytest.fixture(scope="function")
 def omex_verify_workflow_input(simulator_version_copasi: BiosimulatorVersion,
-                               simulator_version_vcell: BiosimulatorVersion,
+                               simulator_version_tellurium: BiosimulatorVersion,
                                compare_settings: CompareSettings) -> OmexVerifyWorkflowInput:
     path = "path/to/omex"
     omex_file = OmexFile(file_hash_md5="hash",
                          uploaded_filename="BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex",
                          file_size=100, omex_gcs_path=path, bucket_name="bucket")
-    simulators = [simulator_version_copasi, simulator_version_vcell]
+    simulators = [simulator_version_copasi, simulator_version_tellurium]
     omex_input = OmexVerifyWorkflowInput(omex_file=omex_file, requested_simulators=simulators,
                                          compare_settings=compare_settings, cache_buster="0")
     return omex_input

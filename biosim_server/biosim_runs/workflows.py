@@ -5,14 +5,12 @@ from enum import StrEnum
 from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.common import RetryPolicy
+from temporalio.exceptions import ActivityError
 
 from biosim_server.biosim_omex import OmexFile
-from biosim_server.biosim_runs.models import BiosimSimulationRun, BiosimulatorVersion, \
-    BiosimSimulationRunStatus, BiosimulatorWorkflowRun, HDF5File
-from biosim_server.biosim_runs.activities import get_hdf5_file_activity, get_biosim_simulation_run_activity, \
-    submit_biosim_simulation_run_activity, SubmitBiosimSimulationRunActivityInput, \
-    GetBiosimSimulationRunActivityInput, GetHdf5FileActivityInput, save_biosimulator_workflow_run_activity, \
-    SaveBiosimulatorWorkflowRunActivityInput
+from biosim_server.biosim_runs.activities import submit_biosim_simulation_run_activity, \
+    SubmitBiosimSimulationRunActivityInput
+from biosim_server.biosim_runs.models import BiosimulatorVersion, BiosimSimulationRunStatus, BiosimulatorWorkflowRun
 
 
 class OmexSimWorkflowInput(BaseModel):
@@ -54,74 +52,41 @@ class OmexSimWorkflow:
     async def run(self, sim_input: OmexSimWorkflowInput) -> OmexSimWorkflowOutput:
         self.sim_output.workflow_id = workflow.info().workflow_id
         workflow.logger.setLevel(level=logging.DEBUG)
-        workflow.logger.info(f"Child workflow started for {sim_input.simulator_version.id}.")
+        workflow.logger.info(f"Child workflow started for "
+                             f"{sim_input.simulator_version.id}:{sim_input.simulator_version.version}.")
 
-        workflow.logger.info(f"submitting job for simulator {sim_input.simulator_version.id}.")
-        submit_biosim_input = SubmitBiosimSimulationRunActivityInput(omex_file=sim_input.omex_file,
-                                                                     simulator_version=sim_input.simulator_version)
-        biosim_simulation_run: BiosimSimulationRun = await workflow.execute_activity(
-            submit_biosim_simulation_run_activity,
-            args=[submit_biosim_input],
-            start_to_close_timeout=timedelta(seconds=60),  # Activity timeout
-            retry_policy=RetryPolicy(maximum_attempts=1),
-        )
+        saved_biosimulator_workflow_run: BiosimulatorWorkflowRun = await submit_biosim_simulation_run(
+            workflow_id=self.sim_output.workflow_id, omex_file=self.sim_input.omex_file,
+            simulator_version=self.sim_input.simulator_version, cache_buster=self.sim_input.cache_buster)
 
-        workflow.logger.info(
-            f"Job {biosim_simulation_run.id} for {sim_input.simulator_version.id}, "
-            f"status is {biosim_simulation_run.status}.")
-
-        while biosim_simulation_run is not None and biosim_simulation_run.status not in [
-            BiosimSimulationRunStatus.SUCCEEDED, BiosimSimulationRunStatus.FAILED,
-            BiosimSimulationRunStatus.RUN_ID_NOT_FOUND]:
-
-            await workflow.sleep(2.0)
-
-            biosim_simulation_run = await workflow.execute_activity(
-                get_biosim_simulation_run_activity, args=[GetBiosimSimulationRunActivityInput(biosim_run_id=biosim_simulation_run.id)],
-                start_to_close_timeout=timedelta(seconds=60),
-                retry_policy=RetryPolicy(maximum_attempts=3)
-            )
-
-            workflow.logger.info(
-                f"Job {biosim_simulation_run.id} for {sim_input.simulator_version.id}, "
-                f"status is {biosim_simulation_run.status}.")
-
-            if biosim_simulation_run.status == BiosimSimulationRunStatus.FAILED:
-                self.sim_output.workflow_status = OmexSimWorkflowStatus.FAILED
-                return self.sim_output
-
-        if biosim_simulation_run.status != BiosimSimulationRunStatus.SUCCEEDED:
+        if saved_biosimulator_workflow_run is None or saved_biosimulator_workflow_run.biosim_run is None:
             self.sim_output.workflow_status = OmexSimWorkflowStatus.FAILED
-            self.sim_output.error_message = biosim_simulation_run.error_message
+            self.sim_output.error_message = "Failed to submit biosim simulation run - activity returned None."
             return self.sim_output
 
-
-        hdf5_file: HDF5File = await workflow.execute_activity(
-            get_hdf5_file_activity,
-            args=[GetHdf5FileActivityInput(simulation_run_id=biosim_simulation_run.id)],
-            start_to_close_timeout=timedelta(seconds=60),  # Activity timeout
-            retry_policy=RetryPolicy(maximum_attempts=100, maximum_interval=timedelta(seconds=5), backoff_coefficient=2.0),
-        )
-
-        workflow.logger.info(
-            f"Simulation run metadata for simulation_run_id: {biosim_simulation_run.id} is {hdf5_file.model_dump_json()}")
+        if saved_biosimulator_workflow_run.biosim_run.status != BiosimSimulationRunStatus.SUCCEEDED:
+            self.sim_output.workflow_status = OmexSimWorkflowStatus.FAILED
+            self.sim_output.error_message = saved_biosimulator_workflow_run.biosim_run.error_message
+            return self.sim_output
 
         self.sim_output.workflow_status = OmexSimWorkflowStatus.COMPLETED
-
-        biosimulator_workflow_run = BiosimulatorWorkflowRun(workflow_id=self.sim_output.workflow_id,
-                                                            file_hash_md5=self.sim_input.omex_file.file_hash_md5,
-                                                            image_digest=self.sim_input.simulator_version.image_digest,
-                                                            cache_buster=self.sim_input.cache_buster,
-                                                            omex_file=self.sim_input.omex_file,
-                                                            simulator_version=self.sim_input.simulator_version,
-                                                            biosim_run=biosim_simulation_run,
-                                                            hdf5_file=hdf5_file)
-        saved_biosimulator_workflow_run = await workflow.execute_activity(
-            save_biosimulator_workflow_run_activity,
-            args=[SaveBiosimulatorWorkflowRunActivityInput(biosim_workflow_run=biosimulator_workflow_run)],
-            start_to_close_timeout=timedelta(seconds=60),  # Activity timeout
-            retry_policy=RetryPolicy(maximum_attempts=100, maximum_interval=timedelta(seconds=5),
-                                     backoff_coefficient=2.0),
-        )
         self.sim_output.biosimulator_workflow_run = saved_biosimulator_workflow_run
         return self.sim_output
+
+
+async def submit_biosim_simulation_run(workflow_id: str,
+                                       omex_file: OmexFile,
+                                       simulator_version: BiosimulatorVersion,
+                                       cache_buster: str) -> BiosimulatorWorkflowRun:
+    try:
+        return await workflow.execute_activity(
+            submit_biosim_simulation_run_activity,
+            args=[SubmitBiosimSimulationRunActivityInput(workflow_id=workflow_id,
+                                                         omex_file=omex_file,
+                                                         simulator_version=simulator_version,
+                                                         cache_buster=cache_buster)],
+            start_to_close_timeout=timedelta(seconds=60*20),  # Activity timeout
+            retry_policy=RetryPolicy(maximum_attempts=1), )
+    except ActivityError as e:
+        workflow.logger.exception(f"Failed to submit biosim simulation run: {str(e)}", exc_info=e)
+        raise e

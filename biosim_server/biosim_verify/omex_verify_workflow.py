@@ -9,11 +9,13 @@ from temporalio.common import RetryPolicy
 from temporalio.workflow import ChildWorkflowHandle
 
 from biosim_server.biosim_omex import OmexFile
-from biosim_server.biosim_runs import BiosimulatorVersion, OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput
+from biosim_server.biosim_runs import BiosimulatorVersion, OmexSimWorkflow, OmexSimWorkflowInput, OmexSimWorkflowOutput, \
+    BiosimulatorWorkflowRun
 from biosim_server.biosim_verify import CompareSettings
 from biosim_server.biosim_verify.activities import generate_statistics_activity, GenerateStatisticsActivityInput
 from biosim_server.biosim_verify.models import GenerateStatisticsActivityOutput, SimulationRunInfo, \
     VerifyWorkflowStatus, VerifyWorkflowOutput
+from biosim_server.biosim_verify.runs_verify_workflow import generate_statistics
 
 
 class OmexVerifyWorkflowInput(BaseModel):
@@ -48,7 +50,7 @@ class OmexVerifyWorkflow:
         workflow.logger.setLevel(level=logging.INFO)
         workflow.logger.info("Main workflow started.")
 
-        # Launch child workflows for each simulator
+        # Launch child workflows to run a simulation for each simulator (or retrieve from cache)
         child_workflows: list[
             Coroutine[Any, Any, ChildWorkflowHandle[OmexSimWorkflowInput, OmexSimWorkflowOutput]]] = []
         for simulator_spec in verify_input.requested_simulators:
@@ -65,7 +67,7 @@ class OmexVerifyWorkflow:
         child_results: list[ChildWorkflowHandle[OmexSimWorkflowInput, OmexSimWorkflowOutput]] = await asyncio.gather(
             *child_workflows)
 
-        run_data: list[SimulationRunInfo] = []
+        simulator_workflow_runs: list[BiosimulatorWorkflowRun] = []
         for child_result in child_results:
             omex_sim_workflow_output = await child_result
             if not child_result.done():
@@ -74,20 +76,12 @@ class OmexVerifyWorkflow:
 
             if omex_sim_workflow_output.biosimulator_workflow_run is None:
                 continue
-            assert omex_sim_workflow_output.biosimulator_workflow_run is not None
-            assert omex_sim_workflow_output.biosimulator_workflow_run.biosim_run is not None
-            assert omex_sim_workflow_output.biosimulator_workflow_run.hdf5_file is not None
-            run_data.append(SimulationRunInfo(biosim_sim_run=omex_sim_workflow_output.biosimulator_workflow_run.biosim_run,
-                                              hdf5_file=omex_sim_workflow_output.biosimulator_workflow_run.hdf5_file))
+            simulator_workflow_runs.append(omex_sim_workflow_output.biosimulator_workflow_run)
 
-        # Generate comparison report
-        generate_statistics_output: GenerateStatisticsActivityOutput = await workflow.execute_activity(
-            generate_statistics_activity,
-            arg=GenerateStatisticsActivityInput(sim_run_info_list=run_data, compare_settings=verify_input.compare_settings),
-            start_to_close_timeout=timedelta(minutes=10),
-            retry_policy=RetryPolicy(maximum_attempts=100, backoff_coefficient=2.0,
-                                     maximum_interval=timedelta(seconds=10)), )
-        self.verify_output.workflow_results = generate_statistics_output
+        # Generate comparison report within an activity
+        workflow.logger.info("calling activity to generate statistics");
+        stats = await generate_statistics(sim_workflow_runs=simulator_workflow_runs, compare_settings=self.verify_input.compare_settings)
 
+        self.verify_output.workflow_results = stats
         self.verify_output.workflow_status = VerifyWorkflowStatus.COMPLETED
         return self.verify_output

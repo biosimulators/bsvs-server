@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 from temporalio.client import Client
+from temporalio.common import RetryPolicy
 from temporalio.worker import Worker
 
 from biosim_server.biosim_omex import OmexDatabaseServiceMongo
@@ -32,7 +33,7 @@ async def test_run_verify_workflow(temporal_client: Client, temporal_verify_work
     observed_results: VerifyWorkflowOutput = await temporal_client.execute_workflow(
         RunsVerifyWorkflow.run, args=[runs_verify_workflow_input],
         # result_type=RunsVerifyWorkflowOutput,
-        id=workflow_id, task_queue="verification_tasks")
+        id=workflow_id, task_queue="verification_tasks", retry_policy=RetryPolicy(maximum_attempts=1))
 
     # uncomment to update fixture for future tests
     # with open(runs_verify_workflow_output_file, "w") as f:
@@ -49,6 +50,7 @@ async def test_run_verify_workflow_not_found_execute(temporal_client: Client, te
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                runs_verify_workflow_output: VerifyWorkflowOutput,
                                biosim_service_rest: BiosimServiceRest,
+                               database_service_mongo: DatabaseServiceMongo,
                                file_service_gcs: FileServiceGCS) -> None:
     workflow_id = uuid.uuid4().hex
 
@@ -67,6 +69,7 @@ async def test_run_verify_workflow_not_found_execute(temporal_client: Client, te
 async def test_run_verify_workflow_not_found_poll(temporal_client: Client, temporal_verify_worker: Worker,
                                runs_verify_workflow_input: RunsVerifyWorkflowInput,
                                runs_verify_workflow_output: VerifyWorkflowOutput,
+                               database_service_mongo: DatabaseServiceMongo,
                                biosim_service_rest: BiosimServiceRest,
                                file_service_gcs: FileServiceGCS) -> None:
     workflow_id = uuid.uuid4().hex
