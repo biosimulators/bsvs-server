@@ -2,8 +2,8 @@ from typing import AsyncGenerator
 
 import pytest_asyncio
 
+from biosim_server.biosim_runs import BiosimServiceRest
 from biosim_server.dependencies import get_biosim_service, set_biosim_service
-from biosim_server.common.biosim1_client import BiosimServiceRest
 from tests.fixtures.biosim_service_mock import BiosimServiceMock
 
 

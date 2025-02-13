@@ -7,25 +7,13 @@ with workflow.unsafe.imports_passed_through():
     from datetime import datetime
 from pathlib import Path
 from typing import Optional
-import aiofiles
-import hashlib
+
 
 class ListingItem(BaseModel):
     Key: str
     LastModified: datetime
     ETag: str
     Size: int
-
-
-async def calculate_file_md5(local_filepath: Path) -> str:
-    hasher = hashlib.md5()
-    async with aiofiles.open(local_filepath, 'rb') as f:
-        while True:
-            chunk = await f.read(8192)
-            if not chunk:
-                break
-            hasher.update(chunk)
-    return hasher.hexdigest()
 
 
 class FileService(ABC):
@@ -51,7 +39,7 @@ class FileService(ABC):
         pass
 
     @abstractmethod
-    async def get_file_contents(self, gcs_path: str) -> bytes:
+    async def get_file_contents(self, gcs_path: str) -> bytes | None:
         pass
 
     @abstractmethod

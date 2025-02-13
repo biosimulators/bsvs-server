@@ -1,6 +1,9 @@
+from motor.motor_asyncio import AsyncIOMotorClient
 from temporalio.client import Client as TemporalClient
 
-from biosim_server.common.biosim1_client import BiosimService, BiosimServiceRest
+from biosim_server.biosim_omex.database import OmexDatabaseService, OmexDatabaseServiceMongo
+from biosim_server.biosim_runs.biosim_service import BiosimService, BiosimServiceRest
+from biosim_server.biosim_runs.database import DatabaseService, DatabaseServiceMongo
 from biosim_server.common.storage import FileService, FileServiceGCS
 from biosim_server.config import get_settings
 
@@ -15,6 +18,30 @@ def set_file_service(file_service: FileService | None) -> None:
 def get_file_service() -> FileService | None:
     global global_file_service
     return global_file_service
+
+#------- database service (standalone or pytest) ------
+
+global_database_service: DatabaseService | None = None
+
+def set_database_service(database_service: DatabaseService | None) -> None:
+    global global_database_service
+    global_database_service = database_service
+
+def get_database_service() -> DatabaseService | None:
+    global global_database_service
+    return global_database_service
+
+#------- database service (standalone or pytest) ------
+
+global_omex_database_service: OmexDatabaseService | None = None
+
+def set_omex_database_service(omex_database_service: OmexDatabaseService | None) -> None:
+    global global_omex_database_service
+    global_omex_database_service = omex_database_service
+
+def get_omex_database_service() -> OmexDatabaseService | None:
+    global global_omex_database_service
+    return global_omex_database_service
 
 #------- biosim service (standalone or pytest) ------
 
@@ -48,7 +75,14 @@ async def init_standalone() -> None:
     set_biosim_service(BiosimServiceRest())
     set_temporal_client(await TemporalClient.connect(settings.temporal_service_url))
 
+    motor_client = AsyncIOMotorClient(get_settings().mongodb_uri)
+    set_database_service(DatabaseServiceMongo(db_client=motor_client))
+    set_omex_database_service(OmexDatabaseServiceMongo(db_client=motor_client))
+
 async def shutdown_standalone() -> None:
+    db_service = get_database_service()
+    if db_service:
+        await db_service.close()
     file_service = get_file_service()
     if file_service:
         await file_service.close()
@@ -61,3 +95,4 @@ async def shutdown_standalone() -> None:
     set_file_service(None)
     set_biosim_service(None)
     set_temporal_client(None)
+    set_database_service(None)

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "biosim-server"
-version = "0.0.1"
+version = "0.2.1"
 description = "Server for the consolidated Biosimulations API"
 authors = ["Alex Patrie <alexanderpatrie@gmail.com>, Jim Schaff <schaff@uchc.edu>"]
 readme = "README.md"
@@ -28,6 +28,8 @@ pydantic-settings = "^2.7.1"
 python-multipart = "^0.0.20"
 gcloud-aio-storage = "^9.3.0"
 h5py = "^3.12.1"
+aiocache = "^0.12.3"
+asyncssh = "^2.19.0"
 
 
 [tool.poetry.group.worker.dependencies]

@@ -1,11 +1,7 @@
 {
-  "workflow_id": "9aa12696dde540afaf5f4d89c1df57cb",
-  "workflow_input": {
+  "workflow_id": "b2ac553f8d8d49449e95f0baf1817bae",
+  "compare_settings": {
     "user_description": "description",
-    "biosimulations_run_ids": [
-      "67817a2e1f52f47f628af971",
-      "67817a2eba5a3f02b9f2938d"
-    ],
     "include_outputs": false,
     "rel_tol": 0.0001,
     "abs_tol_min": 0.001,
@@ -16,31 +12,26 @@
     ]
   },
   "workflow_status": "COMPLETED",
-  "timestamp": "2025-01-27 17:29:43.053376+00:00",
+  "timestamp": "2025-02-13 03:47:38.020627+00:00",
+  "workflow_run_id": "b133eebb-aa6f-4d9b-8d16-a1adaefcc341",
   "workflow_error": null,
-  "actual_simulators": null,
-  "workflow_run_id": "f7052bff-9976-4cc3-a41d-f1d307c65bcc",
   "workflow_results": {
     "sims_run_info": [
       {
         "biosim_sim_run": {
           "id": "67817a2e1f52f47f628af971",
           "name": "name",
-          "simulator": "vcell",
-          "simulatorVersion": "7.7.0.13",
+          "simulator_version": {
+            "id": "vcell",
+            "name": "Virtual Cell",
+            "version": "7.7.0.13",
+            "image_url": "ghcr.io/biosimulators/vcell:7.7.0.13",
+            "image_digest": "sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216",
+            "created": "2024-12-13T16:56:12.395Z",
+            "updated": "2024-12-13T16:56:12.395Z"
+          },
           "status": "SUCCEEDED",
-          "simulatorDigest": "sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216",
-          "cpus": null,
-          "memory": null,
-          "maxTime": null,
-          "envVars": null,
-          "purpose": null,
-          "submitted": null,
-          "updated": null,
-          "projectSize": null,
-          "resultsSize": null,
-          "runtime": null,
-          "email": null
+          "error_message": null
         },
         "hdf5_file": {
           "filename": "reports.h5",
@@ -479,21 +470,17 @@
         "biosim_sim_run": {
           "id": "67817a2eba5a3f02b9f2938d",
           "name": "name",
-          "simulator": "copasi",
-          "simulatorVersion": "4.45.296",
+          "simulator_version": {
+            "id": "copasi",
+            "name": "COPASI",
+            "version": "4.45.296",
+            "image_url": "ghcr.io/biosimulators/copasi:4.45.296",
+            "image_digest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df",
+            "created": "2024-11-18T15:34:26.233Z",
+            "updated": "2024-11-18T15:34:26.233Z"
+          },
           "status": "SUCCEEDED",
-          "simulatorDigest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df",
-          "cpus": null,
-          "memory": null,
-          "maxTime": null,
-          "envVars": null,
-          "purpose": null,
-          "submitted": null,
-          "updated": null,
-          "projectSize": null,
-          "resultsSize": null,
-          "runtime": null,
-          "email": null
+          "error_message": null
         },
         "hdf5_file": {
           "filename": "reports.h5",

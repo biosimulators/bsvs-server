@@ -6,18 +6,20 @@ from temporalio.client import Client
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import Worker, UnsandboxedWorkflowRunner
 
+from biosim_server.biosim_runs import get_existing_biosim_simulation_run_activity, \
+    submit_biosim_simulation_run_activity, OmexSimWorkflow
+from biosim_server.biosim_verify.activities import generate_statistics_activity
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflow
+from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflow
 from biosim_server.common.temporal import pydantic_data_converter
 from biosim_server.dependencies import get_temporal_client, set_temporal_client
-from biosim_server.workflows.simulate import get_sim_run, submit_biosim_sim, get_hdf5_metadata, get_hdf5_data, \
-    OmexSimWorkflow
-from biosim_server.workflows.verify import OmexVerifyWorkflow, RunsVerifyWorkflow, generate_statistics
 
 
 @pytest_asyncio.fixture(scope="session")
 async def temporal_env(request: pytest.FixtureRequest) -> AsyncGenerator[WorkflowEnvironment, None]:
     env_type = request.config.getoption("--workflow-environment")
     if env_type == "local":
-        env = await WorkflowEnvironment.start_local(data_converter=pydantic_data_converter)
+        env = await WorkflowEnvironment.start_local(ui=True, data_converter=pydantic_data_converter)
     elif env_type == "time-skipping":
         env = await WorkflowEnvironment.start_time_skipping(data_converter=pydantic_data_converter)
     else:
@@ -44,7 +46,8 @@ async def temporal_verify_worker(temporal_client: Client) -> AsyncGenerator[Work
             temporal_client,
             task_queue="verification_tasks",
             workflows=[OmexVerifyWorkflow, OmexSimWorkflow, RunsVerifyWorkflow],
-            activities=[generate_statistics, get_sim_run, submit_biosim_sim, get_hdf5_metadata, get_hdf5_data],
+            activities=[generate_statistics_activity, get_existing_biosim_simulation_run_activity,
+                        submit_biosim_simulation_run_activity],
             debug_mode=True,
             workflow_runner=UnsandboxedWorkflowRunner()
     ) as worker:

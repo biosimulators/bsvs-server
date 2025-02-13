@@ -5,19 +5,26 @@ namespace: biosim-local
 
 images:
 - name: ghcr.io/biosimulations/biosim-api
-  newTag: arm64_latest
+  newTag: arm64_0.2.1
 - name: ghcr.io/biosimulations/biosim-worker
-  newTag: arm64_latest
+  newTag: arm64_0.2.1
+- name: docker.io/library/mongo
+  newTag: 8.0.4
 
 replicas:
 - count: 1
   name: api
 - count: 1
   name: worker
+- count: 1
+  name: mongodb
 
 resources:
 - ingress.yaml
 - secret-ghcr.yaml
 - secret-shared.yaml
+- api-pvc.yaml
+- worker-pvc.yaml
+- mongodb-pvc.yaml
 - ../../config/biosim-local
 - ../../base

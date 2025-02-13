@@ -11,6 +11,8 @@ from tests.fixtures.database_fixtures import (  # noqa: F401
     mongo_test_client,
     mongo_test_database,
     mongo_test_collection,
+    database_service_mongo,
+    omex_database_service_mongo
 )
 from tests.fixtures.gcs_fixtures import (  # noqa: F401
     file_service_gcs,
@@ -32,9 +34,18 @@ from tests.fixtures.workflow_fixtures import (  # noqa: F401
     runs_verify_workflow_input,
     runs_verify_workflow_output,
     runs_verify_workflow_output_file,
+    compare_settings,
     omex_test_file,
     hdf5_json_test_file,
-    temp_test_data_dir
+    temp_test_data_dir,
+    simulator_version_tellurium,
+    simulator_version_copasi,
+    fixture_data_dir
+)
+from tests.fixtures.slurm_fixtures import (  # noqa: F401
+    slurm_service,
+    ssh_service,
+    slurm_template_hello,
 )
 
 

@@ -2,28 +2,25 @@ import logging
 import os
 import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime, UTC, timedelta
 from typing import AsyncGenerator, Optional
-
-from temporalio import workflow
-
-from biosim_server.common.biosim1_client import BiosimSimulatorSpec, SourceOmex
-from biosim_server.workflows.verify.runs_verify_workflow import RunsVerifyWorkflowOutput, RunsVerifyWorkflowInput, \
-    RunsVerifyWorkflow, RunsVerifyWorkflowStatus
-
-with workflow.unsafe.imports_passed_through():
-    from datetime import datetime, UTC, timedelta
-from pathlib import Path
 
 import dotenv
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, Query, APIRouter, Depends, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
+from biosim_server.biosim_omex import OmexFile, get_cached_omex_file_from_upload
+from biosim_server.biosim_runs import BiosimulatorVersion
+from biosim_server.biosim_verify import CompareSettings
+from biosim_server.biosim_verify.models import VerifyWorkflowOutput, VerifyWorkflowStatus
+from biosim_server.biosim_verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput
+from biosim_server.biosim_verify.runs_verify_workflow import RunsVerifyWorkflowInput, RunsVerifyWorkflow
 from biosim_server.config import get_local_cache_dir
-from biosim_server.dependencies import get_file_service, get_temporal_client, init_standalone, shutdown_standalone
+from biosim_server.dependencies import get_file_service, get_temporal_client, init_standalone, shutdown_standalone, \
+    get_biosim_service, get_omex_database_service
 from biosim_server.log_config import setup_logging
-from biosim_server.workflows.verify.omex_verify_workflow import OmexVerifyWorkflow, OmexVerifyWorkflowInput, \
-    OmexVerifyWorkflowOutput, OmexVerifyWorkflowStatus
+from biosim_server.version import __version__
 
 logger = logging.getLogger(__name__)
 setup_logging(logger)
@@ -34,19 +31,7 @@ DEV_ENV_PATH = os.path.join(REPO_ROOT, 'assets', 'dev', 'config', '.dev_env')
 dotenv.load_dotenv(DEV_ENV_PATH)  # NOTE: create an env config at this filepath if dev
 
 # -- constraints -- #
-
-version_path = os.path.join(
-    os.path.dirname(__file__),
-    ".VERSION"
-)
-if os.path.exists(version_path):
-    with open(version_path, 'r') as f:
-        APP_VERSION = f.read().strip()
-else:
-    APP_VERSION = "0.0.1"
-
-MONGO_URI = os.getenv("MONGO_URI")
-GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+APP_VERSION = __version__
 APP_TITLE = "biosim-server"
 APP_ORIGINS = [
     'http://127.0.0.1:8000',
@@ -112,18 +97,24 @@ app.add_middleware(
 @app.get("/")
 def root() -> dict[str, str]:
     return {
-        'docs': 'https://biosim.biosimulations.org/docs'
+        'docs': 'https://biosim.biosimulations.org/docs',
+        'version': APP_VERSION
     }
 
 
+@app.get("/version")
+def get_version() -> str:
+    return APP_VERSION
+
+
 @app.post(
-    "/verify_omex",
-    response_model=OmexVerifyWorkflowOutput,
-    operation_id="start-verify-omex",
+    "/verify/omex",
+    response_model=VerifyWorkflowOutput,
+    operation_id="verify-omex",
     tags=["Verification"],
-    dependencies=[Depends(get_temporal_client), Depends(get_file_service)],
-    summary="Request verification report for OMEX/COMBINE archive")
-async def start_verify_omex(
+    dependencies=[Depends(get_temporal_client), Depends(get_file_service), Depends(get_local_cache_dir), Depends(get_omex_database_service)],
+    summary="Request verification report for OMEX/COMBINE archive across simulators")
+async def verify_omex(
         uploaded_file: UploadFile = File(..., description="OMEX/COMBINE archive containing a deterministic SBML model"),
         workflow_id_prefix: str = Query(default="omex-verification-", description="Prefix for the workflow id."),
         simulators: list[str] = Query(default=["amici", "copasi", "pysces", "tellurium", "vcell"],
@@ -134,43 +125,49 @@ async def start_verify_omex(
         rel_tol: float = Query(default=0.0001, description="Relative tolerance for proximity comparison."),
         abs_tol_min: float = Query(default=0.001, description="Min absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale."),
         abs_tol_scale: float = Query(default=0.00001, description="Scale for absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale."),
+        cache_buster: str = Query(default="0", description="Optional unique id for cache busting (unique string to force new simulation runs)."),
         observables: Optional[list[str]] = Query(default=None,
                                                  description="List of observables to include in the return data.")
-) -> OmexVerifyWorkflowOutput:
-    # ---- save omex file to a temporary file and then upload to cloud storage ---- #
-    save_dest_dir = get_local_cache_dir() / "uploaded_files"
-    save_dest_dir.mkdir(exist_ok=True)
-    local_temp_path: Path = await save_uploaded_file(uploaded_file=uploaded_file, save_dest_dir=save_dest_dir)
-    gcs_path = str(Path("verify") / "omex" / uuid.uuid4().hex / local_temp_path.name)
-
+) -> VerifyWorkflowOutput:
+    # ---- using hash to avoid saving multiple copies, upload to cloud storage if needed ---- #
     file_service = get_file_service()
     assert file_service is not None
-    full_gcs_path: str = await file_service.upload_file(file_path=local_temp_path, gcs_path=gcs_path)
-    local_temp_path.unlink()
-    logger.info(f"Uploaded file to S3 at {full_gcs_path}")
+    omex_database = get_omex_database_service()
+    assert omex_database is not None
+    omex_file: OmexFile = await get_cached_omex_file_from_upload(file_service=file_service, omex_database=omex_database,
+                                                                 uploaded_file=uploaded_file)
 
     # ---- create workflow input ---- #
-    simulator_specs: list[BiosimSimulatorSpec] = []
+    simulator_versions: list[BiosimulatorVersion] = []
+    biosim_service = get_biosim_service()
+    assert biosim_service is not None
+    all_simulator_versions = await biosim_service.get_simulator_versions()
     for simulator in simulators:
+        simulator_version: Optional[BiosimulatorVersion] = None
         if ":" in simulator:
             name, version = simulator.split(":")
-            simulator_specs.append(BiosimSimulatorSpec(simulator=name, version=version))
+            for sv in all_simulator_versions:
+                if sv.id == name and sv.version == version:
+                    simulator_version = sv
+                    break
         else:
-            simulator_specs.append(BiosimSimulatorSpec(simulator=simulator, version=None))
-    source_omex = SourceOmex(omex_s3_file=gcs_path, name="name")
+            for sv in all_simulator_versions:
+                if sv.id == simulator:
+                    simulator_version = sv  # don't break, we want the last one in the list
+        if simulator_version is not None:
+            simulator_versions.append(simulator_version)
+        else:
+            raise HTTPException(status_code=400, detail=f"Simulator {simulator} not found.")
+
     workflow_id = f"{workflow_id_prefix}{uuid.uuid4()}"
-    omex_verify_workflow_input = OmexVerifyWorkflowInput(
-        source_omex=SourceOmex(omex_s3_file=gcs_path, name="name"),
-        user_description=user_description,
-        requested_simulators=simulator_specs,
-        include_outputs=include_outputs,
-        rel_tol=rel_tol,
-        abs_tol_min=abs_tol_min,
-        abs_tol_scale=abs_tol_scale,
-        observables=observables)
+    compare_settings = CompareSettings(user_description=user_description, include_outputs=include_outputs,
+                                       rel_tol=rel_tol, abs_tol_min=abs_tol_min, abs_tol_scale=abs_tol_scale,
+                                       observables=observables)
+    omex_verify_workflow_input = OmexVerifyWorkflowInput(omex_file=omex_file, requested_simulators=simulator_versions,
+                                                         compare_settings=compare_settings, cache_buster=cache_buster)
 
     # ---- invoke workflow ---- #
-    logger.info(f"starting workflow for {source_omex}")
+    logger.info(f"starting workflow for {omex_file}")
     temporal_client = get_temporal_client()
     assert temporal_client is not None
     workflow_handle = await temporal_client.start_workflow(
@@ -183,9 +180,9 @@ async def start_verify_omex(
     assert workflow_handle.id == workflow_id
 
     # ---- return initial workflow output ---- #
-    omex_verify_workflow_output = OmexVerifyWorkflowOutput(
-        workflow_input=omex_verify_workflow_input,
-        workflow_status=OmexVerifyWorkflowStatus.PENDING,
+    omex_verify_workflow_output = VerifyWorkflowOutput(
+        compare_settings=compare_settings,
+        workflow_status=VerifyWorkflowStatus.PENDING,
         timestamp=str(datetime.now(UTC)),
         workflow_id=workflow_id,
         workflow_run_id=workflow_handle.run_id
@@ -194,23 +191,24 @@ async def start_verify_omex(
 
 
 @app.get(
-    "/verify_omex/{workflow_id}",
-    response_model=OmexVerifyWorkflowOutput,
-    operation_id='get-verify-omex',
+    "/verify/{workflow_id}",
+    response_model=VerifyWorkflowOutput,
+    operation_id='get-verify-output',
+    name="Retrieve verification report",
     tags=["Verification"],
     dependencies=[Depends(get_temporal_client)],
     summary='Retrieve verification report for OMEX/COMBINE archive')
-async def get_verify_omex(workflow_id: str) -> OmexVerifyWorkflowOutput:
-    logger.info(f"in get /verify_omex/{workflow_id}")
+async def get_verify_output(workflow_id: str) -> VerifyWorkflowOutput:
+    logger.info(f"in get /verify/{workflow_id}")
 
     try:
         # query temporal for the workflow output
         temporal_client = get_temporal_client()
         assert temporal_client is not None
         workflow_handle = temporal_client.get_workflow_handle(workflow_id=workflow_id,
-                                                              result_type=OmexVerifyWorkflowOutput)
-        workflow_output: OmexVerifyWorkflowOutput = await workflow_handle.query("get_output",
-                                                                                result_type=OmexVerifyWorkflowOutput,
+                                                              result_type=VerifyWorkflowOutput)
+        workflow_output: VerifyWorkflowOutput = await workflow_handle.query("get_output",
+                                                                                result_type=VerifyWorkflowOutput,
                                                                                 rpc_timeout=timedelta(seconds=60))
         return workflow_output
     except Exception as e2:
@@ -221,13 +219,13 @@ async def get_verify_omex(workflow_id: str) -> OmexVerifyWorkflowOutput:
 
 
 @app.post(
-    "/verify_runs",
-    response_model=RunsVerifyWorkflowOutput,
-    operation_id="start-verify-runs",
+    "/verify/runs",
+    response_model=VerifyWorkflowOutput,
+    operation_id="verify-runs",
     tags=["Verification"],
     dependencies=[Depends(get_temporal_client)],
-    summary="Request verification report for biosimulation runs")
-async def start_verify_runs(
+    summary="Request verification report for biosimulation runs by run IDs")
+async def verify_runs(
         workflow_id_prefix: str = Query(default="runs-verification-", description="Prefix for the workflow id."),
         biosimulations_run_ids: list[str] = Query(default=["67817a2e1f52f47f628af971","67817a2eba5a3f02b9f2938d"],
                                                   description="List of biosimulations run IDs to compare."),
@@ -239,18 +237,15 @@ async def start_verify_runs(
         abs_tol_scale: float = Query(default=0.00001, description="Scale for absolute tolerance, where atol = max(atol_min, max(arr1,arr2)*atol_scale."),
         observables: Optional[list[str]] = Query(default=None,
                                                  description="List of observables to include in the return data.")
-) -> RunsVerifyWorkflowOutput:
+) -> VerifyWorkflowOutput:
 
     # ---- create workflow input ---- #
     workflow_id = f"{workflow_id_prefix}{uuid.uuid4()}"
-    runs_verify_workflow_input = RunsVerifyWorkflowInput(
-        biosimulations_run_ids=biosimulations_run_ids,
-        user_description=user_description,
-        include_outputs=include_outputs,
-        rel_tol=rel_tol,
-        abs_tol_min=abs_tol_min,
-        abs_tol_scale=abs_tol_scale,
-        observables=observables)
+    compare_settings = CompareSettings(user_description=user_description, include_outputs=include_outputs,
+                                       rel_tol=rel_tol, abs_tol_min=abs_tol_min, abs_tol_scale=abs_tol_scale,
+                                       observables=observables)
+    runs_verify_workflow_input = RunsVerifyWorkflowInput(biosimulations_run_ids=biosimulations_run_ids,
+                                                         compare_settings=compare_settings)
 
     # ---- invoke workflow ---- #
     logger.info(f"starting verify workflow for biosim run IDs {biosimulations_run_ids}")
@@ -266,52 +261,14 @@ async def start_verify_runs(
     assert workflow_handle.id == workflow_id
 
     # ---- return initial workflow output ---- #
-    runs_verify_workflow_output = RunsVerifyWorkflowOutput(
-        workflow_input=runs_verify_workflow_input,
-        workflow_status=RunsVerifyWorkflowStatus.PENDING,
+    runs_verify_workflow_output = VerifyWorkflowOutput(
+        compare_settings=compare_settings,
+        workflow_status=VerifyWorkflowStatus.PENDING,
         timestamp=str(datetime.now(UTC)),
         workflow_id=workflow_id,
         workflow_run_id=workflow_handle.run_id
     )
     return runs_verify_workflow_output
-
-
-@app.get(
-    "/verify_runs/{workflow_id}",
-    response_model=RunsVerifyWorkflowOutput,
-    operation_id='get-verify-runs',
-    name="Retrieve biosimulation run verification",
-    tags=["Verification"],
-    dependencies=[Depends(get_temporal_client)],
-    summary='Get verification report for biosimulation runs')
-async def get_verify_runs(workflow_id: str) -> RunsVerifyWorkflowOutput:
-    logger.info(f"in get /verify_runs/{workflow_id}")
-
-    try:
-        # query temporal for the workflow output
-        temporal_client = get_temporal_client()
-        assert temporal_client is not None
-        workflow_handle = temporal_client.get_workflow_handle(workflow_id=workflow_id,
-                                                              result_type=RunsVerifyWorkflowOutput)
-        workflow_output: RunsVerifyWorkflowOutput = await workflow_handle.query("get_output",
-                                                                                result_type=RunsVerifyWorkflowOutput,
-                                                                                rpc_timeout=timedelta(seconds=60))
-        return workflow_output
-    except Exception as e2:
-        exc_message = str(e2)
-        msg = f"error retrieving verification job output with id: {workflow_id}: {exc_message}"
-        logger.error(msg, exc_info=e2)
-        raise HTTPException(status_code=404, detail=msg)
-
-
-async def save_uploaded_file(uploaded_file: UploadFile, save_dest_dir: Path) -> Path:
-    """Write `fastapi.UploadFile` instance passed by api gateway user to `save_dest`."""
-    filename = uploaded_file.filename or (uuid.uuid4().hex + ".omex")
-    file_path = save_dest_dir / filename
-    with open(file_path, 'wb') as file:
-        contents = await uploaded_file.read()
-        file.write(contents)
-    return file_path
 
 
 if __name__ == "__main__":

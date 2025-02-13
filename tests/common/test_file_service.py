@@ -4,8 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from biosim_server.common.storage import FileServiceGCS, FileServiceLocal
+from biosim_server.common.storage import FileServiceGCS
 from biosim_server.config import get_settings
+from tests.fixtures.file_service_local import FileServiceLocal
 from tests.fixtures.gcs_fixtures import file_service_gcs_test_base_path
 
 
@@ -20,8 +21,8 @@ async def test_file_service_local(file_service_local: FileServiceLocal) -> None:
         f.write(expected_file_content)
 
     # upload the file
-    absolute_gcs_path = await file_service.upload_file(orig_file_path, gcs_path)
-    assert absolute_gcs_path == str(file_service.BASE_DIR / gcs_path)
+    returned_gcs_path = await file_service.upload_file(orig_file_path, gcs_path)
+    assert returned_gcs_path == gcs_path
 
     # download the file
     new_file_path = Path("temp2.txt")
@@ -38,7 +39,8 @@ async def test_file_service_local(file_service_local: FileServiceLocal) -> None:
 @pytest.mark.skipif(len(get_settings().storage_gcs_credentials_file) == 0,
                     reason="gcs_credentials.json file not supplied")
 @pytest.mark.asyncio
-async def test_file_service_gcs(file_service_gcs: FileServiceGCS, file_service_gcs_test_base_path: Path) -> None:
+async def test_file_service_gcs(file_service_gcs: FileServiceGCS,
+                                file_service_gcs_test_base_path: Path) -> None:
     expected_file_content = b"Hello, World!"
     file_service = file_service_gcs
 

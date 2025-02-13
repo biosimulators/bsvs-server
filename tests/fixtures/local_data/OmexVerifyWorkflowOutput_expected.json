@@ -1,21 +1,7 @@
 {
-  "workflow_id": "828669f86cb24c2f991694c0539c8105",
-  "workflow_input": {
-    "source_omex": {
-      "name": "name",
-      "omex_s3_file": "path/to/model.omex"
-    },
+  "workflow_id": "cd15f3db54d848baa5e3b5ddc2d2afc9",
+  "compare_settings": {
     "user_description": "description",
-    "requested_simulators": [
-      {
-        "simulator": "copasi",
-        "version": null
-      },
-      {
-        "simulator": "vcell",
-        "version": null
-      }
-    ],
     "include_outputs": false,
     "rel_tol": 0.0001,
     "abs_tol_min": 0.001,
@@ -26,35 +12,31 @@
     ]
   },
   "workflow_status": "COMPLETED",
-  "timestamp": "2025-01-27 17:13:32.308744+00:00",
-  "actual_simulators": null,
-  "workflow_run_id": "4855aa15-c551-4b90-83fd-64ad613d4b4b",
+  "timestamp": "2025-02-13 03:33:52.944523+00:00",
+  "workflow_run_id": "6f7b6f9b-3a95-451f-b279-d1466dd5aa49",
+  "workflow_error": null,
   "workflow_results": {
     "sims_run_info": [
       {
         "biosim_sim_run": {
-          "id": "6797bebc23ddc7fe45081fe6",
-          "name": "name",
-          "simulator": "copasi",
-          "simulatorVersion": "4.45.296",
+          "id": "67ad68214d176d76c7090114",
+          "name": "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex",
+          "simulator_version": {
+            "id": "copasi",
+            "name": "COPASI",
+            "version": "4.45.296",
+            "image_url": "ghcr.io/biosimulators/copasi:4.45.296",
+            "image_digest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df",
+            "created": "2024-11-18T15:34:26.233Z",
+            "updated": "2024-11-18T15:34:26.233Z"
+          },
           "status": "SUCCEEDED",
-          "simulatorDigest": "sha256:7c9cd076eeec494a653353777e42561a2ec9be1bfcc647d0ea84d89fe18999df",
-          "cpus": null,
-          "memory": null,
-          "maxTime": null,
-          "envVars": null,
-          "purpose": null,
-          "submitted": null,
-          "updated": null,
-          "projectSize": null,
-          "resultsSize": null,
-          "runtime": null,
-          "email": null
+          "error_message": null
         },
         "hdf5_file": {
           "filename": "reports.h5",
-          "id": "6797bebc23ddc7fe45081fe6",
-          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/6797bebc23ddc7fe45081fe6/outputs/reports.h5",
+          "id": "67ad68214d176d76c7090114",
+          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/67ad68214d176d76c7090114/outputs/reports.h5",
           "groups": [
             {
               "name": "BIOMD0000000010_url.sedml",
@@ -486,28 +468,24 @@
       },
       {
         "biosim_sim_run": {
-          "id": "6797bebc23ddc7fe45081fe7",
-          "name": "name",
-          "simulator": "vcell",
-          "simulatorVersion": "7.7.0.13",
+          "id": "67ad6821fed5f9a0fa414df4",
+          "name": "BIOMD0000000010_tellurium_Negative_feedback_and_ultrasen.omex",
+          "simulator_version": {
+            "id": "tellurium",
+            "name": "tellurium",
+            "version": "2.2.10",
+            "image_url": "ghcr.io/biosimulators/tellurium:2.2.10",
+            "image_digest": "sha256:0c22827b4682273810d48ea606ef50c7163e5f5289740951c00c64c669409eae",
+            "created": "2024-10-10T22:00:50.110Z",
+            "updated": "2024-10-10T22:00:50.110Z"
+          },
           "status": "SUCCEEDED",
-          "simulatorDigest": "sha256:828b2dc2b983de901c2d68eeb415cb22b46f1db04cdb9e8815d80bf451005216",
-          "cpus": null,
-          "memory": null,
-          "maxTime": null,
-          "envVars": null,
-          "purpose": null,
-          "submitted": null,
-          "updated": null,
-          "projectSize": null,
-          "resultsSize": null,
-          "runtime": null,
-          "email": null
+          "error_message": null
         },
         "hdf5_file": {
           "filename": "reports.h5",
-          "id": "6797bebc23ddc7fe45081fe7",
-          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/6797bebc23ddc7fe45081fe7/outputs/reports.h5",
+          "id": "67ad6821fed5f9a0fa414df4",
+          "uri": "https://storage.googleapis.com/files.biosimulations.org/simulations/67ad6821fed5f9a0fa414df4/outputs/reports.h5",
           "groups": [
             {
               "name": "BIOMD0000000010_url.sedml",
@@ -694,25 +672,25 @@
                     {
                       "key": "sedmlDataSetIds",
                       "value": [
-                        "0_0",
-                        "0_1",
-                        "1_1"
-                      ]
-                    },
-                    {
-                      "key": "sedmlDataSetLabels",
-                      "value": [
                         "plot_0_0_0",
                         "plot_0_0_1",
                         "plot_0_1_1"
                       ]
                     },
                     {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "task_fig2a.time/60",
+                        "MAPK_PP",
+                        "MAPK"
+                      ]
+                    },
+                    {
                       "key": "sedmlDataSetNames",
                       "value": [
                         "task_fig2a.time/60",
-                        "task_fig2a.MAPK_PP",
-                        "task_fig2a.MAPK"
+                        "MAPK_PP",
+                        "MAPK"
                       ]
                     },
                     {
@@ -759,25 +737,25 @@
                     {
                       "key": "sedmlDataSetIds",
                       "value": [
-                        "0_0",
-                        "0_1",
-                        "1_1"
-                      ]
-                    },
-                    {
-                      "key": "sedmlDataSetLabels",
-                      "value": [
                         "plot_1_0_0",
                         "plot_1_0_1",
                         "plot_1_1_1"
                       ]
                     },
                     {
+                      "key": "sedmlDataSetLabels",
+                      "value": [
+                        "task_fig2b.time/60",
+                        "MAPK_PP",
+                        "MAPK"
+                      ]
+                    },
+                    {
                       "key": "sedmlDataSetNames",
                       "value": [
                         "task_fig2b.time/60",
-                        "task_fig2b.MAPK_PP",
-                        "task_fig2b.MAPK"
+                        "MAPK_PP",
+                        "MAPK"
                       ]
                     },
                     {
@@ -1016,7 +994,7 @@
           {
             "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
             "simulator_version_i": "copasi:4.45.296",
-            "simulator_version_j": "vcell:7.7.0.13",
+            "simulator_version_j": "tellurium:2.2.10",
             "var_names": [
               "Time",
               "MAPK_PP",
@@ -1041,25 +1019,25 @@
             ],
             "score": [
               0.0,
-              0.2109208541519768,
-              0.6160117641611397,
-              0.08073399713312734,
-              0.13396543530030625,
-              0.0844545843285283,
-              0.3207037300083684,
-              0.21449570723816266,
-              0.96109237672241,
+              0.11537010072508691,
+              0.42307909217989575,
+              0.04281839940551131,
+              0.07924963149873862,
+              0.04545515996171613,
+              0.1939993580196978,
+              0.12383092140486648,
+              0.5057962723210435,
               0.0,
-              0.006402084786197194,
-              0.0012556976092903502,
-              0.012589597583596512,
-              0.01308331126907003,
-              0.011326124992810022,
-              0.009667698853151248,
-              0.09630682413689742,
-              0.09893510061030918,
-              0.0020428828371769213,
-              0.01972444866994348
+              0.003764789132764667,
+              0.0006818317528823523,
+              0.007049444210065044,
+              0.007219561793424099,
+              0.005450610845758632,
+              0.005668270000710089,
+              0.055423735026311885,
+              0.05154168165627333,
+              0.001212678696868038,
+              0.010089379474096733
             ],
             "is_close": [
               true,
@@ -1089,7 +1067,7 @@
         [
           {
             "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_i": "tellurium:2.2.10",
             "simulator_version_j": "copasi:4.45.296",
             "var_names": [
               "Time",
@@ -1115,25 +1093,25 @@
             ],
             "score": [
               0.0,
-              0.21092530300648407,
-              0.6159738194492199,
-              0.08073334534056023,
-              0.1339672299981345,
-              0.08445387107687062,
-              0.3206934452499603,
-              0.21449110649600422,
-              0.9610000157434938,
+              0.11536876971442865,
+              0.4230969925290461,
+              0.04281858274782912,
+              0.07924900345330659,
+              0.045454953345498594,
+              0.19400312166780356,
+              0.12383245483356467,
+              0.5058218566019963,
               0.0,
-              0.006402080687530857,
-              0.0012556974516127215,
-              0.012589613433413199,
-              0.0130833283863958,
-              0.011326112164713817,
-              0.009667689506720173,
-              0.09630589664539227,
-              0.09893412180457972,
-              0.0020428832545140354,
-              0.01972440976463269
+              0.0037647905501289216,
+              0.0006818317993718093,
+              0.00704943924060218,
+              0.007219556581220613,
+              0.005450613816676111,
+              0.00566827321364039,
+              0.05542404220705482,
+              0.05154194731213736,
+              0.0012126785498090935,
+              0.010089389653664823
             ],
             "is_close": [
               true,
@@ -1161,8 +1139,8 @@
           },
           {
             "dataset_name": "BIOMD0000000010_url.sedml/autogen_report_for_task_fig2a",
-            "simulator_version_i": "vcell:7.7.0.13",
-            "simulator_version_j": "vcell:7.7.0.13",
+            "simulator_version_i": "tellurium:2.2.10",
+            "simulator_version_j": "tellurium:2.2.10",
             "var_names": [
               "Time",
               "MAPK_PP",
@@ -1259,39 +1237,55 @@
           {
             "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
             "simulator_version_i": "copasi:4.45.296",
-            "simulator_version_j": "vcell:7.7.0.13",
+            "simulator_version_j": "tellurium:2.2.10",
             "var_names": [
               "task_fig2a.time/60",
               "MAPK_PP",
               "MAPK"
             ],
-            "score": null,
-            "is_close": null,
-            "error_message": "Variables of copasi:4.45.296 and vcell:7.7.0.13 do not match, ['task_fig2a.time/60', 'MAPK_PP', 'MAPK'] != ['plot_0_0_0', 'plot_0_0_1', 'plot_0_1_1']"
+            "score": [
+              0.0,
+              0.11537010072508691,
+              0.42307909217989575
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
           }
         ],
         [
           {
             "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
-            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_i": "tellurium:2.2.10",
             "simulator_version_j": "copasi:4.45.296",
             "var_names": [
-              "plot_0_0_0",
-              "plot_0_0_1",
-              "plot_0_1_1"
+              "task_fig2a.time/60",
+              "MAPK_PP",
+              "MAPK"
             ],
-            "score": null,
-            "is_close": null,
-            "error_message": "Variables of vcell:7.7.0.13 and copasi:4.45.296 do not match, ['plot_0_0_0', 'plot_0_0_1', 'plot_0_1_1'] != ['task_fig2a.time/60', 'MAPK_PP', 'MAPK']"
+            "score": [
+              0.0,
+              0.11536876971442865,
+              0.4230969925290461
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
           },
           {
             "dataset_name": "BIOMD0000000010_url.sedml/plot_0",
-            "simulator_version_i": "vcell:7.7.0.13",
-            "simulator_version_j": "vcell:7.7.0.13",
+            "simulator_version_i": "tellurium:2.2.10",
+            "simulator_version_j": "tellurium:2.2.10",
             "var_names": [
-              "plot_0_0_0",
-              "plot_0_0_1",
-              "plot_0_1_1"
+              "task_fig2a.time/60",
+              "MAPK_PP",
+              "MAPK"
             ],
             "score": [
               0.0,
@@ -1333,39 +1327,55 @@
           {
             "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
             "simulator_version_i": "copasi:4.45.296",
-            "simulator_version_j": "vcell:7.7.0.13",
+            "simulator_version_j": "tellurium:2.2.10",
             "var_names": [
               "task_fig2b.time/60",
               "MAPK_PP",
               "MAPK"
             ],
-            "score": null,
-            "is_close": null,
-            "error_message": "Variables of copasi:4.45.296 and vcell:7.7.0.13 do not match, ['task_fig2b.time/60', 'MAPK_PP', 'MAPK'] != ['plot_1_0_0', 'plot_1_0_1', 'plot_1_1_1']"
+            "score": [
+              0.0,
+              0.22846432854445153,
+              0.2485260288391316
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
           }
         ],
         [
           {
             "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
-            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_i": "tellurium:2.2.10",
             "simulator_version_j": "copasi:4.45.296",
             "var_names": [
-              "plot_1_0_0",
-              "plot_1_0_1",
-              "plot_1_1_1"
+              "task_fig2b.time/60",
+              "MAPK_PP",
+              "MAPK"
             ],
-            "score": null,
-            "is_close": null,
-            "error_message": "Variables of vcell:7.7.0.13 and copasi:4.45.296 do not match, ['plot_1_0_0', 'plot_1_0_1', 'plot_1_1_1'] != ['task_fig2b.time/60', 'MAPK_PP', 'MAPK']"
+            "score": [
+              0.0,
+              0.22846954825864513,
+              0.2485198524739293
+            ],
+            "is_close": [
+              true,
+              true,
+              true
+            ],
+            "error_message": null
           },
           {
             "dataset_name": "BIOMD0000000010_url.sedml/plot_1",
-            "simulator_version_i": "vcell:7.7.0.13",
-            "simulator_version_j": "vcell:7.7.0.13",
+            "simulator_version_i": "tellurium:2.2.10",
+            "simulator_version_j": "tellurium:2.2.10",
             "var_names": [
-              "plot_1_0_0",
-              "plot_1_0_1",
-              "plot_1_1_1"
+              "task_fig2b.time/60",
+              "MAPK_PP",
+              "MAPK"
             ],
             "score": [
               0.0,
@@ -1407,16 +1417,16 @@
           {
             "dataset_name": "BIOMD0000000010_url.sedml/report_2",
             "simulator_version_i": "copasi:4.45.296",
-            "simulator_version_j": "vcell:7.7.0.13",
+            "simulator_version_j": "tellurium:2.2.10",
             "var_names": [
               "task_fig2a.time/60",
               "task_fig2a.MAPK_PP",
               "task_fig2a.MAPK"
             ],
             "score": [
-              1.2053311887363872e-12,
-              0.2109208541519768,
-              0.6160117641611397
+              0.0,
+              0.11537010072508691,
+              0.42307909217989575
             ],
             "is_close": [
               true,
@@ -1429,7 +1439,7 @@
         [
           {
             "dataset_name": "BIOMD0000000010_url.sedml/report_2",
-            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_i": "tellurium:2.2.10",
             "simulator_version_j": "copasi:4.45.296",
             "var_names": [
               "task_fig2a.time/60",
@@ -1437,9 +1447,9 @@
               "task_fig2a.MAPK"
             ],
             "score": [
-              1.205331188736387e-12,
-              0.21092530300648407,
-              0.6159738194492199
+              0.0,
+              0.11536876971442865,
+              0.4230969925290461
             ],
             "is_close": [
               true,
@@ -1450,8 +1460,8 @@
           },
           {
             "dataset_name": "BIOMD0000000010_url.sedml/report_2",
-            "simulator_version_i": "vcell:7.7.0.13",
-            "simulator_version_j": "vcell:7.7.0.13",
+            "simulator_version_i": "tellurium:2.2.10",
+            "simulator_version_j": "tellurium:2.2.10",
             "var_names": [
               "task_fig2a.time/60",
               "task_fig2a.MAPK_PP",
@@ -1497,16 +1507,16 @@
           {
             "dataset_name": "BIOMD0000000010_url.sedml/report_3",
             "simulator_version_i": "copasi:4.45.296",
-            "simulator_version_j": "vcell:7.7.0.13",
+            "simulator_version_j": "tellurium:2.2.10",
             "var_names": [
               "task_fig2b.time/60",
               "task_fig2b.MAPK_PP",
               "task_fig2b.MAPK"
             ],
             "score": [
-              1.1516089720585092e-12,
-              0.1449101929048558,
-              0.1579643595189614
+              0.0,
+              0.22846432854445153,
+              0.2485260288391316
             ],
             "is_close": [
               true,
@@ -1519,7 +1529,7 @@
         [
           {
             "dataset_name": "BIOMD0000000010_url.sedml/report_3",
-            "simulator_version_i": "vcell:7.7.0.13",
+            "simulator_version_i": "tellurium:2.2.10",
             "simulator_version_j": "copasi:4.45.296",
             "var_names": [
               "task_fig2b.time/60",
@@ -1527,9 +1537,9 @@
               "task_fig2b.MAPK"
             ],
             "score": [
-              1.1516089720585092e-12,
-              0.14491229283168663,
-              0.15796186428448936
+              0.0,
+              0.22846954825864513,
+              0.2485198524739293
             ],
             "is_close": [
               true,
@@ -1540,8 +1550,8 @@
           },
           {
             "dataset_name": "BIOMD0000000010_url.sedml/report_3",
-            "simulator_version_i": "vcell:7.7.0.13",
-            "simulator_version_j": "vcell:7.7.0.13",
+            "simulator_version_i": "tellurium:2.2.10",
+            "simulator_version_j": "tellurium:2.2.10",
             "var_names": [
               "task_fig2b.time/60",
               "task_fig2b.MAPK_PP",
