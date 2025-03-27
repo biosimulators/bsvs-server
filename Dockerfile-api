@@ -1,5 +1,5 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.11-slim AS base
+FROM python:3.14-rc-alpine3.21 AS base
 
 # Set environment variables
 ENV POETRY_VERSION=1.4.2 \
