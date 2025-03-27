@@ -1,11 +1,11 @@
-![Continuous Integration](https://github.com/biosimulators/bsvs-server/actions/workflows/integrate.yml/badge.svg)
-![Continuous Deployment](https://github.com/biosimulators/bsvs-server/actions/workflows/deploy.yml/badge.svg)
+![Continuous Integration](https://github.com/biosimulations/biosim-server/actions/workflows/integrate.yml/badge.svg)
+![Continuous Deployment](https://github.com/biosimulations/biosim-server/actions/workflows/deploy.yml/badge.svg)
 
 # **`biosim-server`: Biosimulations Services**
 
 This service utilizes separate containers for REST API management, job processing, and datastorage with MongoDB, ensuring scalable and robust performance.
 
-_The REST API can be accessed via Swagger UI here:_ **[https://biochecknet.biosimulations.org/docs](https://biochecknet.biosimulations.org/docs)**
+_The REST API can be accessed via Swagger UI here:_ **[https://biosim.biosimulations.org/docs](https://biosim.biosimulations.org/docs)**
 
 ### **For Developers:**
 
